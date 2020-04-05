@@ -19,7 +19,11 @@ public class Tokenizer {
     );
 
     public static final Set<String> LOGICAL_BINARY = Set.of(
-            ">", "<", "==", "!=", ">=", "<=", "&&", "||"
+            ">", "<", "==", "!=", ">=", "<="
+    );
+
+    public static final Set<String> LAZY_BINARY = Set.of(
+            "&&", "||"
     );
 
     public static final Set<String> LOGICAL_UNARY = Set.of(
@@ -37,6 +41,7 @@ public class Tokenizer {
     public static final Set<String> EXTRA_IDENTIFIERS = Utilities.mergeSets(
             NUMERIC_BINARY,
             LOGICAL_BINARY,
+            LAZY_BINARY,
             LOGICAL_UNARY,
             SYMBOLS,
             OTHERS

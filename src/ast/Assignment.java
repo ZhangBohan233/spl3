@@ -4,6 +4,8 @@ import ast.fakeEnv.FakeEnv;
 import interpreter.Memory;
 import interpreter.SplException;
 import interpreter.env.Environment;
+import interpreter.env.TypeValue;
+import interpreter.primitives.Primitive;
 import util.LineFile;
 
 public class Assignment extends BinaryExpr {
@@ -13,11 +15,14 @@ public class Assignment extends BinaryExpr {
 
     @Override
     public Object evaluate(Environment env) {
-        if (left instanceof VarNameNode) {
-            Object rightRes = right.evaluate(env);
+        TypeValue rightRes = (TypeValue) right.evaluate(env);
 
+        if (left instanceof NameNode) {
+            env.setVar(((NameNode) left).getName(), rightRes);
         } else if (left instanceof Declaration) {
+            left.evaluate(env);
 
+            env.setVar(((Declaration) left).getLeft().getName(), rightRes);
         } else {
             throw new SplException();
         }

@@ -7,4 +7,5 @@ fn main(argc: int, argv: String) fms.GG {
 }
 
 c: int = 2;
-c;
+d: int = c + 7;
+d;

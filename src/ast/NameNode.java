@@ -3,6 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.Memory;
 import interpreter.env.Environment;
+import interpreter.env.TypeValue;
 import util.LineFile;
 
 public class NameNode extends LeafNode {
@@ -23,13 +24,19 @@ public class NameNode extends LeafNode {
     }
 
     @Override
-    public Object evaluate(Environment env) {
-        return null;
+    public TypeValue evaluate(Environment env) {
+        return env.get(name);
     }
 
     @Override
-    public VarNameNode preprocess(FakeEnv env) {
-        int[] locLay = env.get(name);
-        return new VarNameNode(locLay[0], locLay[1], getLineFile());
+    public NameNode preprocess(FakeEnv env) {
+//        int[] locLay = env.get(name);
+//        return new VarNameNode(locLay[0], locLay[1], getLineFile());
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof NameNode && ((NameNode) obj).name.equals(name);
     }
 }

@@ -1,8 +1,8 @@
 package util;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import interpreter.primitives.Int;
+
+import java.util.*;
 
 public class Utilities {
 
@@ -43,6 +43,13 @@ public class Utilities {
         Set<String> res = new HashSet<>();
         for (Set<String> s : sets) res.addAll(s);
 
+        return res;
+    }
+
+    @SafeVarargs
+    public static Map<String, Integer> mergeMaps(Map<String, Integer>... maps) {
+        Map<String, Integer> res = new HashMap<>();
+        for (Map<String, Integer> m : maps) res.putAll(m);
         return res;
     }
 }

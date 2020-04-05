@@ -22,7 +22,9 @@ public class Declaration extends BinaryExpr {
 
     @Override
     public Object evaluate(Environment env) {
-        return 0;
+
+        env.defineVar(getLeft().getName(), new Type(right));
+        return null;
     }
 
     @Override
@@ -36,5 +38,10 @@ public class Declaration extends BinaryExpr {
         env.defineVar(((NameNode) left).getName(), type);
 
         return this;
+    }
+
+    public NameNode getLeft() {
+        if (!(left instanceof NameNode)) throw new EnvironmentError();
+        return (NameNode) left;
     }
 }

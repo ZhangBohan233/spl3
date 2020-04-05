@@ -2,6 +2,7 @@ package parser;
 
 import ast.*;
 import util.LineFile;
+import util.Utilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +10,30 @@ import java.util.Map;
 
 public class AstBuilder {
 
-    private static final Map<String, Integer> PRECEDENCES = Map.of(
-            ".", 500,
+    private static final Map<String, Integer> PCD_BIN_NUMERIC = Map.of(
+            "*", 100,
+            "/", 100,
+            "%", 100,
             "+", 50,
-            "-", 50,
+            "-", 50
+    );
 
-            "=", 1,
-            ":", 3
+    private static final Map<String, Integer> PCD_BIN_LOGICAL = Map.of(
+            ">", 25,
+            "<", 25,
+            ">=", 25,
+            "<=", 25,
+            "==", 20
+    );
+
+    private static final Map<String, Integer> PCD_BIN_SPECIAL = Map.of(
+            ".", 500,
+            ":", 3,
+            "=", 1
+    );
+
+    private static final Map<String, Integer> PRECEDENCES = Utilities.mergeMaps(
+            PCD_BIN_NUMERIC, PCD_BIN_LOGICAL, PCD_BIN_SPECIAL
     );
 
     private BlockStmt baseBlock = new BlockStmt();
@@ -51,11 +69,11 @@ public class AstBuilder {
         }
     }
 
-    void addBinaryOperator(String op, LineFile lineFile) {
+    void addBinaryOperator(String op, int type, LineFile lineFile) {
         if (inner == null) {
-            stack.add(new BinaryOperator(op, lineFile));
+            stack.add(new BinaryOperator(op, type, lineFile));
         } else {
-            inner.addBinaryOperator(op, lineFile);
+            inner.addBinaryOperator(op, type, lineFile);
         }
     }
 
@@ -64,6 +82,14 @@ public class AstBuilder {
             stack.add(new Declaration(level, lineFile));
         } else {
             inner.addDeclaration(level, lineFile);
+        }
+    }
+
+    void addDot(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new Dot(lineFile));
+        } else {
+            inner.addDot(lineFile);
         }
     }
 

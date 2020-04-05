@@ -30,7 +30,11 @@ public class Line extends Node {
 
     @Override
     public Object evaluate(Environment env) {
-        return null;
+        Object res = null;
+        for (Node node : children) {
+            res = node.evaluate(env);
+        }
+        return res;
     }
 
     @Override

@@ -17,11 +17,13 @@ public class Main {
             Parser parser = new Parser(tokenList);
             BlockStmt root = parser.parse();
             System.out.println(root);
-            FakeGlobalEnv environment = new FakeGlobalEnv();
-            root.preprocess(environment);
+//            FakeGlobalEnv environment = new FakeGlobalEnv();
+//            root.preprocess(environment);
             Memory memory = new Memory();
             GlobalEnvironment globalEnvironment = new GlobalEnvironment(memory);
             root.evaluate(globalEnvironment);
+
+            globalEnvironment.printVars();
             memory.printMemory();
         } else {
             System.out.println(argumentParser.getMsg());
