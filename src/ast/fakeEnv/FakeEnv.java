@@ -1,16 +1,19 @@
-package interpreter;
+package ast.fakeEnv;
+
+import interpreter.EnvironmentError;
+import interpreter.Type;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class Environment {
+public abstract class FakeEnv {
 
-    protected Environment outer;
+    protected FakeEnv outer;
 
     protected Map<String, Integer> variables = new HashMap<>();
     protected Map<String, Integer> constants = new HashMap<>();
 
-    protected Environment(Environment outer) {
+    protected FakeEnv(FakeEnv outer) {
         this.outer = outer;
     }
 

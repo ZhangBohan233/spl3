@@ -1,5 +1,6 @@
-import interpreter.GlobalEnvironment;
+import ast.fakeEnv.FakeGlobalEnv;
 import interpreter.Memory;
+import interpreter.env.GlobalEnvironment;
 import lexer.TokenList;
 import lexer.Tokenizer;
 import ast.BlockStmt;
@@ -16,10 +17,11 @@ public class Main {
             Parser parser = new Parser(tokenList);
             BlockStmt root = parser.parse();
             System.out.println(root);
-            GlobalEnvironment environment = new GlobalEnvironment();
+            FakeGlobalEnv environment = new FakeGlobalEnv();
             root.preprocess(environment);
             Memory memory = new Memory();
-            root.evaluate(memory);
+            GlobalEnvironment globalEnvironment = new GlobalEnvironment(memory);
+            root.evaluate(globalEnvironment);
             memory.printMemory();
         } else {
             System.out.println(argumentParser.getMsg());

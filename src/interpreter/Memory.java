@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class Memory {
 
     private static final int defaultStackSize = 1024;
-    private static final int defaultHeapSize = 4096;
+    private static final int defaultHeapSize = 256;
     private int stackSize;
     private int heapSize;
 

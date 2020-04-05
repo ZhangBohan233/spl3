@@ -1,7 +1,8 @@
 package ast;
 
-import interpreter.Environment;
+import ast.fakeEnv.FakeEnv;
 import interpreter.Memory;
+import interpreter.env.Environment;
 import util.LineFile;
 
 public class VarNameNode extends LeafNode {
@@ -14,12 +15,12 @@ public class VarNameNode extends LeafNode {
     }
 
     @Override
-    public Object evaluate(Memory memory) {
+    public Object evaluate(Environment env) {
         return null;
     }
 
     @Override
-    public Node preprocess(Environment env) {
+    public Node preprocess(FakeEnv env) {
         return this;
     }
 }

@@ -1,8 +1,9 @@
 package ast;
 
-import interpreter.Environment;
-import interpreter.FunctionEnvironment;
+import ast.fakeEnv.FakeEnv;
+import ast.fakeEnv.FakeFunctionEnv;
 import interpreter.Memory;
+import interpreter.env.Environment;
 import parser.ParseError;
 import util.LineFile;
 
@@ -12,6 +13,7 @@ public class FuncDefinition extends Node {
     private Node rType;
     private Line parameters;
     private BlockStmt body;
+    private int stackUsage;
 
     public FuncDefinition(String name, LineFile lineFile) {
         super(lineFile);
@@ -32,13 +34,13 @@ public class FuncDefinition extends Node {
     }
 
     @Override
-    public Object evaluate(Memory memory) {
-        return null;
+    public Object evaluate(Environment env) {
+        return 0;
     }
 
     @Override
-    public FuncDefinition preprocess(Environment env) {
-        FunctionEnvironment scope = new FunctionEnvironment(env);
+    public FuncDefinition preprocess(FakeEnv env) {
+        FakeFunctionEnv scope = new FakeFunctionEnv(env);
         for (int i = 0; i < parameters.getChildren().size(); ++i) {
             Node node = parameters.getChildren().get(i);
             if (!(node instanceof Declaration)) {
@@ -47,6 +49,7 @@ public class FuncDefinition extends Node {
             parameters.getChildren().set(i, node.preprocess(scope));
         }
         body = body.preprocess(scope);
+        stackUsage = scope.getStackCounter();
 
         return this;
     }

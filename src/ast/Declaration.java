@@ -1,9 +1,10 @@
 package ast;
 
-import interpreter.Environment;
+import ast.fakeEnv.FakeEnv;
 import interpreter.EnvironmentError;
 import interpreter.Memory;
 import interpreter.Type;
+import interpreter.env.Environment;
 import util.LineFile;
 
 public class Declaration extends BinaryExpr {
@@ -20,12 +21,12 @@ public class Declaration extends BinaryExpr {
     }
 
     @Override
-    public Object evaluate(Memory memory) {
-        return null;
+    public Object evaluate(Environment env) {
+        return 0;
     }
 
     @Override
-    public Declaration preprocess(Environment env) {
+    public Declaration preprocess(FakeEnv env) {
 //        System.out.println(left);
 //        System.out.println(right);
 

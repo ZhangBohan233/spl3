@@ -1,7 +1,8 @@
 package ast;
 
-import interpreter.Environment;
+import ast.fakeEnv.FakeEnv;
 import interpreter.Memory;
+import interpreter.env.Environment;
 import util.LineFile;
 
 import java.util.ArrayList;
@@ -28,12 +29,12 @@ public class Line extends Node {
     }
 
     @Override
-    public Object evaluate(Memory memory) {
+    public Object evaluate(Environment env) {
         return null;
     }
 
     @Override
-    public Line preprocess(Environment env) {
+    public Line preprocess(FakeEnv env) {
         for (int i = 0 ; i < children.size(); ++i) {
             children.set(i, children.get(i).preprocess(env));
         }

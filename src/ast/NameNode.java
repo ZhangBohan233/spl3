@@ -1,7 +1,8 @@
 package ast;
 
-import interpreter.Environment;
+import ast.fakeEnv.FakeEnv;
 import interpreter.Memory;
+import interpreter.env.Environment;
 import util.LineFile;
 
 public class NameNode extends LeafNode {
@@ -22,12 +23,12 @@ public class NameNode extends LeafNode {
     }
 
     @Override
-    public Object evaluate(Memory memory) {
+    public Object evaluate(Environment env) {
         return null;
     }
 
     @Override
-    public VarNameNode preprocess(Environment env) {
+    public VarNameNode preprocess(FakeEnv env) {
         int[] locLay = env.get(name);
         return new VarNameNode(locLay[0], locLay[1], getLineFile());
     }

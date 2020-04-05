@@ -1,10 +1,12 @@
-package interpreter;
+package ast.fakeEnv;
 
-public class GlobalEnvironment extends MainAbstractEnvironment {
+import interpreter.Type;
+
+public class FakeGlobalEnv extends FakeMainAbstractEnv {
 
     private int globalCounter = 0;
 
-    public GlobalEnvironment() {
+    public FakeGlobalEnv() {
         super(null);
     }
 

@@ -1,7 +1,8 @@
 package ast;
 
-import interpreter.Environment;
+import ast.fakeEnv.FakeEnv;
 import interpreter.Memory;
+import interpreter.env.Environment;
 import util.LineFile;
 
 public abstract class Node {
@@ -13,7 +14,7 @@ public abstract class Node {
         this.lineFile = lineFile;
     }
 
-    public abstract Object evaluate(Memory memory);
+    public abstract Object evaluate(Environment env);
 
     /**
      * Preprocess this node and return the new node of this
@@ -21,7 +22,7 @@ public abstract class Node {
      * @param env the environment
      * @return this {@code Node} if no substitution,
      */
-    public abstract Node preprocess(Environment env);
+    public abstract Node preprocess(FakeEnv env);
 
     public LineFile getLineFile() {
         return lineFile;

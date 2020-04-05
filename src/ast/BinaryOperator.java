@@ -1,7 +1,8 @@
 package ast;
 
-import interpreter.Environment;
+import ast.fakeEnv.FakeEnv;
 import interpreter.Memory;
+import interpreter.env.Environment;
 import util.LineFile;
 
 public class BinaryOperator extends BinaryExpr {
@@ -10,12 +11,12 @@ public class BinaryOperator extends BinaryExpr {
     }
 
     @Override
-    public Object evaluate(Memory memory) {
-        return null;
+    public Object evaluate(Environment env) {
+        return 0;
     }
 
     @Override
-    public BinaryOperator preprocess(Environment env) {
+    public BinaryOperator preprocess(FakeEnv env) {
         return this;
     }
 }

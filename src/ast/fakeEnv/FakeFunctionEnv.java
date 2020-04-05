@@ -1,10 +1,12 @@
-package interpreter;
+package ast.fakeEnv;
 
-public class FunctionEnvironment extends MainAbstractEnvironment {
+import interpreter.Type;
+
+public class FakeFunctionEnv extends FakeMainAbstractEnv {
 
     private int stackCounter = 0;
 
-    public FunctionEnvironment(Environment outer) {
+    public FakeFunctionEnv(FakeEnv outer) {
         super(outer);
     }
 
@@ -14,5 +16,9 @@ public class FunctionEnvironment extends MainAbstractEnvironment {
         variables.put(name, address);
         stackCounter += type.getStackSize();
         return address;
+    }
+
+    public int getStackCounter() {
+        return stackCounter;
     }
 }
