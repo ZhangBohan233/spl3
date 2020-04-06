@@ -4,7 +4,18 @@ import interpreter.Memory;
 
 public class FunctionEnvironment extends MainAbstractEnvironment {
 
-    public FunctionEnvironment(Memory memory, Environment outer, int begins, int size) {
-        super(memory, outer);
+    private TypeValue returnValue;
+
+    public FunctionEnvironment(Environment outer) {
+        super(outer.memory, outer);
+    }
+
+    public TypeValue getReturnValue() {
+        return returnValue;
+    }
+
+    @Override
+    public void setReturn(TypeValue typeValue) {
+        returnValue = typeValue;
     }
 }

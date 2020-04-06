@@ -3,8 +3,10 @@ package parser;
 import ast.BinaryOperator;
 import ast.BlockStmt;
 import ast.Declaration;
+import interpreter.primitives.Int;
 import lexer.*;
 import util.LineFile;
+import util.Utilities;
 
 import java.util.List;
 import java.util.Stack;
@@ -31,6 +33,7 @@ public class Parser {
         boolean fnRType = false;
 
         Stack<Integer> paramBrackets = new Stack<>();
+        Stack<Integer> callBrackets = new Stack<>();
         Stack<Integer> funcBodyBraces = new Stack<>();
 
         for (int i = 0; i < tokens.size(); ++i) {
@@ -53,13 +56,18 @@ public class Parser {
                                 fnRType = true;
                                 paramBrackets.push(bracketCount);
                                 builder.addParameterBracket();
-
+                            } else if (isCall(tokens.get(i - 1))) {
+                                builder.addCall(lineFile);
+                                callBrackets.push(bracketCount);
                             }
                             break;
                         case ")":
-                            if (bracketCount == paramBrackets.peek()) {
+                            if (isThisStack(paramBrackets, bracketCount)) {
                                 paramBrackets.pop();
                                 builder.buildParameterBracket();
+                            } else if (isThisStack(callBrackets, bracketCount)) {
+                                callBrackets.pop();
+                                builder.buildCall();
                             }
                             bracketCount--;
                             break;
@@ -73,7 +81,7 @@ public class Parser {
                             }
                             break;
                         case "}":
-                            if (braceCount == funcBodyBraces.peek()) {
+                            if (isThisStack(funcBodyBraces, braceCount)) {
                                 funcBodyBraces.pop();
                                 builder.buildBraceBlock();
                                 builder.finishFunction();
@@ -106,6 +114,7 @@ public class Parser {
                             fnHeader = true;
                             break;
                         case "return":
+                            builder.addReturnStmt(lineFile);
                             break;
                         case ",":
                             builder.finishPart();
@@ -120,6 +129,12 @@ public class Parser {
                             builder.finishLine();
 
                             varLevel = Declaration.VAR;  // restore the var level
+                            break;
+                        case "int":
+                        case "float":
+                        case "char":
+                        case "boolean":
+                            builder.addPrimitiveTypeName(identifier, lineFile);
                             break;
                         default:  // name
                             builder.addName(identifier, lineFile);
@@ -140,5 +155,18 @@ public class Parser {
         }
 
         return builder.getBaseBlock();
+    }
+
+    private static boolean isThisStack(Stack<Integer> stack, int value) {
+        if (stack.empty()) return false;
+        else return stack.peek() == value;
+    }
+
+    private static boolean isCall(Token token) {
+        if (token instanceof IdToken) {
+            String identifier = ((IdToken) token).getIdentifier();
+            return Tokenizer.StringTypes.isIdentifier(identifier) && !Tokenizer.RESERVED.contains(identifier);
+        }
+        return false;
     }
 }

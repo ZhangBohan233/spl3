@@ -1,10 +1,10 @@
 package interpreter.env;
 
-import interpreter.EnvironmentError;
-import interpreter.Memory;
-import interpreter.Type;
-import interpreter.TypeError;
-import interpreter.primitives.Primitive;
+import interpreter.*;
+import interpreter.primitives.Pointer;
+import interpreter.types.CallableType;
+import interpreter.types.Type;
+import interpreter.types.TypeError;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +21,14 @@ public abstract class Environment {
         this.memory = memory;
         this.outer = outer;
     }
+
+    public Memory getMemory() {
+        return memory;
+    }
+
+    public abstract void defineFunction(String name, TypeValue funcTv);
+
+    public abstract void setReturn(TypeValue typeValue);
 
     public void defineVar(String name, Type type) {
 //        if (variables.containsKey(name)) throw new EnvironmentError("Variable '" + name + "' already defined. ");
@@ -58,5 +66,9 @@ public abstract class Environment {
 
     private boolean typeCheck(Type bigger, Type smaller) {
         return true;
+    }
+
+    protected boolean alreadyDefined(String name) {
+        return false;
     }
 }

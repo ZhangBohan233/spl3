@@ -1,6 +1,6 @@
 package interpreter.env;
 
-import interpreter.Type;
+import interpreter.types.Type;
 import interpreter.primitives.Primitive;
 
 public class TypeValue {

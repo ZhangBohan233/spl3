@@ -47,6 +47,12 @@ public class Tokenizer {
             OTHERS
     );
 
+    public static final Set<String> RESERVED = Set.of(
+            "class", "fn", "if", "else", "new", "extends", "return", "break", "continue",
+            "true", "false", "null", "operator", "while", "for", "import", "namespace",
+            "abstract", "const", "var", "assert", "as"
+    );
+
     private File srcFile;
     private boolean main = true;
     private List<Token> tokens = new ArrayList<>();
@@ -319,7 +325,7 @@ public class Tokenizer {
         }
     }
 
-    private static class StringTypes {
+    public static class StringTypes {
 
         private static boolean isInteger(String s) {
             for (char c : s.toCharArray()) {
@@ -328,7 +334,7 @@ public class Tokenizer {
             return true;
         }
 
-        private static boolean isIdentifier(String s) {
+        public static boolean isIdentifier(String s) {
             if (s.length() > 0) {
                 char lead = s.charAt(0);
                 if (!(Character.isAlphabetic(lead) || lead == '_')) return false;

@@ -28,12 +28,19 @@ public class AstBuilder {
 
     private static final Map<String, Integer> PCD_BIN_SPECIAL = Map.of(
             ".", 500,
+            "call", 400,
             ":", 3,
             "=", 1
     );
 
+    private static final Map<String, Integer> PCD_UNARY_SPECIAL = Map.of(
+            "new", 150,
+            "return", 0
+    );
+
     private static final Map<String, Integer> PRECEDENCES = Utilities.mergeMaps(
-            PCD_BIN_NUMERIC, PCD_BIN_LOGICAL, PCD_BIN_SPECIAL
+            PCD_BIN_NUMERIC, PCD_BIN_LOGICAL, PCD_BIN_SPECIAL,
+            PCD_UNARY_SPECIAL
     );
 
     private BlockStmt baseBlock = new BlockStmt();
@@ -46,6 +53,14 @@ public class AstBuilder {
             stack.add(new NameNode(name, lineFile));
         } else {
             inner.addName(name, lineFile);
+        }
+    }
+
+    void addPrimitiveTypeName(String name, LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new PrimitiveTypeNameNode(name, lineFile));
+        } else {
+            inner.addPrimitiveTypeName(name, lineFile);
         }
     }
 
@@ -74,6 +89,20 @@ public class AstBuilder {
             stack.add(new BinaryOperator(op, type, lineFile));
         } else {
             inner.addBinaryOperator(op, type, lineFile);
+        }
+    }
+
+    void addUnaryOperator(String op, LineFile lineFile) {
+//        if (inner == null) {
+//            stack.add(new )
+//        }
+    }
+
+    void addReturnStmt(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new ReturnStmt(lineFile));
+        } else {
+            inner.addReturnStmt(lineFile);
         }
     }
 
@@ -135,6 +164,27 @@ public class AstBuilder {
             def.setRType(rType);
         } else {
             inner.addFnRType();
+        }
+    }
+
+    void addCall(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new FuncCall(lineFile));
+            inner = new AstBuilder();
+        } else {
+            inner.addCall(lineFile);
+        }
+    }
+
+    void buildCall() {
+        if (inner.inner == null) {
+            inner.finishPart();
+            Line line = inner.getLine();
+            inner = null;
+            Arguments arguments = new Arguments(line);
+            stack.add(arguments);
+        } else {
+            inner.buildCall();
         }
     }
 
@@ -210,24 +260,40 @@ public class AstBuilder {
         try {
             while (true) {
 //                System.out.println(list);
-                int maxPre = 0;
+                int maxPre = -1;
                 int index = 0;
 
                 for (int i = 0; i < list.size(); ++i) {
                     Node node = list.get(i);
-                    if (node instanceof BinaryExpr && ((BinaryExpr) node).notFulfilled()) {
-                        int pre = PRECEDENCES.get(((BinaryExpr) node).getOperator());
-                        if (pre > maxPre) {
-                            maxPre = pre;
-                            index = i;
+                    if (node instanceof Expr && ((Expr) node).notFulfilled()) {
+                        if (node instanceof UnaryExpr) {
+                            int pre = PRECEDENCES.get(((UnaryExpr) node).getOperator());
+                            if (pre > maxPre) {
+                                maxPre = pre;
+                                index = i;
+                            }
+                        } else if (node instanceof BinaryExpr) {
+                            int pre = PRECEDENCES.get(((BinaryExpr) node).getOperator());
+                            if (pre > maxPre) {
+                                maxPre = pre;
+                                index = i;
+                            }
                         }
                     }
                 }
 
-                if (maxPre == 0) break;  // no expr found
+                if (maxPre == -1) break;  // no expr found
 
                 Expr expr = (Expr) list.get(index);
-                if (expr instanceof BinaryExpr) {
+                if (expr instanceof UnaryExpr) {
+                    if (((UnaryExpr) expr).atLeft) {
+                        Node value = list.remove(index + 1);
+                        ((UnaryExpr) expr).setValue(value);
+                    } else {
+                        Node value = list.remove(index - 1);
+                        ((UnaryExpr) expr).setValue(value);
+                    }
+                } else if (expr instanceof BinaryExpr) {
                     Node right = list.remove(index + 1);
                     Node left = list.remove(index - 1);
                     ((BinaryExpr) expr).setLeft(left);

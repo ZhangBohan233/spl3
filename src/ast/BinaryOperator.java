@@ -1,9 +1,8 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
-import interpreter.Memory;
+import interpreter.types.PrimitiveType;
 import interpreter.SplException;
-import interpreter.Type;
 import interpreter.env.Environment;
 import interpreter.env.TypeValue;
 import interpreter.primitives.Int;
@@ -27,17 +26,29 @@ public class BinaryOperator extends BinaryExpr {
         TypeValue leftTv = (TypeValue) left.evaluate(env);
         TypeValue rightTv = (TypeValue) right.evaluate(env);
         if (type == NUMERIC) {
-            if (leftTv.getType().equals(Type.TYPE_INT)) {
+            if (leftTv.getType().equals(PrimitiveType.TYPE_INT)) {
                 Primitive result;
                 switch (operator) {
                     case "+":
                         result = new Int(leftTv.getValue().intValue() + rightTv.getValue().intValue());
                         break;
+                    case "-":
+                        result = new Int(leftTv.getValue().intValue() - rightTv.getValue().intValue());
+                        break;
+                    case "*":
+                        result = new Int(leftTv.getValue().intValue() * rightTv.getValue().intValue());
+                        break;
+                    case "/":
+                        result = new Int(leftTv.getValue().intValue() / rightTv.getValue().intValue());
+                        break;
+                    case "%":
+                        result = new Int(leftTv.getValue().intValue() % rightTv.getValue().intValue());
+                        break;
                     default:
                         throw new SplException("Unsupported binary operator '" + operator + "' between " +
                                 leftTv.getType() + " and " + rightTv.getType() + ". ", getLineFile());
                 }
-                return new TypeValue(Type.TYPE_INT, result);
+                return new TypeValue(PrimitiveType.TYPE_INT, result);
             }
         } else if (type == LOGICAL) {
 

@@ -1,6 +1,6 @@
 package ast.fakeEnv;
 
-import interpreter.Type;
+import interpreter.types.Type;
 
 public class FakeFunctionEnv extends FakeMainAbstractEnv {
 
@@ -13,8 +13,8 @@ public class FakeFunctionEnv extends FakeMainAbstractEnv {
     @Override
     public int defineVar(String name, Type type) {
         int address = stackCounter;
-        variables.put(name, address);
-        stackCounter += type.getStackSize();
+//        variables.put(name, address);
+//        stackCounter += type.getStackSize();
         return address;
     }
 

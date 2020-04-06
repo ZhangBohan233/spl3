@@ -1,11 +1,15 @@
-fn main(argc: int, argv: String) fms.GG {
+fn add(a: int, b: int) int {
+    return a + b;
+}
+
+fn main() int {
     a: int;
     a = 5;
     b: int = 3;
 
-    return b;
+    //c: int = add(a, b);
+
+    return c;
 }
 
-c: int = 2;
-d: int = c + 7;
-d;
+c: int = add(2, 3);

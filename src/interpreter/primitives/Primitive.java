@@ -1,5 +1,7 @@
 package interpreter.primitives;
 
+import interpreter.types.TypeError;
+
 public abstract class Primitive {
 
     public static final int INT = 1;
@@ -13,4 +15,19 @@ public abstract class Primitive {
     public abstract long intValue();
 
     public abstract double floatValue();
+
+    public static String typeToString(int type) {
+        switch (type) {
+            case INT:
+                return "int";
+            case FLOAT:
+                return "float";
+            case CHAR:
+                return "char";
+            case BOOLEAN:
+                return "boolean";
+            default:
+                throw new TypeError();
+        }
+    }
 }
