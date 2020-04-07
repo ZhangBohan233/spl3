@@ -1,4 +1,4 @@
-package interpreter;
+package interpreter.env;
 
 public class EnvironmentError extends RuntimeException {
 

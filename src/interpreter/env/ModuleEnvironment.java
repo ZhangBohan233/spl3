@@ -2,9 +2,10 @@ package interpreter.env;
 
 import interpreter.Memory;
 
-public class GlobalEnvironment extends MainAbstractEnvironment {
-    public GlobalEnvironment(Memory memory) {
-        super(memory, null);
+public class ModuleEnvironment extends MainAbstractEnvironment {
+
+    public ModuleEnvironment(Environment outer) {
+        super(outer.memory, outer);
     }
 
     @Override

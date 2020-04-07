@@ -1,14 +1,14 @@
-package interpreter;
+package interpreter.splObjects;
 
 import ast.Arguments;
 import ast.BlockStmt;
 import ast.Declaration;
 import ast.Node;
+import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.env.FunctionEnvironment;
 import interpreter.env.TypeValue;
 import interpreter.types.CallableType;
-import interpreter.types.Type;
 import interpreter.types.TypeError;
 
 import java.util.List;

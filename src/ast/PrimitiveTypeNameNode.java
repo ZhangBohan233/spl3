@@ -4,10 +4,11 @@ import ast.fakeEnv.FakeEnv;
 import interpreter.types.PrimitiveType;
 import interpreter.env.Environment;
 import interpreter.primitives.Primitive;
+import interpreter.types.Type;
 import parser.ParseError;
 import util.LineFile;
 
-public class PrimitiveTypeNameNode extends LeafNode {
+public class PrimitiveTypeNameNode extends LeafNode implements TypeRepresent {
 
     private PrimitiveType type;
 
@@ -31,7 +32,11 @@ public class PrimitiveTypeNameNode extends LeafNode {
 
     @Override
     public PrimitiveType evaluate(Environment env) {
+        return type;
+    }
 
+    @Override
+    public PrimitiveType evalType(Environment environment) {
         return type;
     }
 

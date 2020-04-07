@@ -1,10 +1,6 @@
 package interpreter.env;
 
-import interpreter.EnvironmentError;
-import interpreter.Function;
 import interpreter.Memory;
-import interpreter.primitives.Pointer;
-import interpreter.types.CallableType;
 
 public abstract class MainAbstractEnvironment extends Environment {
 

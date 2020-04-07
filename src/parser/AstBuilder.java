@@ -154,16 +154,18 @@ public class AstBuilder {
         }
     }
 
-    void addFnRType() {
+    void addFnRType(LineFile lineFile) {
         if (inner == null) {
             finishPart();
-            if (activeLine.getChildren().size() != 2)
-                throw new ParseError("Function must have a return type. ", activeLine.getLineFile());
+            if (activeLine.getChildren().size() != 2) {
+                System.err.println(activeLine.getChildren());
+                throw new ParseError("Function must have a return type. ", lineFile);
+            }
             FuncDefinition def = (FuncDefinition) activeLine.getChildren().get(0);
             Node rType = activeLine.getChildren().remove(1);
             def.setRType(rType);
         } else {
-            inner.addFnRType();
+            inner.addFnRType(lineFile);
         }
     }
 
@@ -207,17 +209,41 @@ public class AstBuilder {
         }
     }
 
-    void finishFunction() {
+    void addImportModule(String importName, LineFile lineFile) {
+        if (inner == null) {
+            ImportStmt stmt = new ImportStmt(importName, lineFile);
+            stack.add(stmt);
+        } else {
+            inner.addImportModule(importName, lineFile);
+        }
+    }
+
+    void buildImportModule(LineFile lineFile) {
+        if (inner == null) {
+            finishPart();
+            if (activeLine.getChildren().size() != 2) {
+                throw new ParseError("Function must have a return type. ", lineFile);
+            }
+            ImportStmt importStmt = (ImportStmt) activeLine.getChildren().get(0);
+            BlockStmt blockStmt = (BlockStmt) activeLine.getChildren().remove(1);
+            importStmt.setContent(blockStmt);
+            finishLine();
+        } else {
+            inner.buildImportModule(lineFile);
+        }
+    }
+
+    void finishFunction(LineFile lineFile) {
         if (inner == null) {
             finishPart();
             if (activeLine.getChildren().size() != 2)
-                throw new ParseError("Non-abstract Function must have a body. ", activeLine.getLineFile());
+                throw new ParseError("Non-abstract Function must have a body. ", lineFile);
             FuncDefinition def = (FuncDefinition) activeLine.getChildren().get(0);
             BlockStmt body = (BlockStmt) activeLine.getChildren().remove(1);
             def.setBody(body);
             finishLine();
         } else {
-            inner.finishFunction();
+            inner.finishFunction(lineFile);
         }
     }
 

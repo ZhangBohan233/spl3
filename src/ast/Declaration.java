@@ -1,7 +1,7 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
-import interpreter.EnvironmentError;
+import interpreter.env.EnvironmentError;
 import interpreter.types.Type;
 import interpreter.env.Environment;
 import util.LineFile;

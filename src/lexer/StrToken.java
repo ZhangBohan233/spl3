@@ -10,6 +10,10 @@ public class StrToken extends Token {
         this.literal = literal;
     }
 
+    public String getLiteral() {
+        return literal;
+    }
+
     @Override
     public String toString() {
         return "StrToken{" +

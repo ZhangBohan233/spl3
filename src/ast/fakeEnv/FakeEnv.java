@@ -1,6 +1,6 @@
 package ast.fakeEnv;
 
-import interpreter.EnvironmentError;
+import interpreter.env.EnvironmentError;
 import interpreter.types.Type;
 
 import java.util.HashMap;

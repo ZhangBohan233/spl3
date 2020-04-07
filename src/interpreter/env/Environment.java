@@ -1,8 +1,6 @@
 package interpreter.env;
 
 import interpreter.*;
-import interpreter.primitives.Pointer;
-import interpreter.types.CallableType;
 import interpreter.types.Type;
 import interpreter.types.TypeError;
 

@@ -1,6 +1,8 @@
 package interpreter;
 
 import interpreter.primitives.Pointer;
+import interpreter.splObjects.Function;
+import interpreter.splObjects.SplObject;
 
 import java.util.Arrays;
 import java.util.LinkedList;

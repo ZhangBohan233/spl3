@@ -1,5 +1,6 @@
 package lexer;
 
+import parser.ParseError;
 import util.LineFile;
 import util.Utilities;
 
@@ -71,7 +72,6 @@ public class Tokenizer {
     public TokenList tokenize() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(srcFile));
         int lineNum = 1;
-        boolean inDoc = false;
         String line;
         while ((line = br.readLine()) != null) {
             LineFile lineFile = new LineFile(lineNum, srcFile.getAbsolutePath());
@@ -81,14 +81,66 @@ public class Tokenizer {
 
             lineNum++;
         }
-        System.out.println(tokens);
+        if (main) System.out.println(tokens);
         return new TokenList(tokens);
     }
 
-    private void findImport(int from, int to) {
+    private void findImport(int from, int to) throws IOException {
         for (int i = from; i < to; ++i) {
+            Token token = tokens.get(i);
+            if (token instanceof IdToken && ((IdToken) token).getIdentifier().equals("import")) {
+                Token pathTk = tokens.get(i + 1);
+                if (!(pathTk instanceof StrToken)) {
+                    throw new ParseError("Usage of import: 'import \"path\"' or 'import \"path\" as' module",
+                            pathTk.getLineFile());
+                }
+                String path = ((StrToken) pathTk).getLiteral();
+                String name;
+                int removeCount;
+                if (i + 2 < to) {
+                    Token nextToken = tokens.get(i + 2);
+                    if (nextToken instanceof IdToken && ((IdToken) nextToken).getIdentifier().equals("as")) {
+                        Token nameToken = tokens.get(i + 3);
+                        if (nameToken instanceof IdToken) {
+                            name = ((IdToken) nameToken).getIdentifier();
+                            removeCount = 3;
+                        } else {
+                            throw new ParseError("Usage of import: 'import \"path\"' or 'import \"path\" as' module",
+                                    nameToken.getLineFile());
+                        }
+                    } else {
+                        name = null;
+                        removeCount = 1;
+                    }
+                } else {
+                    name = null;
+                    removeCount = 1;
+                }
 
+                for (int j = 0; j < removeCount; ++j) {
+                    tokens.remove(i + 1);
+                }
+
+                File file;
+                if (path.endsWith(".sp")) {  // user library
+                    file = new File(srcFile.getParentFile().getAbsolutePath() + File.separator + path);
+                } else {
+                    file = new File("lib" + File.separator + path + ".sp");
+                }
+                importFile(file, name, token.getLineFile());
+
+                break;
+            }
         }
+    }
+
+    private void importFile(File importedFile, String importName, LineFile lineFile) throws IOException {
+        Tokenizer tokenizer = new Tokenizer(importedFile, null);
+        TokenList tokenList = tokenizer.tokenize();
+        tokens.add(new IdToken(importName, lineFile));
+        tokens.add(new IdToken("{", lineFile));
+        tokens.addAll(tokenList.getTokens());
+        tokens.add(new IdToken("}", lineFile));
     }
 
     private void proceedLine(String line, LineFile lineFile) {

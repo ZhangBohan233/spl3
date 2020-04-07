@@ -1,7 +1,7 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
-import interpreter.Function;
+import interpreter.splObjects.Function;
 import interpreter.env.TypeValue;
 import interpreter.types.CallableType;
 import interpreter.types.Type;

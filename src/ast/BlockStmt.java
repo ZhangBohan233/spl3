@@ -42,7 +42,7 @@ public class BlockStmt extends Node {
         for (Line line : children) {
             line.evaluate(env);
         }
-        return 0;
+        return null;
     }
 
     @Override

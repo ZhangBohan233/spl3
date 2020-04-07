@@ -31,10 +31,13 @@ public class Parser {
 
         boolean fnHeader = false;
         boolean fnRType = false;
+        boolean importingModule = false;
 
         Stack<Integer> paramBrackets = new Stack<>();
         Stack<Integer> callBrackets = new Stack<>();
         Stack<Integer> funcBodyBraces = new Stack<>();
+        Stack<Integer> moduleBraces = new Stack<>();
+        Stack<Integer> classBraces = new Stack<>();
 
         for (int i = 0; i < tokens.size(); ++i) {
             Token token = tokens.get(i);
@@ -75,16 +78,24 @@ public class Parser {
                             braceCount++;
                             if (fnRType) {
                                 fnRType = false;
-                                builder.addFnRType();
+                                builder.addFnRType(lineFile);
                                 builder.addBraceBlock();
-                                funcBodyBraces.add(braceCount);
+                                funcBodyBraces.push(braceCount);
+                            } else if (importingModule) {
+                                importingModule = false;
+                                builder.addBraceBlock();
+                                moduleBraces.push(braceCount);
                             }
                             break;
                         case "}":
                             if (isThisStack(funcBodyBraces, braceCount)) {
                                 funcBodyBraces.pop();
                                 builder.buildBraceBlock();
-                                builder.finishFunction();
+                                builder.finishFunction(lineFile);
+                            } else if (isThisStack(moduleBraces, braceCount)) {
+                                moduleBraces.pop();
+                                builder.buildBraceBlock();
+                                builder.buildImportModule(lineFile);
                             }
 
                             braceCount--;
@@ -113,6 +124,14 @@ public class Parser {
                             builder.addFunction(fnName, lineFile);
                             fnHeader = true;
                             break;
+                        case "class":
+                            break;
+                        case "import":
+                            String importName = ((IdToken) tokens.get(i + 1)).getIdentifier();
+                            builder.addImportModule(importName, lineFile);
+                            importingModule = true;
+                            i += 1;
+                            break;
                         case "return":
                             builder.addReturnStmt(lineFile);
                             break;
@@ -123,7 +142,7 @@ public class Parser {
                             builder.finishPart();
                             if (fnRType) {
                                 fnRType = false;  // TODO
-                                builder.addFnRType();
+                                builder.addFnRType(lineFile);
                             }
 
                             builder.finishLine();
