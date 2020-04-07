@@ -22,7 +22,7 @@ public class BinaryOperator extends BinaryExpr {
     }
 
     @Override
-    public Object evaluate(Environment env) {
+    public TypeValue evaluate(Environment env) {
         TypeValue leftTv = (TypeValue) left.evaluate(env);
         TypeValue rightTv = (TypeValue) right.evaluate(env);
         if (type == NUMERIC) {
@@ -56,7 +56,7 @@ public class BinaryOperator extends BinaryExpr {
             throw new SplException("Unexpected error. ", getLineFile());
         }
 
-        return 0;
+        return null;
     }
 
     @Override

@@ -2,6 +2,7 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
+import interpreter.env.TypeValue;
 import util.LineFile;
 
 public class Arguments extends Node {
@@ -19,7 +20,7 @@ public class Arguments extends Node {
     }
 
     @Override
-    public Object evaluate(Environment env) {
+    public TypeValue evaluate(Environment env) {
         return null;
     }
 

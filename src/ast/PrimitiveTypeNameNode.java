@@ -1,6 +1,8 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
+import interpreter.SplException;
+import interpreter.env.TypeValue;
 import interpreter.types.PrimitiveType;
 import interpreter.env.Environment;
 import interpreter.primitives.Primitive;
@@ -31,8 +33,8 @@ public class PrimitiveTypeNameNode extends LeafNode implements TypeRepresent {
     }
 
     @Override
-    public PrimitiveType evaluate(Environment env) {
-        return type;
+    public TypeValue evaluate(Environment env) {
+        throw new SplException("Type self is not evaluate-able. ", getLineFile());
     }
 
     @Override

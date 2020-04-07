@@ -13,7 +13,7 @@ public class ReturnStmt extends UnaryExpr {
 
     @Override
     public TypeValue evaluate(Environment env) {
-        env.setReturn((TypeValue) value.evaluate(env));
+        env.setReturn(value.evaluate(env));
         return null;
     }
 

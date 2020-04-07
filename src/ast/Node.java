@@ -3,6 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.Memory;
 import interpreter.env.Environment;
+import interpreter.env.TypeValue;
 import util.LineFile;
 
 public abstract class Node {
@@ -14,7 +15,7 @@ public abstract class Node {
         this.lineFile = lineFile;
     }
 
-    public abstract Object evaluate(Environment env);
+    public abstract TypeValue evaluate(Environment env);
 
     /**
      * Preprocess this node and return the new node of this

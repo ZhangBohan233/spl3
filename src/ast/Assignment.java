@@ -14,8 +14,8 @@ public class Assignment extends BinaryExpr {
     }
 
     @Override
-    public Object evaluate(Environment env) {
-        TypeValue rightRes = (TypeValue) right.evaluate(env);
+    public TypeValue evaluate(Environment env) {
+        TypeValue rightRes = right.evaluate(env);
 
         if (left instanceof NameNode) {
             env.setVar(((NameNode) left).getName(), rightRes);

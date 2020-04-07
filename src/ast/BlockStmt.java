@@ -3,6 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.Memory;
 import interpreter.env.Environment;
+import interpreter.env.TypeValue;
 import util.LineFile;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class BlockStmt extends Node {
     }
 
     @Override
-    public Object evaluate(Environment env) {
+    public TypeValue evaluate(Environment env) {
         for (Line line : children) {
             line.evaluate(env);
         }

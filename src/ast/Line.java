@@ -3,6 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.Memory;
 import interpreter.env.Environment;
+import interpreter.env.TypeValue;
 import util.LineFile;
 
 import java.util.ArrayList;
@@ -29,8 +30,8 @@ public class Line extends Node {
     }
 
     @Override
-    public Object evaluate(Environment env) {
-        Object res = null;
+    public TypeValue evaluate(Environment env) {
+        TypeValue res = null;
         for (Node node : children) {
             res = node.evaluate(env);
         }

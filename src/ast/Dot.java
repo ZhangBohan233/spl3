@@ -18,12 +18,12 @@ public class Dot extends BinaryExpr implements TypeRepresent {
 
     @Override
     public TypeValue evaluate(Environment env) {
-        TypeValue leftTv = (TypeValue) left.evaluate(env);
+        TypeValue leftTv = left.evaluate(env);
         if (leftTv.getType() instanceof ClassType) {
 
         } else if (leftTv.getType() instanceof ModuleType) {
             Module module = (Module) env.getMemory().get((Pointer) leftTv.getValue());
-            return (TypeValue) right.evaluate(module.getEnv());
+            return right.evaluate(module.getEnv());
         }
         return null;
     }

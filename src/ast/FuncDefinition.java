@@ -1,6 +1,7 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
+import interpreter.env.EnvironmentError;
 import interpreter.splObjects.Function;
 import interpreter.env.TypeValue;
 import interpreter.types.CallableType;
@@ -16,7 +17,7 @@ import java.util.List;
 public class FuncDefinition extends Node {
 
     private String name;
-    private Node rType;
+    private TypeRepresent rType;
     private Line parameters;
     private BlockStmt body;
 
@@ -31,7 +32,9 @@ public class FuncDefinition extends Node {
     }
 
     public void setRType(Node rType) {
-        this.rType = rType;
+        if (rType instanceof TypeRepresent)
+            this.rType = (TypeRepresent) rType;
+        else throw new ParseError("'" + rType + "' is not a type. ", rType.getLineFile());
     }
 
     public void setBody(BlockStmt body) {
@@ -39,20 +42,20 @@ public class FuncDefinition extends Node {
     }
 
     @Override
-    public Object evaluate(Environment env) {
+    public TypeValue evaluate(Environment env) {
         List<Declaration> params = new ArrayList<>();
         List<Type> paramTypes = new ArrayList<>();
         for (int i = 0; i < parameters.getChildren().size(); ++i) {
             Node node = parameters.getChildren().get(i);
             if (node instanceof Declaration) {
                 params.add((Declaration) node);
-                paramTypes.add((Type) ((Declaration) node).right.evaluate(env));
+                paramTypes.add(((Declaration) node).getRight().evalType(env));
             } else {
                 throw new ParseError("Unexpected parameter syntax. ", node.getLineFile());
             }
         }
 
-        Type rtype = (Type) rType.evaluate(env);
+        Type rtype = rType.evalType(env);
         CallableType funcType = new CallableType(paramTypes, rtype);
 
         Function function = new Function(body, params, funcType, env);

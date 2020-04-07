@@ -2,6 +2,7 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.EnvironmentError;
+import interpreter.env.TypeValue;
 import interpreter.types.Type;
 import interpreter.env.Environment;
 import util.LineFile;
@@ -20,8 +21,9 @@ public class Declaration extends BinaryExpr {
     }
 
     @Override
-    public Object evaluate(Environment env) {
-        Type rightEv = (Type) right.evaluate(env);
+    public TypeValue evaluate(Environment env) {
+//        Type rightEv = (Type) right.evaluate(env);
+        Type rightEv = getRight().evalType(env);
         env.defineVar(getLeft().getName(), rightEv);
         return null;
     }
@@ -42,5 +44,10 @@ public class Declaration extends BinaryExpr {
     public NameNode getLeft() {
         if (!(left instanceof NameNode)) throw new EnvironmentError();
         return (NameNode) left;
+    }
+
+    public TypeRepresent getRight() {
+        if (!(right instanceof TypeRepresent)) throw new EnvironmentError();
+        return (TypeRepresent) right;
     }
 }
