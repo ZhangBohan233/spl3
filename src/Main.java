@@ -1,8 +1,7 @@
 import ast.*;
-import ast.fakeEnv.FakeGlobalEnv;
 import interpreter.Memory;
 import interpreter.env.GlobalEnvironment;
-import interpreter.env.TypeValue;
+import interpreter.types.TypeValue;
 import lexer.TokenList;
 import lexer.Tokenizer;
 import parser.Parser;

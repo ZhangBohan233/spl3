@@ -32,6 +32,8 @@ public class Parser {
         boolean fnHeader = false;
         boolean fnRType = false;
         boolean importingModule = false;
+        boolean classHeader = false;
+        boolean extending = false;
 
         Stack<Integer> paramBrackets = new Stack<>();
         Stack<Integer> callBrackets = new Stack<>();
@@ -85,6 +87,14 @@ public class Parser {
                                 importingModule = false;
                                 builder.addBraceBlock();
                                 moduleBraces.push(braceCount);
+                            } else if (classHeader) {
+                                classHeader = false;
+                                if (extending) {
+                                    extending = false;
+                                    builder.finishExtends();
+                                }
+                                builder.addBraceBlock();
+                                classBraces.push(braceCount);
                             }
                             break;
                         case "}":
@@ -96,6 +106,10 @@ public class Parser {
                                 moduleBraces.pop();
                                 builder.buildBraceBlock();
                                 builder.buildImportModule(lineFile);
+                            } else if (isThisStack(classBraces, braceCount)) {
+                                classBraces.pop();
+                                builder.buildBraceBlock();
+                                builder.buildClass(lineFile);
                             }
 
                             braceCount--;
@@ -125,6 +139,18 @@ public class Parser {
                             fnHeader = true;
                             break;
                         case "class":
+                            Token classNameToken = tokens.get(i + 1);
+                            i += 1;
+                            if (!(classNameToken instanceof IdToken)) {
+                                throw new ParseError("Class must have a name. ", lineFile);
+                            }
+                            String className = ((IdToken) classNameToken).getIdentifier();
+                            classHeader = true;
+                            builder.addClass(className, lineFile);
+                            break;
+                        case "extends":
+                            builder.addExtends();
+                            extending = true;
                             break;
                         case "import":
                             String importName = ((IdToken) tokens.get(i + 1)).getIdentifier();
@@ -134,6 +160,9 @@ public class Parser {
                             break;
                         case "return":
                             builder.addReturnStmt(lineFile);
+                            break;
+                        case "new":
+                            builder.addNewStmt(lineFile);
                             break;
                         case ",":
                             builder.finishPart();
@@ -153,6 +182,7 @@ public class Parser {
                         case "float":
                         case "char":
                         case "boolean":
+                        case "void":
                             builder.addPrimitiveTypeName(identifier, lineFile);
                             break;
                         default:  // name

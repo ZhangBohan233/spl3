@@ -1,9 +1,8 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
-import interpreter.env.EnvironmentError;
 import interpreter.splObjects.Function;
-import interpreter.env.TypeValue;
+import interpreter.types.TypeValue;
 import interpreter.types.CallableType;
 import interpreter.types.Type;
 import interpreter.env.Environment;

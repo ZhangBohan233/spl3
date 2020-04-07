@@ -1,6 +1,7 @@
 package interpreter.env;
 
 import interpreter.Memory;
+import interpreter.types.TypeValue;
 
 public abstract class MainAbstractEnvironment extends Environment {
 
@@ -13,5 +14,10 @@ public abstract class MainAbstractEnvironment extends Environment {
         if (alreadyDefined(name)) throw new EnvironmentError();
 
         variables.put(name, funcTv);
+    }
+
+    @Override
+    public void setReturn(TypeValue typeValue) {
+        throw new EnvironmentError("Return outside function. ");
     }
 }

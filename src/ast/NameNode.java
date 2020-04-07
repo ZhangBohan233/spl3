@@ -1,12 +1,9 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
-import interpreter.Memory;
 import interpreter.env.Environment;
-import interpreter.env.TypeValue;
-import interpreter.primitives.Pointer;
+import interpreter.types.TypeValue;
 import interpreter.types.PointerType;
-import interpreter.types.Type;
 import util.LineFile;
 
 public class NameNode extends LeafNode implements TypeRepresent {
@@ -45,6 +42,8 @@ public class NameNode extends LeafNode implements TypeRepresent {
 
     @Override
     public PointerType evalType(Environment environment) {
-        return null;
+        TypeValue typeValue = environment.get(name);
+        return (PointerType) typeValue.getType();
+//        return null;
     }
 }

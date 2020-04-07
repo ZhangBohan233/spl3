@@ -10,11 +10,11 @@ public abstract class UnaryExpr extends Expr {
     protected Node value;
     public final boolean atLeft;
 
-    public UnaryExpr(String op, boolean atLeft, LineFile lineFile) {
+    public UnaryExpr(String op, boolean operatorAtLeft, LineFile lineFile) {
         super(lineFile);
 
         this.op = op;
-        this.atLeft = atLeft;
+        this.atLeft = operatorAtLeft;
     }
 
     @Override

@@ -1,11 +1,11 @@
-package interpreter.env;
+package interpreter.types;
 
 import interpreter.types.Type;
 import interpreter.primitives.Primitive;
 
 public class TypeValue {
 
-    private Type type;
+    private final Type type;
     private Primitive value;
 
     public TypeValue(Type type) {
@@ -27,6 +27,10 @@ public class TypeValue {
 
     public void setValue(Primitive value) {
         this.value = value;
+    }
+
+    public TypeValue copy() {
+        return new TypeValue(type, value);
     }
 
     @Override

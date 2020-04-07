@@ -2,7 +2,7 @@ package interpreter.primitives;
 
 public class Pointer extends Primitive {
 
-    private int ptr;
+    private final int ptr;
 
     public Pointer(int ptr) {
         this.ptr = ptr;

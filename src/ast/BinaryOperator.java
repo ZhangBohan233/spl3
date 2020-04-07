@@ -4,7 +4,7 @@ import ast.fakeEnv.FakeEnv;
 import interpreter.types.PrimitiveType;
 import interpreter.SplException;
 import interpreter.env.Environment;
-import interpreter.env.TypeValue;
+import interpreter.types.TypeValue;
 import interpreter.primitives.Int;
 import interpreter.primitives.Primitive;
 import util.LineFile;

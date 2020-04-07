@@ -3,7 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
 import interpreter.env.ModuleEnvironment;
-import interpreter.env.TypeValue;
+import interpreter.types.TypeValue;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Module;
 import interpreter.types.ModuleType;

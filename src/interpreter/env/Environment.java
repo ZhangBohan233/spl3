@@ -3,6 +3,7 @@ package interpreter.env;
 import interpreter.*;
 import interpreter.types.Type;
 import interpreter.types.TypeError;
+import interpreter.types.TypeValue;
 
 import java.util.HashMap;
 import java.util.Map;

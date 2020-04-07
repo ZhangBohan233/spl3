@@ -6,4 +6,9 @@ public class ModuleType extends PointerType {
     public String toString() {
         return "ModuleType";
     }
+
+    @Override
+    public int getPointerType() {
+        return PointerType.MODULE_TYPE;
+    }
 }

@@ -4,6 +4,7 @@ import interpreter.types.TypeError;
 
 public abstract class Primitive {
 
+    public static final int VOID = 0;
     public static final int INT = 1;
     public static final int FLOAT = 2;
     public static final int CHAR = 3;
@@ -26,6 +27,8 @@ public abstract class Primitive {
                 return "char";
             case BOOLEAN:
                 return "boolean";
+            case VOID:
+                return "void";
             default:
                 throw new TypeError();
         }

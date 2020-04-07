@@ -1,9 +1,8 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
-import interpreter.Memory;
 import interpreter.env.Environment;
-import interpreter.env.TypeValue;
+import interpreter.types.TypeValue;
 import util.LineFile;
 
 public abstract class Node {

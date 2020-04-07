@@ -2,7 +2,7 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
-import interpreter.env.TypeValue;
+import interpreter.types.TypeValue;
 import util.LineFile;
 
 public class ReturnStmt extends UnaryExpr {

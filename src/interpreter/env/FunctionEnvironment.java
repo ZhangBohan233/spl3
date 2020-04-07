@@ -1,6 +1,6 @@
 package interpreter.env;
 
-import interpreter.Memory;
+import interpreter.types.TypeValue;
 
 public class FunctionEnvironment extends MainAbstractEnvironment {
 

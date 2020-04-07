@@ -2,7 +2,7 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.types.PrimitiveType;
-import interpreter.env.TypeValue;
+import interpreter.types.TypeValue;
 import interpreter.primitives.Int;
 import interpreter.env.Environment;
 import util.LineFile;

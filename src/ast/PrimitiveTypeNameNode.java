@@ -2,11 +2,10 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.SplException;
-import interpreter.env.TypeValue;
+import interpreter.types.TypeValue;
 import interpreter.types.PrimitiveType;
 import interpreter.env.Environment;
 import interpreter.primitives.Primitive;
-import interpreter.types.Type;
 import parser.ParseError;
 import util.LineFile;
 
@@ -26,6 +25,9 @@ public class PrimitiveTypeNameNode extends LeafNode implements TypeRepresent {
             case "char":
                 break;
             case "boolean":
+                break;
+            case "void":
+                type = PrimitiveType.TYPE_VOID;
                 break;
             default:
                 throw new ParseError("No primitive type named '" + typeName + "'. ", lineFile);

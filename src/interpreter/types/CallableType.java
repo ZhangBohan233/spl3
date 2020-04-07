@@ -25,4 +25,9 @@ public class CallableType extends PointerType {
     public String toString() {
         return paramTypes + "->" + rType;
     }
+
+    @Override
+    public int getPointerType() {
+        return PointerType.CALLABLE_TYPE;
+    }
 }

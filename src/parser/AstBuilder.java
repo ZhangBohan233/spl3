@@ -106,6 +106,14 @@ public class AstBuilder {
         }
     }
 
+    void addNewStmt(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new NewStmt(lineFile));
+        } else {
+            inner.addNewStmt(lineFile);
+        }
+    }
+
     void addDeclaration(int level, LineFile lineFile) {
         if (inner == null) {
             stack.add(new Declaration(level, lineFile));
@@ -230,6 +238,50 @@ public class AstBuilder {
             finishLine();
         } else {
             inner.buildImportModule(lineFile);
+        }
+    }
+
+    void addClass(String className, LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new ClassStmt(className, lineFile));
+        } else {
+            inner.addClass(className, lineFile);
+        }
+    }
+
+    void buildClass(LineFile lineFile) {
+        if (inner == null) {
+            finishPart();
+            if (activeLine.getChildren().size() != 2)
+                throw new ParseError("Class must have a body. ", lineFile);
+            ClassStmt cs = (ClassStmt) activeLine.getChildren().get(0);
+            BlockStmt body = (BlockStmt) activeLine.getChildren().remove(1);
+            cs.setBody(body);
+            finishLine();
+//            System.out.println(6666);
+        } else {
+            inner.buildClass(lineFile);
+        }
+    }
+
+    void addExtends() {
+        if (inner == null) {
+            inner = new AstBuilder();
+        } else {
+            inner.addExtends();
+        }
+    }
+
+    void finishExtends() {
+        if (inner.inner == null) {
+            inner.finishPart();
+            Line line = inner.getLine();
+            inner = null;
+            Extends extending = new Extends(line);
+            ClassStmt clazz = (ClassStmt) stack.get(stack.size() - 1);
+            clazz.setSuperclasses(extending);
+        } else {
+            inner.finishExtends();
         }
     }
 

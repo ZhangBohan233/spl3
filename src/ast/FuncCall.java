@@ -3,7 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.splObjects.Function;
 import interpreter.env.Environment;
-import interpreter.env.TypeValue;
+import interpreter.types.TypeValue;
 import interpreter.primitives.Pointer;
 import interpreter.types.CallableType;
 import interpreter.types.TypeError;
@@ -17,7 +17,7 @@ public class FuncCall extends BinaryExpr {
 
     @Override
     public TypeValue evaluate(Environment env) {
-        TypeValue leftTv = (TypeValue) left.evaluate(env);
+        TypeValue leftTv = left.evaluate(env);
         if (!(leftTv.getType() instanceof CallableType)) {
             throw new TypeError("Type '" + leftTv.getType() + "' is not callable. ", getLineFile());
         }

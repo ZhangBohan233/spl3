@@ -7,7 +7,7 @@ import ast.Node;
 import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.env.FunctionEnvironment;
-import interpreter.env.TypeValue;
+import interpreter.types.TypeValue;
 import interpreter.types.CallableType;
 import interpreter.types.TypeError;
 
@@ -52,7 +52,7 @@ public class Function extends SplObject {
             String paramName = param.getLeft().getName();
             param.evaluate(scope);
             Node argNode = arguments.getLine().getChildren().get(i);
-            TypeValue arg = (TypeValue) argNode.evaluate(callingEnv);
+            TypeValue arg = argNode.evaluate(callingEnv);
             scope.setVar(paramName, arg);
         }
 

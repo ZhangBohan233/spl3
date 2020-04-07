@@ -1,11 +1,14 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
-import interpreter.Memory;
 import interpreter.SplException;
 import interpreter.env.Environment;
-import interpreter.env.TypeValue;
-import interpreter.primitives.Primitive;
+import interpreter.primitives.Pointer;
+import interpreter.splObjects.Instance;
+import interpreter.splObjects.Module;
+import interpreter.types.PointerType;
+import interpreter.types.TypeError;
+import interpreter.types.TypeValue;
 import util.LineFile;
 
 public class Assignment extends BinaryExpr {
@@ -23,10 +26,24 @@ public class Assignment extends BinaryExpr {
             left.evaluate(env);
 
             env.setVar(((Declaration) left).getLeft().getName(), rightRes);
+        } else if (left instanceof Dot) {
+            TypeValue leftLeft = ((Dot) left).left.evaluate(env);
+            PointerType leftLeftType = (PointerType) leftLeft.getType();
+            Environment leftEnv;
+            if (leftLeftType.getPointerType() == PointerType.MODULE_TYPE) {
+                Module leftModule = (Module) env.getMemory().get((Pointer) leftLeft.getValue());
+                leftEnv = leftModule.getEnv();
+            } else if (leftLeftType.getPointerType() == PointerType.CLASS_TYPE) {
+                Instance leftModule = (Instance) env.getMemory().get((Pointer) leftLeft.getValue());
+                leftEnv = leftModule.getEnv();
+            } else {
+                throw new TypeError();
+            }
+            leftEnv.setVar(((NameNode) ((Dot) left).right).getName(), rightRes);
         } else {
             throw new SplException();
         }
-        return null;
+        return rightRes;
     }
 
     @Override

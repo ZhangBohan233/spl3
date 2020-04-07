@@ -2,8 +2,7 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
-import interpreter.env.TypeValue;
-import util.LineFile;
+import interpreter.types.TypeValue;
 
 public class Arguments extends Node {
 
