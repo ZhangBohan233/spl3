@@ -19,4 +19,13 @@ public class ClassEnvironment extends MainAbstractEnvironment {
         ie.variables.replaceAll((k, v) -> v.copy());
         return ie;
     }
+
+    public void inherit(ClassEnvironment subclassEnv) {
+        for (Map.Entry<String, TypeValue> entry : constants.entrySet()) {
+            subclassEnv.constants.put(entry.getKey(), entry.getValue().copy());
+        }
+        for (Map.Entry<String, TypeValue> entry : variables.entrySet()) {
+            subclassEnv.variables.put(entry.getKey(), entry.getValue().copy());
+        }
+    }
 }

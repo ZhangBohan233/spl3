@@ -185,6 +185,9 @@ public class Parser {
                         case "void":
                             builder.addPrimitiveTypeName(identifier, lineFile);
                             break;
+                        case "namespace":
+                            builder.addNamespace(lineFile);
+                            break;
                         default:  // name
                             builder.addName(identifier, lineFile);
                             break;

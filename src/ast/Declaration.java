@@ -23,7 +23,7 @@ public class Declaration extends BinaryExpr {
     @Override
     public TypeValue evaluate(Environment env) {
         Type rightEv = getRight().evalType(env);
-        env.defineVar(getLeft().getName(), rightEv);
+        env.defineVar(getLeft().getName(), rightEv, getLineFile());
         return null;
     }
 

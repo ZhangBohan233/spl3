@@ -2,6 +2,7 @@ package util;
 
 public class LineFile {
 
+    public static final LineFile LF_TOKENIZE = new LineFile(0, "Tokenizer");
     public static final LineFile LF_INTERPRETER = new LineFile(0, "Interpreter");
 
     private int line;

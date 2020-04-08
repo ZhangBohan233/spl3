@@ -1,6 +1,9 @@
 package interpreter.env;
 
-public class EnvironmentError extends RuntimeException {
+import util.LineFile;
+import util.SplBaseException;
+
+public class EnvironmentError extends SplBaseException {
 
     public EnvironmentError() {
         super();
@@ -8,5 +11,9 @@ public class EnvironmentError extends RuntimeException {
 
     public EnvironmentError(String msg) {
         super(msg);
+    }
+
+    public EnvironmentError(String msg, LineFile lineFile) {
+        super(msg, lineFile);
     }
 }

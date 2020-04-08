@@ -35,6 +35,7 @@ public class AstBuilder {
 
     private static final Map<String, Integer> PCD_UNARY_SPECIAL = Map.of(
             "new", 150,
+            "namespace", 150,
             "return", 0
     );
 
@@ -296,6 +297,14 @@ public class AstBuilder {
             finishLine();
         } else {
             inner.finishFunction(lineFile);
+        }
+    }
+
+    void addNamespace(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new NamespaceNode(lineFile));
+        } else {
+            inner.addNamespace(lineFile);
         }
     }
 

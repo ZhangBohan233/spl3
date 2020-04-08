@@ -43,14 +43,10 @@ public class Function extends SplObject {
             throw new SplException("Arguments length does not match parameters. ", arguments.getLineFile());
         }
 
-        for (Declaration param : params) {
-            param.evaluate(scope);  // declare params
-        }
-
         for (int i = 0; i < params.size(); ++i) {
             Declaration param = params.get(i);
             String paramName = param.getLeft().getName();
-            param.evaluate(scope);
+            param.evaluate(scope);  // declare param
             Node argNode = arguments.getLine().getChildren().get(i);
             TypeValue arg = argNode.evaluate(callingEnv);
             scope.setVar(paramName, arg);

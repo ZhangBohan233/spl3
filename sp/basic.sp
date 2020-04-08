@@ -1,4 +1,4 @@
-import "math" as mat
+import namespace "math"
 
 class A {
     a: int;
@@ -7,9 +7,11 @@ class A {
     fn init() void {
 
     }
+
+    fn test() int {
+        return b;
+    }
 }
-
-
 
 fn add(a: int, b: int) int {
     return a + b;
@@ -21,10 +23,10 @@ fn main() int {
     b: int = 3;
 
     //c: int = add(a, add(2, b));
-    //d: int = mat.max(2, 4);
+    //d: int = max(2, 4);
 
     e: A = new A();
     e.a = a;
 
-    return e.a;
+    return e.hashCode();
 }

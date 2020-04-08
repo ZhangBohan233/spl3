@@ -5,7 +5,7 @@ import interpreter.env.Environment;
 import interpreter.env.ModuleEnvironment;
 import interpreter.types.TypeValue;
 import interpreter.primitives.Pointer;
-import interpreter.splObjects.Module;
+import interpreter.splObjects.SplModule;
 import interpreter.types.ModuleType;
 import util.LineFile;
 
@@ -26,21 +26,17 @@ public class ImportStmt extends Node {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        ModuleEnvironment moduleScope = new ModuleEnvironment(env);
+        content.evaluate(moduleScope);
+        SplModule module = new SplModule(importName, moduleScope);
 
-        if (importName == null) {  // importing whole namespace
-            content.evaluate(env);
-        } else {
-            ModuleEnvironment moduleScope = new ModuleEnvironment(env);
-            content.evaluate(moduleScope);
-            Module module = new Module(moduleScope);
+        Pointer ptr = env.getMemory().allocate(1);
+        env.getMemory().set(ptr, module);
 
-            Pointer ptr = env.getMemory().allocate(1);
-            env.getMemory().set(ptr, module);
+        ModuleType moduleType = new ModuleType();
+        env.defineVar(importName, moduleType, getLineFile());
+        env.setVar(importName, new TypeValue(moduleType, ptr));
 
-            ModuleType moduleType = new ModuleType();
-            env.defineVar(importName, moduleType);
-            env.setVar(importName, new TypeValue(moduleType, ptr));
-        }
         return null;
     }
 

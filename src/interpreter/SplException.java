@@ -1,8 +1,9 @@
 package interpreter;
 
 import util.LineFile;
+import util.SplBaseException;
 
-public class SplException extends RuntimeException {
+public class SplException extends SplBaseException {
 
     public SplException() {
         super();

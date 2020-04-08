@@ -3,6 +3,7 @@ package lexer;
 import util.LineFile;
 
 public class IdToken extends Token {
+
     private String identifier;
 
     public IdToken(String identifier, LineFile lineFile) {

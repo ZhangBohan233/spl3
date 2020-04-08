@@ -5,7 +5,7 @@ import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Instance;
-import interpreter.splObjects.Module;
+import interpreter.splObjects.SplModule;
 import interpreter.types.PointerType;
 import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
@@ -31,7 +31,7 @@ public class Assignment extends BinaryExpr {
             PointerType leftLeftType = (PointerType) leftLeft.getType();
             Environment leftEnv;
             if (leftLeftType.getPointerType() == PointerType.MODULE_TYPE) {
-                Module leftModule = (Module) env.getMemory().get((Pointer) leftLeft.getValue());
+                SplModule leftModule = (SplModule) env.getMemory().get((Pointer) leftLeft.getValue());
                 leftEnv = leftModule.getEnv();
             } else if (leftLeftType.getPointerType() == PointerType.CLASS_TYPE) {
                 Instance leftModule = (Instance) env.getMemory().get((Pointer) leftLeft.getValue());

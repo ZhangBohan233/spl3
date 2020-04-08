@@ -33,6 +33,10 @@ public class ArgumentParser {
         return allValid;
     }
 
+    public boolean importLang() {
+        return true;
+    }
+
     public String getMsg() {
         return msg;
     }

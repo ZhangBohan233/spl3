@@ -54,23 +54,34 @@ public class Tokenizer {
             "abstract", "const", "var", "assert", "as"
     );
 
+    private static final String IMPORT_USAGE = "Usage of import: 'import \"path\"' or 'import \"path\" as <module>' " +
+            "or 'import namespace \"path\"'";
+
     private File srcFile;
-    private boolean main = true;
+    private boolean main;
+    private boolean importLang;
     private List<Token> tokens = new ArrayList<>();
 
     private boolean inDoc = false;
 
-    public Tokenizer(File srcFile) {
+    public Tokenizer(File srcFile, boolean main, boolean importLang) {
         this.srcFile = srcFile;
-    }
-
-    public Tokenizer(File importedFile, File mainSrcFile) {
-        this.srcFile = importedFile;
-        main = false;
+        this.main = main;
+        this.importLang = importLang;
     }
 
     public TokenList tokenize() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(srcFile));
+
+        tokens.clear();
+
+        if (importLang) {
+            tokens.add(new IdToken("import", LineFile.LF_TOKENIZE));
+            tokens.add(new IdToken("namespace", LineFile.LF_TOKENIZE));
+            tokens.add(new StrToken("lang", LineFile.LF_TOKENIZE));
+            findImport(0, 3);
+        }
+
         int lineNum = 1;
         String line;
         while ((line = br.readLine()) != null) {
@@ -89,32 +100,36 @@ public class Tokenizer {
         for (int i = from; i < to; ++i) {
             Token token = tokens.get(i);
             if (token instanceof IdToken && ((IdToken) token).getIdentifier().equals("import")) {
-                Token pathTk = tokens.get(i + 1);
-                if (!(pathTk instanceof StrToken)) {
-                    throw new ParseError("Usage of import: 'import \"path\"' or 'import \"path\" as' module",
-                            pathTk.getLineFile());
-                }
-                String path = ((StrToken) pathTk).getLiteral();
-                String name;
+                Token nextTk = tokens.get(i + 1);
+                String name, path;
                 int removeCount;
-                if (i + 2 < to) {
-                    Token nextToken = tokens.get(i + 2);
-                    if (nextToken instanceof IdToken && ((IdToken) nextToken).getIdentifier().equals("as")) {
-                        Token nameToken = tokens.get(i + 3);
-                        if (nameToken instanceof IdToken) {
-                            name = ((IdToken) nameToken).getIdentifier();
-                            removeCount = 3;
-                        } else {
-                            throw new ParseError("Usage of import: 'import \"path\"' or 'import \"path\" as' module",
-                                    nameToken.getLineFile());
-                        }
-                    } else {
-                        name = null;
+                boolean namespace = false;
+
+                try {
+                    if (nextTk instanceof StrToken) {
+                        path = ((StrToken) nextTk).getLiteral();
+                        name = nameOfPath(path);
                         removeCount = 1;
+                    } else if (nextTk instanceof IdToken && ((IdToken) nextTk).getIdentifier().equals("namespace")) {
+                        path = ((StrToken) tokens.get(i + 2)).getLiteral();
+                        name = nameOfPath(path);
+                        removeCount = 2;
+                        namespace = true;
+                    } else {
+                        throw new SyntaxError(IMPORT_USAGE, nextTk.getLineFile());
                     }
-                } else {
-                    name = null;
-                    removeCount = 1;
+
+                    if (!namespace && tokens.size() > i + 2) {
+                        IdToken asToken = (IdToken) tokens.get(i + 2);
+                        if (asToken.getIdentifier().equals("as")) {
+                            removeCount = 3;
+                            name = ((IdToken) tokens.get(i + 3)).getIdentifier();
+                        } else {
+                            throw new SyntaxError(IMPORT_USAGE, nextTk.getLineFile());
+                        }
+                    }
+                } catch (ClassCastException | IndexOutOfBoundsException e) {
+                    throw new SyntaxError(IMPORT_USAGE, nextTk.getLineFile());
                 }
 
                 for (int j = 0; j < removeCount; ++j) {
@@ -127,20 +142,34 @@ public class Tokenizer {
                 } else {
                     file = new File("lib" + File.separator + path + ".sp");
                 }
-                importFile(file, name, token.getLineFile());
+                importFile(file, name, namespace, token.getLineFile());
 
                 break;
             }
         }
     }
 
-    private void importFile(File importedFile, String importName, LineFile lineFile) throws IOException {
-        Tokenizer tokenizer = new Tokenizer(importedFile, null);
+    private void importFile(File importedFile, String importName, boolean namespace, LineFile lineFile)
+            throws IOException {
+        Tokenizer tokenizer = new Tokenizer(importedFile, false, false);
         TokenList tokenList = tokenizer.tokenize();
         tokens.add(new IdToken(importName, lineFile));
         tokens.add(new IdToken("{", lineFile));
         tokens.addAll(tokenList.getTokens());
         tokens.add(new IdToken("}", lineFile));
+        if (namespace) {
+            tokens.add(new IdToken("namespace", lineFile));
+            tokens.add(new IdToken(importName, lineFile));
+            tokens.add(new IdToken(";", lineFile));
+        }
+    }
+
+    private static String nameOfPath(String path) {
+        if (path.contains(File.separator)) {
+            return path.substring(path.lastIndexOf(File.separator) + 1);
+        } else {
+            return path;
+        }
     }
 
     private void proceedLine(String line, LineFile lineFile) {

@@ -2,11 +2,13 @@ package interpreter.splObjects;
 
 import interpreter.env.ModuleEnvironment;
 
-public class Module extends SplObject {
+public class SplModule extends SplObject {
 
+    private String importName;
     private ModuleEnvironment env;
 
-    public Module(ModuleEnvironment env) {
+    public SplModule(String importName, ModuleEnvironment env) {
+        this.importName = importName;
         this.env = env;
     }
 
@@ -16,6 +18,6 @@ public class Module extends SplObject {
 
     @Override
     public String toString() {
-        return "Module";
+        return "Module " + importName;
     }
 }

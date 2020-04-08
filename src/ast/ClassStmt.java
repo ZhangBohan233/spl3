@@ -36,8 +36,8 @@ public class ClassStmt extends Node {
     private void validateExtending() {
         if (superclasses == null) {
             Line line = new Line();  // TODO
-//            if (!className.equals("Object"))
-//                line.getChildren().add(new NameNode("Object", getLineFile()));
+            if (!className.equals("Object"))
+                line.getChildren().add(new NameNode("Object", getLineFile()));
             superclasses = new Extends(line);
         }
     }
@@ -57,6 +57,11 @@ public class ClassStmt extends Node {
 
         ClassEnvironment classEnvironment = new ClassEnvironment(env);
         // TODO: inheritance
+        for (ClassType ct : superclassPointers) {
+            SplClass superclass = (SplClass) env.getMemory().get(ct.getClazzPointer());
+            superclass.getClassBaseEnv().inherit(classEnvironment);
+        }
+
         // attributes are evaluated when class created
         // During instance creation, copies the whole class environment to the instance environment
         body.evaluate(classEnvironment);
@@ -66,7 +71,7 @@ public class ClassStmt extends Node {
         env.getMemory().set(clazzPtr, clazz);
         ClassType clazzType = new ClassType(clazzPtr);
 
-        env.defineVar(className, clazzType);
+        env.defineVar(className, clazzType, getLineFile());
         TypeValue typeValue = new TypeValue(clazzType, clazzPtr);
 
         env.setVar(className, typeValue);
