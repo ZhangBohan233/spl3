@@ -5,6 +5,7 @@ import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.env.InstanceEnvironment;
 import interpreter.primitives.Pointer;
+import interpreter.splObjects.Function;
 import interpreter.splObjects.Instance;
 import interpreter.splObjects.SplClass;
 import interpreter.splObjects.SplObject;
@@ -26,12 +27,15 @@ public class NewStmt extends UnaryExpr {
         if (!(type instanceof ClassType)) throw new TypeError();
         ClassType clazzType = (ClassType) type;
 
-        TypeValue instanceTv = createInstanceAndAllocate(clazzType, env);
+        InstanceTypeValue instanceTv = createInstanceAndAllocate(clazzType, env);
+        Instance instance = instanceTv.instance;
 
         Arguments args = (Arguments) getValue().right;
-//        CallableType callableType = instance.getEnv().get();
+        TypeValue constructorTv = instance.getEnv().get("init");
+        Function constructor = (Function) env.getMemory().get((Pointer) constructorTv.getValue());
+        constructor.call(args, env);
 
-        return instanceTv;
+        return instanceTv.typeValue;
     }
 
     @Override
@@ -39,12 +43,26 @@ public class NewStmt extends UnaryExpr {
         return null;
     }
 
-    private static TypeValue createInstanceAndAllocate(ClassType clazzType, Environment env) {
+    private static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType, Environment env) {
         SplObject obj = env.getMemory().get(clazzType.getClazzPointer());
         if (!(obj instanceof SplClass)) throw new TypeError();
         SplClass clazz = (SplClass) obj;
         InstanceEnvironment instanceEnv = new InstanceEnvironment(clazz.getDefinitionEnv());
-        clazz.getBody().evaluate(instanceEnv);
+
+        clazz.getBody().evaluate(instanceEnv);  // most important step
+
+        if (!instanceEnv.hasName("init")) {
+            // If class no constructor, put an empty default constructor
+            // TODO: call super() in constructor
+            FuncDefinition fd = new FuncDefinition("init", LineFile.LF_INTERPRETER);
+            fd.setParameters(new Line());
+            fd.setRType(new PrimitiveTypeNameNode("void", LineFile.LF_INTERPRETER));
+            BlockStmt constBody = new BlockStmt(LineFile.LF_INTERPRETER);
+            fd.setBody(constBody);
+
+            fd.evaluate(instanceEnv);
+        }
+
         Instance instance = new Instance(clazzType, instanceEnv);
         Pointer instancePtr = env.getMemory().allocate(1);
         env.getMemory().set(instancePtr, instance);
@@ -55,11 +73,12 @@ public class NewStmt extends UnaryExpr {
 
         ClassType scp = clazz.getSuperclassType();
         if (scp != null) {
-            TypeValue scInstance = createInstanceAndAllocate(scp, env);
+            InstanceTypeValue scItv = createInstanceAndAllocate(scp, env);
+            TypeValue scInstance = scItv.typeValue;
             instance.getEnv().directDefineConstAndSet("super", scInstance);
         }
 
-        return instanceTv;
+        return new InstanceTypeValue(instance, instanceTv);
     }
 
     private FuncCall getValue() {
@@ -67,6 +86,16 @@ public class NewStmt extends UnaryExpr {
             return (FuncCall) value;
         } else {
             throw new SplException("Class instantiation must be a call. ", getLineFile());
+        }
+    }
+
+    private static class InstanceTypeValue {
+        private Instance instance;
+        private TypeValue typeValue;
+
+        InstanceTypeValue(Instance instance, TypeValue typeValue) {
+            this.instance = instance;
+            this.typeValue = typeValue;
         }
     }
 }

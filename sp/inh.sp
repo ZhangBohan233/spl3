@@ -9,8 +9,12 @@ class B {
 class C extends B {
     a: int;
 
+    fn init(x: int) void {
+        a = x;
+    }
+
     fn t() int {
-        return super.t();
+        return a;
     }
 
     fn set(x: int) void {
@@ -21,7 +25,7 @@ class C extends B {
 fn main() int {
     a: C = new C();
 
-    a.set(3);
+    //a.set(3);
 
     return a.t();
 }

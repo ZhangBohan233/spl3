@@ -57,6 +57,10 @@ public abstract class Environment {
         return tv;
     }
 
+    public boolean hasName(String name) {
+        return innerGet(name, true) != null;
+    }
+
     protected TypeValue innerGet(String name, boolean isFirst) {
         TypeValue tv = constants.get(name);
         if (tv == null) tv = variables.get(name);
