@@ -75,6 +75,10 @@ public abstract class Environment {
         System.out.println(variables);
     }
 
+    public Environment getOuter() {
+        return outer;
+    }
+
     private boolean typeCheck(Type bigger, Type smaller) {
         return true;
     }

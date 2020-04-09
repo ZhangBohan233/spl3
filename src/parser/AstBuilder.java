@@ -36,6 +36,7 @@ public class AstBuilder {
     private static final Map<String, Integer> PCD_UNARY_SPECIAL = Map.of(
             "new", 150,
             "namespace", 150,
+            "extends", 150,
             "return", 0
     );
 
@@ -242,17 +243,18 @@ public class AstBuilder {
         }
     }
 
-    void addClass(String className, LineFile lineFile) {
+    void addClass(String className, boolean isInterface, LineFile lineFile) {
         if (inner == null) {
-            stack.add(new ClassStmt(className, lineFile));
+            stack.add(new ClassStmt(className, isInterface, lineFile));
         } else {
-            inner.addClass(className, lineFile);
+            inner.addClass(className, isInterface, lineFile);
         }
     }
 
     void buildClass(LineFile lineFile) {
         if (inner == null) {
             finishPart();
+//            System.out.println(activeLine.getChildren());
             if (activeLine.getChildren().size() != 2)
                 throw new ParseError("Class must have a body. ", lineFile);
             ClassStmt cs = (ClassStmt) activeLine.getChildren().get(0);
@@ -265,24 +267,46 @@ public class AstBuilder {
         }
     }
 
-    void addExtends() {
+    void addExtend(LineFile lineFile) {
         if (inner == null) {
-            inner = new AstBuilder();
+            stack.add(new Extends(lineFile));
         } else {
-            inner.addExtends();
+            inner.addExtend(lineFile);
         }
     }
 
-    void finishExtends() {
+    void finishExtend(LineFile lineFile) {
+        if (inner == null) {
+            finishPart();
+            if (activeLine.getChildren().size() != 2) {
+                throw new ParseError("Keyword 'extends' must follow a class. ", lineFile);
+            }
+            ClassStmt classStmt = (ClassStmt) activeLine.getChildren().get(0);
+            classStmt.setSuperclass(activeLine.getChildren().remove(1));
+        } else {
+            inner.finishExtend(lineFile);
+        }
+    }
+
+    void addImplements() {
+        if (inner == null) {
+            inner = new AstBuilder();
+        } else {
+            inner.addImplements();
+        }
+    }
+
+    void finishImplements() {
         if (inner.inner == null) {
             inner.finishPart();
             Line line = inner.getLine();
             inner = null;
-            Extends extending = new Extends(line);
-            ClassStmt clazz = (ClassStmt) stack.get(stack.size() - 1);
-            clazz.setSuperclasses(extending);
+            finishPart();
+            Implements extending = new Implements(line);
+            ClassStmt clazz = (ClassStmt) activeLine.getChildren().get(activeLine.getChildren().size() - 1);
+            clazz.setImplements(extending);
         } else {
-            inner.finishExtends();
+            inner.finishImplements();
         }
     }
 

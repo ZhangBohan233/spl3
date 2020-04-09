@@ -20,4 +20,9 @@ public class Instance extends SplObject {
     public ClassType getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return "Instance<" + type + ">";
+    }
 }

@@ -3,10 +3,8 @@ package parser;
 import ast.BinaryOperator;
 import ast.BlockStmt;
 import ast.Declaration;
-import interpreter.primitives.Int;
 import lexer.*;
 import util.LineFile;
-import util.Utilities;
 
 import java.util.List;
 import java.util.Stack;
@@ -33,6 +31,7 @@ public class Parser {
         boolean fnRType = false;
         boolean importingModule = false;
         boolean classHeader = false;
+        boolean implementing = false;
         boolean extending = false;
 
         Stack<Integer> paramBrackets = new Stack<>();
@@ -53,6 +52,7 @@ public class Parser {
                 } else if (Tokenizer.LOGICAL_BINARY.contains(identifier)) {
                     builder.addBinaryOperator(identifier, BinaryOperator.LOGICAL, lineFile);
                 } else {
+                    boolean isInterface = false;
                     switch (identifier) {
                         case "(":
                             bracketCount++;
@@ -90,8 +90,13 @@ public class Parser {
                             } else if (classHeader) {
                                 classHeader = false;
                                 if (extending) {
+                                    assert !implementing;  // keyword "implements" should already finished extends
                                     extending = false;
-                                    builder.finishExtends();
+                                    builder.finishExtend(lineFile);
+                                }
+                                if (implementing) {
+                                    implementing = false;
+                                    builder.finishImplements();
                                 }
                                 builder.addBraceBlock();
                                 classBraces.push(braceCount);
@@ -138,6 +143,8 @@ public class Parser {
                             builder.addFunction(fnName, lineFile);
                             fnHeader = true;
                             break;
+                        case "interface":
+                            isInterface = true;
                         case "class":
                             Token classNameToken = tokens.get(i + 1);
                             i += 1;
@@ -146,11 +153,19 @@ public class Parser {
                             }
                             String className = ((IdToken) classNameToken).getIdentifier();
                             classHeader = true;
-                            builder.addClass(className, lineFile);
+                            builder.addClass(className, isInterface, lineFile);
                             break;
                         case "extends":
-                            builder.addExtends();
+                            builder.addExtend(lineFile);
                             extending = true;
+                            break;
+                        case "implements":
+                            if (extending) {
+                                extending = false;
+                                builder.finishExtend(lineFile);
+                            }
+                            builder.addImplements();
+                            implementing = true;
                             break;
                         case "import":
                             String importName = ((IdToken) tokens.get(i + 1)).getIdentifier();

@@ -25,7 +25,7 @@ fn main() int {
     //c: int = add(a, add(2, b));
     //d: int = max(2, 4);
 
-    e: A = new A();
+    e: A = new A(a);
     e.a = a;
 
     return e.hashCode();

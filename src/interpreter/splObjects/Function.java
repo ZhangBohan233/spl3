@@ -54,7 +54,7 @@ public class Function extends SplObject {
 
         body.evaluate(scope);
         TypeValue rtnVal = scope.getReturnValue();
-        if (!funcType.getRType().isSuperclassOfOrEquals(rtnVal.getType())) {
+        if (rtnVal != null && !funcType.getRType().isSuperclassOfOrEquals(rtnVal.getType())) {
             throw new TypeError();
         }
 

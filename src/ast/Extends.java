@@ -4,24 +4,17 @@ import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
 import interpreter.types.TypeValue;
 import parser.ParseError;
+import util.LineFile;
 
-public class Extends extends Node {
+public class Extends extends UnaryExpr {
 
-    private Line extending;
-
-    public Extends(Line extending) {
-        super(extending.getLineFile());
-
-        this.extending = extending;
-    }
-
-    public Line getExtending() {
-        return extending;
+    public Extends(LineFile lineFile) {
+        super("extends", true, lineFile);
     }
 
     @Override
     public TypeValue evaluate(Environment env) {
-        throw new ParseError("Extends is not evaluate-able. ", getLineFile());
+        throw new ParseError("Extend node not evaluate-able. ", getLineFile());
     }
 
     @Override
@@ -29,8 +22,8 @@ public class Extends extends Node {
         return null;
     }
 
-    @Override
-    public String toString() {
-        return "Extends " + extending;
+    public TypeRepresent getValue() {
+        if (value instanceof TypeRepresent) return (TypeRepresent) value;
+        else throw new ParseError("Superclass must be a class. ", getLineFile());
     }
 }

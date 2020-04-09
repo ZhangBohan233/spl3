@@ -7,8 +7,12 @@ import java.util.Map;
 
 public class ClassEnvironment extends MainAbstractEnvironment {
 
-    public ClassEnvironment(Environment outer) {
+    private ClassEnvironment superclassEnv;
+
+    public ClassEnvironment(Environment outer, ClassEnvironment superclassEnv) {
         super(outer.getMemory(), outer);
+
+        this.superclassEnv = superclassEnv;
     }
 
     public InstanceEnvironment createInstanceEnv() {
@@ -21,11 +25,6 @@ public class ClassEnvironment extends MainAbstractEnvironment {
     }
 
     public void inherit(ClassEnvironment subclassEnv) {
-        for (Map.Entry<String, TypeValue> entry : constants.entrySet()) {
-            subclassEnv.constants.put(entry.getKey(), entry.getValue().copy());
-        }
-        for (Map.Entry<String, TypeValue> entry : variables.entrySet()) {
-            subclassEnv.variables.put(entry.getKey(), entry.getValue().copy());
-        }
+
     }
 }
