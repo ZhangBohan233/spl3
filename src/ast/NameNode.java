@@ -25,7 +25,6 @@ public class NameNode extends LeafNode implements TypeRepresent {
 
     @Override
     public TypeValue evaluate(Environment env) {
-        System.out.println(env.getOuter());
         return env.get(name);
     }
 
@@ -43,7 +42,6 @@ public class NameNode extends LeafNode implements TypeRepresent {
 
     @Override
     public PointerType evalType(Environment environment) {
-        System.out.println(environment);
         TypeValue typeValue = environment.get(name);
         return (PointerType) typeValue.getType();
 //        return null;

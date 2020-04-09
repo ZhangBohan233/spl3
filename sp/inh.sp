@@ -10,11 +10,11 @@ class C extends B {
     a: int;
 
     fn t() int {
-        return a;
+        return super.t();
     }
 
     fn set(x: int) void {
-        super;
+        a = x;
     }
 }
 

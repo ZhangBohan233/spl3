@@ -1,7 +1,7 @@
 package interpreter.splObjects;
 
 import ast.BlockStmt;
-import interpreter.env.ClassEnvironment;
+import interpreter.env.Environment;
 import interpreter.types.ClassType;
 
 import java.util.List;
@@ -10,19 +10,25 @@ public class SplClass extends SplObject {
 
     private ClassType superclassType;
     private List<ClassType> interfacePointers;
-    private ClassEnvironment classBaseEnv;
+    private BlockStmt body;
     private String className;
+    private Environment definitionEnv;
 
     public SplClass(String className, ClassType superclassType, List<ClassType> interfacePointers,
-                    ClassEnvironment classBaseEnv) {
+                    BlockStmt body, Environment definitionEnv) {
         this.className = className;
         this.superclassType = superclassType;
         this.interfacePointers = interfacePointers;
-        this.classBaseEnv = classBaseEnv;
+        this.body = body;
+        this.definitionEnv = definitionEnv;
     }
 
-    public ClassEnvironment getClassBaseEnv() {
-        return classBaseEnv;
+    public BlockStmt getBody() {
+        return body;
+    }
+
+    public Environment getDefinitionEnv() {
+        return definitionEnv;
     }
 
     public ClassType getSuperclassType() {

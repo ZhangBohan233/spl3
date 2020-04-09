@@ -3,6 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.SplException;
 import interpreter.env.Environment;
+import interpreter.env.InstanceEnvironment;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Instance;
 import interpreter.splObjects.SplClass;
@@ -42,7 +43,9 @@ public class NewStmt extends UnaryExpr {
         SplObject obj = env.getMemory().get(clazzType.getClazzPointer());
         if (!(obj instanceof SplClass)) throw new TypeError();
         SplClass clazz = (SplClass) obj;
-        Instance instance = new Instance(clazzType, clazz.getClassBaseEnv().createInstanceEnv());
+        InstanceEnvironment instanceEnv = new InstanceEnvironment(clazz.getDefinitionEnv());
+        clazz.getBody().evaluate(instanceEnv);
+        Instance instance = new Instance(clazzType, instanceEnv);
         Pointer instancePtr = env.getMemory().allocate(1);
         env.getMemory().set(instancePtr, instance);
 

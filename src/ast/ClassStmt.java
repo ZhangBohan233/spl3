@@ -2,7 +2,6 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.SplException;
-import interpreter.env.ClassEnvironment;
 import interpreter.env.Environment;
 import interpreter.types.Type;
 import interpreter.types.TypeValue;
@@ -62,16 +61,10 @@ public class ClassStmt extends Node {
         validateExtending();
 
         ClassType superclassPointer;
-        SplClass superclassObj;
-        ClassEnvironment superEnv;
         if (superclass == null) {
             superclassPointer = null;
-            superclassObj = null;
-            superEnv = null;
         } else {
             superclassPointer = (ClassType) superclass.evalType(env);
-            superclassObj = (SplClass) env.getMemory().get(superclassPointer.getClazzPointer());
-            superEnv = superclassObj.getClassBaseEnv();
         }
 
         List<ClassType> interfacePointers = new ArrayList<>();
@@ -84,20 +77,15 @@ public class ClassStmt extends Node {
             }
         }
 
-        ClassEnvironment classEnvironment = new ClassEnvironment(env, superEnv);
         // TODO: inheritance
 //        for (ClassType ct : interfacePointers) {
 //            SplClass superclass = (SplClass) env.getMemory().get(ct.getClazzPointer());
 //            superclass.getClassBaseEnv().inherit(classEnvironment);
 //        }
 
-        // attributes are evaluated when class created
-        // During instance creation, copies the whole class environment to the instance environment
-        body.evaluate(classEnvironment);
-
         // TODO: check implementations
 
-        SplClass clazz = new SplClass(className, superclassPointer, interfacePointers, classEnvironment);
+        SplClass clazz = new SplClass(className, superclassPointer, interfacePointers, body, env);
         Pointer clazzPtr = env.getMemory().allocate(1);
         env.getMemory().set(clazzPtr, clazz);
         ClassType clazzType = new ClassType(clazzPtr);

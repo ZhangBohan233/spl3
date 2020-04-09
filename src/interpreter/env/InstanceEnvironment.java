@@ -7,7 +7,7 @@ import interpreter.types.TypeValue;
 
 public class InstanceEnvironment extends MainAbstractEnvironment {
 
-    InstanceEnvironment(Environment outer) {
+    public InstanceEnvironment(Environment outer) {
         super(outer.getMemory(), outer);
     }
 
@@ -18,7 +18,6 @@ public class InstanceEnvironment extends MainAbstractEnvironment {
     @Override
     protected TypeValue innerGet(String name, boolean isFirst) {
         TypeValue tv = searchSuper(name);
-        System.out.println(name + tv);
         if (tv == null)
             return super.innerGet(name, isFirst);
         else return tv;
