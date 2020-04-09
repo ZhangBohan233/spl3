@@ -31,4 +31,14 @@ public class Pointer extends Primitive {
     public int getPtr() {
         return ptr;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Pointer pointer = (Pointer) o;
+
+        return ptr == pointer.ptr;
+    }
 }

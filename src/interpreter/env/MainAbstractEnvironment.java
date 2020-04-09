@@ -16,7 +16,7 @@ public abstract class MainAbstractEnvironment extends Environment {
 
     @Override
     public void defineFunction(String name, TypeValue funcTv) {
-        if (alreadyDefined(name)) throw new EnvironmentError();
+        if (hasName(name)) throw new EnvironmentError();
 
         variables.put(name, funcTv);
     }

@@ -35,6 +35,10 @@ public class SplClass extends SplObject {
         return superclassType;
     }
 
+    public String getClassName() {
+        return className;
+    }
+
     @Override
     public String toString() {
         return "Class <" + className + ">";

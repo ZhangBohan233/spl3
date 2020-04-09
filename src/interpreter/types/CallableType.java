@@ -1,6 +1,9 @@
 package interpreter.types;
 
+import interpreter.env.Environment;
+
 import java.util.List;
+import java.util.Objects;
 
 public class CallableType extends PointerType {
 
@@ -30,4 +33,21 @@ public class CallableType extends PointerType {
     public int getPointerType() {
         return PointerType.CALLABLE_TYPE;
     }
+
+    @Override
+    public boolean isSuperclassOfOrEquals(Type child, Environment env) {
+        return equals(child);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CallableType that = (CallableType) o;
+
+        if (!Objects.equals(paramTypes, that.paramTypes)) return false;
+        return Objects.equals(rType, that.rType);
+    }
+
 }

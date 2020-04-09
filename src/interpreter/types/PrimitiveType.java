@@ -1,5 +1,6 @@
 package interpreter.types;
 
+import interpreter.env.Environment;
 import interpreter.primitives.Primitive;
 
 public class PrimitiveType implements Type {
@@ -19,7 +20,7 @@ public class PrimitiveType implements Type {
     }
 
     @Override
-    public boolean isSuperclassOfOrEquals(Type child) {
+    public boolean isSuperclassOfOrEquals(Type child, Environment env) {
         return equals(child);
     }
 

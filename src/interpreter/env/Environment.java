@@ -1,6 +1,7 @@
 package interpreter.env;
 
 import interpreter.*;
+import interpreter.types.ClassType;
 import interpreter.types.Type;
 import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
@@ -45,7 +46,12 @@ public abstract class Environment {
         if (typeCheck(typeValue.getType(), newTypeValue.getType())) {
             typeValue.setValue(newTypeValue.getValue());
         } else {
-            throw new TypeError();
+            String ntvStr = newTypeValue.getType() instanceof ClassType ?
+                    ((ClassType) newTypeValue.getType()).toStringClass(memory) : newTypeValue.toString();
+            String otvStr = typeValue.getType() instanceof ClassType ?
+                    ((ClassType) typeValue.getType()).toStringClass(memory) : typeValue.toString();
+            throw new TypeError("Cannot convert type '" + ntvStr +
+                    "' to type '" + otvStr + "'. ");
         }
     }
 
@@ -79,16 +85,8 @@ public abstract class Environment {
         System.out.println(variables);
     }
 
-    public Environment getOuter() {
-        return outer;
-    }
-
-    private boolean typeCheck(Type bigger, Type smaller) {
-        return true;
-    }
-
-    protected boolean alreadyDefined(String name) {
-        return false;
+    private boolean typeCheck(Type inStock, Type assignment) {
+        return inStock.isSuperclassOfOrEquals(assignment, this);
     }
 
     public abstract void addNamespace(ModuleEnvironment moduleEnvironment);
