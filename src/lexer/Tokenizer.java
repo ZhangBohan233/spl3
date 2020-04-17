@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class Tokenizer {
 
@@ -165,6 +166,9 @@ public class Tokenizer {
     }
 
     private static String nameOfPath(String path) {
+        path = path.replace("/", File.separator);
+        path = path.replace("\\", File.separator);
+        if (path.endsWith(".sp")) path = path.substring(0, path.length() - 3);
         if (path.contains(File.separator)) {
             return path.substring(path.lastIndexOf(File.separator) + 1);
         } else {

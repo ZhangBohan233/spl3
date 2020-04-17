@@ -1,4 +1,4 @@
-
+import "imp/imp.sp"
 
 class B {
     fn t() int {
@@ -24,8 +24,9 @@ class C extends B {
 
 fn main() int {
     a: C = new C();
+    b: imp.Imp = new imp.Imp(1);
 
-    //a.set(3);
+    cl:int = System.clock();
 
     return a.t();
 }

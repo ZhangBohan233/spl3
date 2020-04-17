@@ -44,4 +44,9 @@ public class ImportStmt extends Node {
     public Node preprocess(FakeEnv env) {
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Import as '" + importName + "'";
+    }
 }
