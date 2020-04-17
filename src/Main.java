@@ -35,7 +35,7 @@ public class Main {
     }
 
     private static void callMain(GlobalEnvironment globalEnvironment) {
-        TypeValue mainTv = globalEnvironment.get("main");
+        TypeValue mainTv = globalEnvironment.get("main", new LineFile(0, "Main"));
         if (mainTv != null) {
             FuncCall mainCall = new FuncCall(LineFile.LF_INTERPRETER);
             mainCall.setLeft(new NameNode("main", LineFile.LF_INTERPRETER));

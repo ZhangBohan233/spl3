@@ -27,11 +27,11 @@ public class NewStmt extends UnaryExpr {
         if (!(type instanceof ClassType)) throw new TypeError();
         ClassType clazzType = (ClassType) type;
 
-        InstanceTypeValue instanceTv = createInstanceAndAllocate(clazzType, env);
+        InstanceTypeValue instanceTv = createInstanceAndAllocate(clazzType, env, getLineFile());
         Instance instance = instanceTv.instance;
 
         Arguments args = (Arguments) getValue().right;
-        TypeValue constructorTv = instance.getEnv().get("init");
+        TypeValue constructorTv = instance.getEnv().get("init", getLineFile());
         Function constructor = (Function) env.getMemory().get((Pointer) constructorTv.getValue());
         constructor.call(args, env);
 
@@ -43,7 +43,7 @@ public class NewStmt extends UnaryExpr {
         return null;
     }
 
-    private static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType, Environment env) {
+    private static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType, Environment env, LineFile lineFile) {
         SplObject obj = env.getMemory().get(clazzType.getClazzPointer());
         if (!(obj instanceof SplClass)) throw new TypeError();
         SplClass clazz = (SplClass) obj;
@@ -51,7 +51,7 @@ public class NewStmt extends UnaryExpr {
 
         clazz.getBody().evaluate(instanceEnv);  // most important step
 
-        if (!instanceEnv.hasName("init")) {
+        if (!instanceEnv.hasName("init", lineFile)) {
             // If class no constructor, put an empty default constructor
             // TODO: call super() in constructor
             FuncDefinition fd = new FuncDefinition("init", LineFile.LF_INTERPRETER);
@@ -73,7 +73,7 @@ public class NewStmt extends UnaryExpr {
 
         ClassType scp = clazz.getSuperclassType();
         if (scp != null) {
-            InstanceTypeValue scItv = createInstanceAndAllocate(scp, env);
+            InstanceTypeValue scItv = createInstanceAndAllocate(scp, env, lineFile);
             TypeValue scInstance = scItv.typeValue;
             instance.getEnv().directDefineConstAndSet("super", scInstance);
         }

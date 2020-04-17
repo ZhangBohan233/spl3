@@ -130,6 +130,9 @@ public class Parser {
                         case "=":
                             builder.addAssignment(lineFile);
                             break;
+                        case "const":
+                            varLevel = Declaration.CONST;
+                            break;
                         case "fn":
                             Token fnNameTk = tokens.get(i + 1);
                             if (!(fnNameTk instanceof IdToken))

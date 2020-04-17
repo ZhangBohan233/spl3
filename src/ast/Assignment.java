@@ -21,11 +21,11 @@ public class Assignment extends BinaryExpr {
         TypeValue rightRes = right.evaluate(env);
 
         if (left instanceof NameNode) {
-            env.setVar(((NameNode) left).getName(), rightRes);
+            env.setVar(((NameNode) left).getName(), rightRes, getLineFile());
         } else if (left instanceof Declaration) {
             left.evaluate(env);
 
-            env.setVar(((Declaration) left).getLeft().getName(), rightRes);
+            env.setVar(((Declaration) left).getLeft().getName(), rightRes, getLineFile());
         } else if (left instanceof Dot) {
             TypeValue leftLeft = ((Dot) left).left.evaluate(env);
             PointerType leftLeftType = (PointerType) leftLeft.getType();
@@ -39,7 +39,7 @@ public class Assignment extends BinaryExpr {
             } else {
                 throw new TypeError();
             }
-            leftEnv.setVar(((NameNode) ((Dot) left).right).getName(), rightRes);
+            leftEnv.setVar(((NameNode) ((Dot) left).right).getName(), rightRes, getLineFile());
         } else {
             throw new SplException();
         }

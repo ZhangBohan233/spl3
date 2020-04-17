@@ -2,6 +2,7 @@ package interpreter.env;
 
 import interpreter.Memory;
 import interpreter.types.TypeValue;
+import util.LineFile;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,10 +16,10 @@ public abstract class MainAbstractEnvironment extends Environment {
     }
 
     @Override
-    public void defineFunction(String name, TypeValue funcTv) {
-        if (hasName(name)) throw new EnvironmentError();
+    public void defineFunction(String name, TypeValue funcTv, LineFile lineFile) {
+        if (hasName(name, lineFile)) throw new EnvironmentError();
 
-        variables.put(name, funcTv);
+        constants.put(name, funcTv);
     }
 
     @Override

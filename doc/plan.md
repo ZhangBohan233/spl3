@@ -6,3 +6,4 @@
 * Array
 * Create spl object via interpreter
 * String (using char array)
+* const

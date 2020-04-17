@@ -35,7 +35,7 @@ public class ImportStmt extends Node {
 
         ModuleType moduleType = new ModuleType();
         env.defineVar(importName, moduleType, getLineFile());
-        env.setVar(importName, new TypeValue(moduleType, ptr));
+        env.setVar(importName, new TypeValue(moduleType, ptr), getLineFile());
 
         return null;
     }

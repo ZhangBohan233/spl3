@@ -3,3 +3,7 @@ class Object {
         return 0;
     }
 }
+
+class String {
+
+}

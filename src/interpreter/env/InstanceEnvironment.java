@@ -4,6 +4,7 @@ import interpreter.Memory;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Instance;
 import interpreter.types.TypeValue;
+import util.LineFile;
 
 public class InstanceEnvironment extends MainAbstractEnvironment {
 
@@ -16,10 +17,10 @@ public class InstanceEnvironment extends MainAbstractEnvironment {
     }
 
     @Override
-    protected TypeValue innerGet(String name, boolean isFirst) {
+    protected TypeValue innerGet(String name, boolean isFirst, boolean includeConst, LineFile lineFile) {
         TypeValue tv = searchSuper(name);
         if (tv == null)
-            return super.innerGet(name, isFirst);
+            return super.innerGet(name, isFirst, includeConst, lineFile);
         else return tv;
     }
 

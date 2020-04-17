@@ -1,6 +1,7 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
+import interpreter.SplException;
 import interpreter.env.EnvironmentError;
 import interpreter.types.TypeValue;
 import interpreter.types.Type;
@@ -23,7 +24,13 @@ public class Declaration extends BinaryExpr {
     @Override
     public TypeValue evaluate(Environment env) {
         Type rightEv = getRight().evalType(env);
-        env.defineVar(getLeft().getName(), rightEv, getLineFile());
+        if (level == VAR) {
+            env.defineVar(getLeft().getName(), rightEv, getLineFile());
+        } else if (level == CONST) {
+            env.defineConst(getLeft().getName(), rightEv, getLineFile());
+        } else {
+            throw new SplException("Unknown declaration type. ", getLineFile());
+        }
         return null;
     }
 

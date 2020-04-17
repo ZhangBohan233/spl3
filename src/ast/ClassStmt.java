@@ -77,12 +77,6 @@ public class ClassStmt extends Node {
             }
         }
 
-        // TODO: inheritance
-//        for (ClassType ct : interfacePointers) {
-//            SplClass superclass = (SplClass) env.getMemory().get(ct.getClazzPointer());
-//            superclass.getClassBaseEnv().inherit(classEnvironment);
-//        }
-
         // TODO: check implementations
 
         SplClass clazz = new SplClass(className, superclassPointer, interfacePointers, body, env);
@@ -93,7 +87,7 @@ public class ClassStmt extends Node {
         env.defineVar(className, clazzType, getLineFile());
         TypeValue typeValue = new TypeValue(clazzType, clazzPtr);
 
-        env.setVar(className, typeValue);
+        env.setVar(className, typeValue, getLineFile());
 
         return typeValue;
     }

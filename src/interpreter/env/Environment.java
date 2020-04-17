@@ -27,21 +27,30 @@ public abstract class Environment {
         return memory;
     }
 
-    public abstract void defineFunction(String name, TypeValue funcTv);
+    public abstract void defineFunction(String name, TypeValue funcTv, LineFile lineFile);
 
     public abstract void setReturn(TypeValue typeValue);
 
     public void defineVar(String name, Type type, LineFile lineFile) {
-        if (innerGet(name, true) != null)
+        if (innerGet(name, true, true, lineFile) != null)
             throw new EnvironmentError("Variable '" + name + "' already defined. ", lineFile);
 
         TypeValue typeValue = new TypeValue(type);
         variables.put(name, typeValue);
     }
 
-    public void setVar(String name, TypeValue newTypeValue) {
-        TypeValue typeValue = get(name);
-        if (typeValue == null) throw new EnvironmentError("Variable '" + name + "' is not defined in this scope. ");
+    public void defineConst(String name, Type type, LineFile lineFile) {
+        if (innerGet(name, true, true, lineFile) != null)
+            throw new EnvironmentError("Constant '" + name + "' already defined. ", lineFile);
+
+        TypeValue typeValue = new TypeValue(type);
+        constants.put(name, typeValue);
+    }
+
+    public void setVar(String name, TypeValue newTypeValue, LineFile lineFile) {
+        TypeValue typeValue = innerGet(name, true, false, lineFile);
+        if (typeValue == null)
+            throw new EnvironmentError("Variable '" + name + "' is not defined in this scope. ", lineFile);
 
         if (typeCheck(typeValue.getType(), newTypeValue.getType())) {
             typeValue.setValue(newTypeValue.getValue());
@@ -51,28 +60,31 @@ public abstract class Environment {
             String otvStr = typeValue.getType() instanceof ClassType ?
                     ((ClassType) typeValue.getType()).toStringClass(memory) : typeValue.toString();
             throw new TypeError("Cannot convert type '" + ntvStr +
-                    "' to type '" + otvStr + "'. ");
+                    "' to type '" + otvStr + "'. ", lineFile);
         }
     }
 
-    public TypeValue get(String name) {
-        TypeValue tv = innerGet(name, true);
+    public TypeValue get(String name, LineFile lineFile) {
+        TypeValue tv = innerGet(name, true, true, lineFile);
         if (tv == null) {
-            throw new EnvironmentError("Name '" + name + "' not found. ");
+            throw new EnvironmentError("Name '" + name + "' not found. ", lineFile);
         }
         return tv;
     }
 
-    public boolean hasName(String name) {
-        return innerGet(name, true) != null;
+    public boolean hasName(String name, LineFile lineFile) {
+        return innerGet(name, true, true, lineFile) != null;
     }
 
-    protected TypeValue innerGet(String name, boolean isFirst) {
+    protected TypeValue innerGet(String name, boolean isFirst, boolean includeConst, LineFile lineFile) {
         TypeValue tv = constants.get(name);
+        if (!includeConst && tv != null && tv.getValue() != null) {
+            throw new EnvironmentError("Constant '" + name + "' is not assignable. ", lineFile);
+        }
         if (tv == null) tv = variables.get(name);
         if (tv == null) {
             if (outer != null) {
-                tv = outer.innerGet(name, false);
+                tv = outer.innerGet(name, false, includeConst, lineFile);
             }
             if (isFirst && tv == null) {
                 tv = searchInNamespaces(name);

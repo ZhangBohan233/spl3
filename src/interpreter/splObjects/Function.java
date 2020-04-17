@@ -10,6 +10,7 @@ import interpreter.env.FunctionEnvironment;
 import interpreter.types.TypeValue;
 import interpreter.types.CallableType;
 import interpreter.types.TypeError;
+import util.LineFile;
 
 import java.util.List;
 
@@ -23,12 +24,15 @@ public class Function extends SplObject {
     private List<Declaration> params;
     private CallableType funcType;
     private BlockStmt body;
+    private LineFile lineFile;
 
-    public Function(BlockStmt body, List<Declaration> params, CallableType funcType, Environment definitionEnv) {
+    public Function(BlockStmt body, List<Declaration> params, CallableType funcType, Environment definitionEnv,
+                    LineFile lineFile) {
         this.body = body;
         this.params = params;
         this.funcType = funcType;
         this.definitionEnv = definitionEnv;
+        this.lineFile = lineFile;
     }
 
     @Override
@@ -49,7 +53,7 @@ public class Function extends SplObject {
             param.evaluate(scope);  // declare param
             Node argNode = arguments.getLine().getChildren().get(i);
             TypeValue arg = argNode.evaluate(callingEnv);
-            scope.setVar(paramName, arg);
+            scope.setVar(paramName, arg, lineFile);
         }
 
         body.evaluate(scope);
