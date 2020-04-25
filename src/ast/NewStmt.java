@@ -5,12 +5,12 @@ import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.env.InstanceEnvironment;
 import interpreter.primitives.Pointer;
-import interpreter.splObjects.Function;
-import interpreter.splObjects.Instance;
-import interpreter.splObjects.SplClass;
-import interpreter.splObjects.SplObject;
+import interpreter.splObjects.*;
 import interpreter.types.*;
 import util.LineFile;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class NewStmt extends UnaryExpr {
 
@@ -20,26 +20,79 @@ public class NewStmt extends UnaryExpr {
 
     @Override
     public TypeValue evaluate(Environment env) {
-        // TODO: Array creation
+        if (value instanceof FuncCall) {
+            return instanceCreation((FuncCall) value, env, getLineFile());
+        } else if (value instanceof IndexingNode) {
+            return arrayCreation((IndexingNode) value, env, getLineFile());
+        } else {
+            throw new SplException("Class instantiation must be a call. ", getLineFile());
+        }
+    }
 
-        TypeRepresent clazzNode = (TypeRepresent) getValue().left;
+    @Override
+    public Node preprocess(FakeEnv env) {
+        return null;
+    }
+
+    private static TypeValue instanceCreation(FuncCall call, Environment env, LineFile lineFile) {
+        TypeRepresent clazzNode = (TypeRepresent) call.left;
         Type type = clazzNode.evalType(env);
         if (!(type instanceof ClassType)) throw new TypeError();
         ClassType clazzType = (ClassType) type;
 
-        InstanceTypeValue instanceTv = createInstanceAndAllocate(clazzType, env, getLineFile());
+        InstanceTypeValue instanceTv = createInstanceAndAllocate(clazzType, env, lineFile);
         Instance instance = instanceTv.instance;
 
-        Arguments args = (Arguments) getValue().right;
-        TypeValue constructorTv = instance.getEnv().get("init", getLineFile());
+        Arguments args = (Arguments) call.right;
+        TypeValue constructorTv = instance.getEnv().get("init", lineFile);
         Function constructor = (Function) env.getMemory().get((Pointer) constructorTv.getValue());
         constructor.call(args, env);
 
         return instanceTv.typeValue;
     }
 
-    @Override
-    public Node preprocess(FakeEnv env) {
+    private TypeValue arrayCreation(IndexingNode node, Environment env, LineFile lineFile) {
+        Pointer arrPtr = createArrayAndAllocate(node, env, lineFile);
+        ArrayType arrayType = (ArrayType) node.evalType(env);
+        return new TypeValue(arrayType, arrPtr);
+//        Type arrayElementType = arrayType.getEleType();
+//        // TODO: direct create
+//        List<Node> argsList = node.getArgs().getChildren();
+//        System.out.println(argsList);
+//        if (argsList.size() == 0) {
+//            return null;
+//        } else if (argsList.size() == 1) {
+//            TypeValue argument = argsList.get(0).evaluate(env);
+//            System.out.println(argument);
+//            if (argument.getType().equals(PrimitiveType.TYPE_INT)) {
+//                System.out.println(666);
+//            }
+//        } else {
+//            throw new TypeError("Array creation must have a size argument");
+//        }
+//        System.out.println(arrayType);
+    }
+
+    private static Pointer createArrayAndAllocate(IndexingNode node, Environment env, LineFile lineFile) {
+        if (node.getCallObj() instanceof IndexingNode) {
+            createArrayAndAllocate((IndexingNode) node.getCallObj(), env, lineFile);
+            System.out.println(node.getArgs());
+        } else {
+            List<Node> argsList = node.getArgs().getChildren();
+            if (argsList.size() != 1) {
+                throw new TypeError("Array creation must have a size argument");
+            }
+            TypeValue argument = argsList.get(0).evaluate(env);
+            if (argument.getType().equals(PrimitiveType.TYPE_INT)) {
+                int arrSize = (int) argument.getValue().intValue();
+                Pointer arrPtr = env.getMemory().allocate(arrSize + 1);  // one for array object
+                SplArray arrIns = new SplArray(arrSize);
+                env.getMemory().set(arrPtr, arrIns);
+                return arrPtr;
+            } else {
+                throw new TypeError();
+            }
+        }
         return null;
     }
 

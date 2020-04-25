@@ -3,6 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
 import interpreter.splObjects.Instance;
+import interpreter.splObjects.SplArray;
 import interpreter.types.*;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.SplModule;
@@ -22,6 +23,9 @@ public class Dot extends BinaryExpr implements TypeRepresent {
         } else if (leftTv.getType() instanceof ModuleType) {
             SplModule module = (SplModule) env.getMemory().get((Pointer) leftTv.getValue());
             return right.evaluate(module.getEnv());
+        } else if (leftTv.getType() instanceof ArrayType) {
+            SplArray arr = (SplArray) env.getMemory().get((Pointer) leftTv.getValue());
+            return arr.getAttr(right, getLineFile());
         }
         return null;
     }

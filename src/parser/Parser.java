@@ -120,7 +120,16 @@ public class Parser {
                             braceCount--;
                             break;
                         case "[":
+                            sqrBracketCount++;
+
+                            builder.addIndexing(lineFile);
+                            break;
                         case "]":
+
+                            builder.buildIndexing();
+
+                            sqrBracketCount--;
+                            break;
                         case ".":
                             builder.addDot(lineFile);
                             break;

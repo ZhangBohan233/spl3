@@ -53,7 +53,7 @@ public class Declaration extends BinaryExpr {
     }
 
     public TypeRepresent getRight() {
-        if (!(right instanceof TypeRepresent)) throw new EnvironmentError();
+        if (!(right instanceof TypeRepresent)) throw new EnvironmentError("Not a type");
         return (TypeRepresent) right;
     }
 }

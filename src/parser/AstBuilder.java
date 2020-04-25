@@ -29,6 +29,7 @@ public class AstBuilder {
     private static final Map<String, Integer> PCD_BIN_SPECIAL = Map.of(
             ".", 500,
             "call", 400,
+            "index", 50,
             ":", 3,
             "=", 1
     );
@@ -216,6 +217,29 @@ public class AstBuilder {
             inner = null;
         } else {
             inner.buildBraceBlock();
+        }
+    }
+
+    void addIndexing(LineFile lineFile) {
+        if (inner == null) {
+//            System.out.println(stack);
+            IndexingNode node = new IndexingNode(stack.remove(stack.size() - 1), lineFile);
+            stack.add(node);
+            inner = new AstBuilder();
+        } else {
+            inner.addIndexing(lineFile);
+        }
+    }
+
+    void buildIndexing() {
+        if (inner.inner == null) {
+            inner.finishPart();
+            Line line = inner.getLine();
+            inner = null;
+            IndexingNode node = (IndexingNode) stack.get(stack.size() - 1);
+            node.setArgs(line);
+        } else {
+            inner.buildIndexing();
         }
     }
 
