@@ -9,6 +9,10 @@ public class SplException extends SplBaseException {
         super();
     }
 
+    public SplException(String msg) {
+        super(msg, LineFile.LF_INTERPRETER);
+    }
+
     public SplException(String msg, LineFile lineFile) {
         super(msg + lineFile.toStringFileLine());
     }

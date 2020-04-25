@@ -9,7 +9,7 @@ public class AttributeError extends SplException {
     }
 
     public AttributeError(String msg) {
-        super(msg, LineFile.LF_INTERPRETER);
+        super(msg);
     }
 
     public AttributeError(String msg, LineFile lineFile) {

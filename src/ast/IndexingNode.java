@@ -1,11 +1,16 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
+import interpreter.SplException;
 import interpreter.env.Environment;
-import interpreter.types.ArrayType;
-import interpreter.types.Type;
-import interpreter.types.TypeValue;
+import interpreter.primitives.Pointer;
+import interpreter.primitives.Primitive;
+import interpreter.splObjects.ReadOnlyPrimitiveWrapper;
+import interpreter.splObjects.SplArray;
+import interpreter.types.*;
 import util.LineFile;
+
+import java.util.List;
 
 public class IndexingNode extends Node implements TypeRepresent {
 
@@ -32,7 +37,23 @@ public class IndexingNode extends Node implements TypeRepresent {
 
     @Override
     public TypeValue evaluate(Environment env) {
-        return null;
+        TypeValue callRes = getCallObj().evaluate(env);
+        List<Node> arguments = getArgs().getChildren();
+        int index = getIndex(callRes, arguments, env, getLineFile());
+
+        Type arrEleType = ((ArrayType) callRes.getType()).getEleType();
+
+        Primitive value = getItemAtIndex((Pointer) callRes.getValue(), index, env, getLineFile());
+        return new TypeValue(arrEleType, value);
+    }
+
+    private Primitive getItemAtIndex(Pointer arrPtr, int index, Environment env, LineFile lineFile) {
+        SplArray array = (SplArray) env.getMemory().get(arrPtr);
+        if (index < 0 || index >= array.length) {
+            throw new SplException("Index " + index + " out of array length " + array.length + ". ", lineFile);
+        }
+        ReadOnlyPrimitiveWrapper wrapper = (ReadOnlyPrimitiveWrapper) env.getMemory().get(arrPtr.getPtr() + index + 1);
+        return wrapper.value;
     }
 
     @Override
@@ -49,5 +70,19 @@ public class IndexingNode extends Node implements TypeRepresent {
     public Type evalType(Environment environment) {
         Type ofType = ((TypeRepresent) callObj).evalType(environment);
         return new ArrayType(ofType);
+    }
+
+    public static int getIndex(TypeValue arrayTv, List<Node> arguments, Environment env, LineFile lineFile) {
+        if (!(arrayTv.getType() instanceof ArrayType)) {
+            throw new TypeError("Only array type supports indexing. ", lineFile);
+        }
+        if (arguments.size() != 1) {
+            throw new TypeError("Indexing must have 1 index. ", lineFile);
+        }
+        TypeValue index = arguments.get(0).evaluate(env);
+        if (!index.getType().equals(PrimitiveType.TYPE_INT)) {
+            throw new TypeError("Indexing must be int. ", lineFile);
+        }
+        return (int) index.getValue().intValue();
     }
 }
