@@ -28,13 +28,13 @@ public class Memory {
     }
 
     public Pointer allocate(int size) {
+        int ptr;
         if (size == 1) {
-            int ptr = available.firstAva();
-            return new Pointer(ptr);
+            ptr = available.firstAva();
         } else {
-            int ptr = available.findAva(size);
-            return new Pointer(ptr);
+            ptr = available.findAva(size);
         }
+        return new Pointer(ptr);
     }
 
     public void set(Pointer ptr, SplObject obj) {
@@ -79,7 +79,7 @@ public class Memory {
 
         AvailableList(int size) {
             LnkNode last = null;
-            for (int i = size - 1; i >= -1; --i) {
+            for (int i = size - 1; i >= 0; --i) {
                 LnkNode node = new LnkNode();
                 node.next = last;
                 node.value = i;

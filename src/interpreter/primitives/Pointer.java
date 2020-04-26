@@ -4,6 +4,8 @@ public class Pointer extends Primitive {
 
     private final int ptr;
 
+    public static final Pointer NULL_PTR = new Pointer(0);
+
     public Pointer(int ptr) {
         this.ptr = ptr;
     }

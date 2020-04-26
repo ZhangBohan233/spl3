@@ -28,4 +28,9 @@ public class ArrayType extends PointerType {
     public String toString() {
         return "ArrayType{" + eleType + "}";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return getClass() == o.getClass() && getEleType().equals(((ArrayType) o).getEleType());
+    }
 }

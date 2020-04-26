@@ -9,6 +9,7 @@ import interpreter.splObjects.*;
 import interpreter.types.*;
 import util.LineFile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,48 +53,51 @@ public class NewStmt extends UnaryExpr {
     }
 
     private TypeValue arrayCreation(IndexingNode node, Environment env, LineFile lineFile) {
-        Pointer arrPtr = createArrayAndAllocate(node, env, lineFile);
         ArrayType arrayType = (ArrayType) node.evalType(env);
+        List<Integer> dimensions = new ArrayList<>();
+        traverseArrayCreation(node, dimensions, env, lineFile);
+        Pointer arrPtr = SplArray.createArray(arrayType, dimensions, env.getMemory());
+
         return new TypeValue(arrayType, arrPtr);
-//        Type arrayElementType = arrayType.getEleType();
-//        // TODO: direct create
-//        List<Node> argsList = node.getArgs().getChildren();
-//        System.out.println(argsList);
-//        if (argsList.size() == 0) {
-//            return null;
-//        } else if (argsList.size() == 1) {
-//            TypeValue argument = argsList.get(0).evaluate(env);
-//            System.out.println(argument);
-//            if (argument.getType().equals(PrimitiveType.TYPE_INT)) {
-//                System.out.println(666);
-//            }
-//        } else {
-//            throw new TypeError("Array creation must have a size argument");
-//        }
-//        System.out.println(arrayType);
     }
 
-    private static Pointer createArrayAndAllocate(IndexingNode node, Environment env, LineFile lineFile) {
+    private static void traverseArrayCreation(IndexingNode node,
+                                              List<Integer> dimensions,
+                                              Environment env,
+                                              LineFile lineFile) {
+        List<Node> argsList = node.getArgs().getChildren();
         if (node.getCallObj() instanceof IndexingNode) {
-            createArrayAndAllocate((IndexingNode) node.getCallObj(), env, lineFile);
-            System.out.println(node.getArgs());
+
+            traverseArrayCreation((IndexingNode) node.getCallObj(),
+                    dimensions,
+                    env,
+                    lineFile);
+
+            if (argsList.size() == 0) {
+                dimensions.add(-1);
+            } else if (argsList.size() == 1) {
+                TypeValue argument = argsList.get(0).evaluate(env);
+                if (argument.getType().equals(PrimitiveType.TYPE_INT)) {
+                    int arrSize = (int) argument.getValue().intValue();
+                    dimensions.add(arrSize);
+                } else {
+                    throw new TypeError();
+                }
+            } else {
+                throw new TypeError("Array creation must have a size argument", lineFile);
+            }
         } else {
-            List<Node> argsList = node.getArgs().getChildren();
             if (argsList.size() != 1) {
-                throw new TypeError("Array creation must have a size argument");
+                throw new TypeError("Array creation must have a size argument", lineFile);
             }
             TypeValue argument = argsList.get(0).evaluate(env);
             if (argument.getType().equals(PrimitiveType.TYPE_INT)) {
                 int arrSize = (int) argument.getValue().intValue();
-                Pointer arrPtr = env.getMemory().allocate(arrSize + 1);  // one for array object
-                SplArray arrIns = new SplArray(arrSize);
-                env.getMemory().set(arrPtr, arrIns);
-                return arrPtr;
+                dimensions.add(arrSize);
             } else {
                 throw new TypeError();
             }
         }
-        return null;
     }
 
     private static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType, Environment env, LineFile lineFile) {

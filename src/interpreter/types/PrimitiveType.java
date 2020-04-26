@@ -6,6 +6,9 @@ import interpreter.primitives.Primitive;
 public class PrimitiveType implements Type {
 
     public static final PrimitiveType TYPE_INT = new PrimitiveType(Primitive.INT);
+    public static final PrimitiveType TYPE_BOOLEAN = new PrimitiveType(Primitive.BOOLEAN);
+    public static final PrimitiveType TYPE_FLOAT = new PrimitiveType(Primitive.FLOAT);
+    public static final PrimitiveType TYPE_CHAR = new PrimitiveType(Primitive.CHAR);
     public static final PrimitiveType TYPE_VOID = new PrimitiveType(Primitive.VOID);
 
     public final int type;
