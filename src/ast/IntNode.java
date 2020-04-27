@@ -7,8 +7,8 @@ import interpreter.primitives.Int;
 import interpreter.env.Environment;
 import util.LineFile;
 
-public class IntNode extends LeafNode {
-    private long value;
+public class IntNode extends LiteralNode {
+    private final long value;
 
     public IntNode(long value, LineFile lineFile) {
         super(lineFile);

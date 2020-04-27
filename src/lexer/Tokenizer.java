@@ -221,6 +221,8 @@ public class Tokenizer {
                     } else if (ch == '\'') {
                         // enter char literal
                         if (i < len - 2 && line.charAt(i + 2) == '\'') {
+                            lineTokenize(nonLiteral.toString(), lineFile);
+                            nonLiteral.setLength(0);
                             tokens.add(new CharToken(line.charAt(i + 1), lineFile));
                             i += 2;
                         } else {

@@ -223,11 +223,11 @@ public class Parser {
             } else if (token instanceof IntToken) {
                 builder.addInt(((IntToken) token).getValue(), lineFile);
             } else if (token instanceof FloatToken) {
-
+                builder.addFloat(((FloatToken) token).getValue(), lineFile);
             } else if (token instanceof StrToken) {
 
             } else if (token instanceof CharToken) {
-
+                builder.addChar(((CharToken) token).getValue(), lineFile);
             } else {
                 throw new ParseError("Unexpected token type. ", lineFile);
             }

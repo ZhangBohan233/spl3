@@ -59,7 +59,8 @@ public class Function extends SplObject {
         body.evaluate(scope);
         TypeValue rtnVal = scope.getReturnValue();
         if (rtnVal != null && !funcType.getRType().isSuperclassOfOrEquals(rtnVal.getType(), callingEnv)) {
-            throw new TypeError();
+            throw new TypeError("Declared return type: " + funcType.getRType() + ", actual returning " +
+                    "type: " + rtnVal.getType() + ". ");
         }
 
         return rtnVal;

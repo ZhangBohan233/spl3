@@ -75,8 +75,28 @@ public class AstBuilder {
         }
     }
 
-    void addFloat(double value, LineFile lineFile) {
+    void addChar(char value, LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new CharNode(value, lineFile));
+        } else {
+            inner.addChar(value, lineFile);
+        }
+    }
 
+    void addBoolean(long value, LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new IntNode(value, lineFile));
+        } else {
+            inner.addBoolean(value, lineFile);
+        }
+    }
+
+    void addFloat(double value, LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new FloatNode(value, lineFile));
+        } else {
+            inner.addFloat(value, lineFile);
+        }
     }
 
     void addAssignment(LineFile lineFile) {

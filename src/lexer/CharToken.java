@@ -11,6 +11,10 @@ public class CharToken extends Token {
         this.ch = ch;
     }
 
+    public char getValue() {
+        return ch;
+    }
+
     @Override
     public String toString() {
         return "CharToken{" +

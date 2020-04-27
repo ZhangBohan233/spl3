@@ -21,10 +21,13 @@ public class PrimitiveTypeNameNode extends LeafNode implements TypeRepresent {
                 type = PrimitiveType.TYPE_INT;
                 break;
             case "float":
+                type = PrimitiveType.TYPE_FLOAT;
                 break;
             case "char":
+                type = PrimitiveType.TYPE_CHAR;
                 break;
             case "boolean":
+                type = PrimitiveType.TYPE_BOOLEAN;
                 break;
             case "void":
                 type = PrimitiveType.TYPE_VOID;
