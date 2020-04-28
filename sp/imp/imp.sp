@@ -7,4 +7,8 @@ class Imp {
         this.a = aa;
         this.b = 2;
     }
+
+    fn getA() int {
+        return a;
+    }
 }

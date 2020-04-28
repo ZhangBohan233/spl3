@@ -47,6 +47,13 @@ public abstract class Environment {
         constants.put(name, typeValue);
     }
 
+    public void defineConstAndSet(String name, TypeValue typeValue, LineFile lineFile) {
+        if (innerGet(name, true, true, lineFile) != null)
+            throw new EnvironmentError("Constant '" + name + "' already defined. ", lineFile);
+
+        constants.put(name, typeValue);
+    }
+
     public void setVar(String name, TypeValue newTypeValue, LineFile lineFile) {
         TypeValue typeValue = innerGet(name, true, false, lineFile);
         if (typeValue == null)

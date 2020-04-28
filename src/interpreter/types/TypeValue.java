@@ -5,6 +5,8 @@ import interpreter.primitives.Primitive;
 
 public class TypeValue {
 
+    public static final TypeValue VOID_NULL = new TypeValue(PrimitiveType.TYPE_VOID);
+
     private final Type type;
     private Primitive value;
 

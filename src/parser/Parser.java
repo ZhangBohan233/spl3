@@ -225,7 +225,7 @@ public class Parser {
             } else if (token instanceof FloatToken) {
                 builder.addFloat(((FloatToken) token).getValue(), lineFile);
             } else if (token instanceof StrToken) {
-
+                builder.addString(((StrToken) token).getLiteral().toCharArray(), lineFile);
             } else if (token instanceof CharToken) {
                 builder.addChar(((CharToken) token).getValue(), lineFile);
             } else {

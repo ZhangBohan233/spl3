@@ -20,13 +20,20 @@ class C extends B {
     fn set(x: int) void {
         a = x;
     }
+
+    fn self() C {
+        return this;
+    }
 }
 
 fn main() int {
     a: C = new C();
-    b: imp.Imp = new imp.Imp(1);
+    v: int = 1;
+    b: imp.Imp = new imp.Imp(v);
+    c: imp.Imp[] = new imp.Imp[2];
+    a.self().set(6);
 
-    cl:int = System.clock();
+    //cl:int = System.clock();
 
     return a.t();
 }

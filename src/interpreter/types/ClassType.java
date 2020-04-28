@@ -7,7 +7,7 @@ import interpreter.splObjects.SplClass;
 
 public class ClassType extends PointerType {
 
-    private Pointer clazzPointer;
+    private final Pointer clazzPointer;
 
     public ClassType(Pointer clazzPointer) {
         this.clazzPointer = clazzPointer;

@@ -6,6 +6,7 @@ public abstract class PointerType implements Type {
     public static final int MODULE_TYPE = 2;
     public static final int CALLABLE_TYPE = 3;
     public static final int ARRAY_TYPE = 4;
+    public static final int NATIVE_TYPE = 5;
 
     @Override
     public boolean isPrimitive() {

@@ -4,10 +4,10 @@ import interpreter.env.Environment;
 
 public class ArrayType extends PointerType {
 
-    private Type eleType;
+    private final Type eleType;
 
-    public ArrayType(Type ofType) {
-        this.eleType = ofType;
+    public ArrayType(Type elementType) {
+        this.eleType = elementType;
     }
 
     public Type getEleType() {

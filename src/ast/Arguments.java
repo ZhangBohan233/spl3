@@ -6,7 +6,7 @@ import interpreter.types.TypeValue;
 
 public class Arguments extends Node {
 
-    private Line line;
+    private final Line line;
 
     public Arguments(Line line) {
         super(line.getLineFile());
@@ -16,6 +16,16 @@ public class Arguments extends Node {
 
     public Line getLine() {
         return line;
+    }
+
+    public TypeValue[] evalArgs(Environment callingEnv) {
+        TypeValue[] res = new TypeValue[getLine().getChildren().size()];
+
+        for (int i = 0; i < res.length; ++i) {
+            Node argNode = getLine().getChildren().get(i);
+            res[i] = argNode.evaluate(callingEnv);
+        }
+        return res;
     }
 
     @Override

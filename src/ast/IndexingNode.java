@@ -43,17 +43,8 @@ public class IndexingNode extends Node implements TypeRepresent {
 
         Type arrEleType = ((ArrayType) callRes.getType()).getEleType();
 
-        Primitive value = getItemAtIndex((Pointer) callRes.getValue(), index, env, getLineFile());
+        Primitive value = SplArray.getItemAtIndex((Pointer) callRes.getValue(), index, env, getLineFile());
         return new TypeValue(arrEleType, value);
-    }
-
-    private Primitive getItemAtIndex(Pointer arrPtr, int index, Environment env, LineFile lineFile) {
-        SplArray array = (SplArray) env.getMemory().get(arrPtr);
-        if (index < 0 || index >= array.length) {
-            throw new SplException("Index " + index + " out of array length " + array.length + ". ", lineFile);
-        }
-        ReadOnlyPrimitiveWrapper wrapper = (ReadOnlyPrimitiveWrapper) env.getMemory().get(arrPtr.getPtr() + index + 1);
-        return wrapper.value;
     }
 
     @Override

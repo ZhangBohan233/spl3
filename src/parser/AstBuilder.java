@@ -99,6 +99,14 @@ public class AstBuilder {
         }
     }
 
+    void addString(char[] charArray, LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new StringLiteral(charArray, lineFile));
+        } else {
+            inner.addString(charArray, lineFile);
+        }
+    }
+
     void addAssignment(LineFile lineFile) {
         if (inner == null) {
             stack.add(new Assignment(lineFile));
@@ -202,7 +210,10 @@ public class AstBuilder {
 
     void addCall(LineFile lineFile) {
         if (inner == null) {
-            stack.add(new FuncCall(lineFile));
+            FuncCall funcCall = new FuncCall(lineFile);
+            Node callObj = stack.remove(stack.size() - 1);
+            funcCall.setCallObj(callObj);
+            stack.add(funcCall);
             inner = new AstBuilder();
         } else {
             inner.addCall(lineFile);
@@ -215,7 +226,8 @@ public class AstBuilder {
             Line line = inner.getLine();
             inner = null;
             Arguments arguments = new Arguments(line);
-            stack.add(arguments);
+            FuncCall call = (FuncCall) stack.get(stack.size() - 1);
+            call.setArguments(arguments);
         } else {
             inner.buildCall();
         }

@@ -1,9 +1,6 @@
 package interpreter.splObjects;
 
-import ast.Arguments;
-import ast.BlockStmt;
-import ast.Declaration;
-import ast.Node;
+import ast.*;
 import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.env.FunctionEnvironment;
@@ -12,6 +9,7 @@ import interpreter.types.CallableType;
 import interpreter.types.TypeError;
 import util.LineFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Function extends SplObject {
@@ -41,19 +39,22 @@ public class Function extends SplObject {
     }
 
     public TypeValue call(Arguments arguments, Environment callingEnv) {
-        FunctionEnvironment scope = new FunctionEnvironment(definitionEnv);
+        TypeValue[] evaluatedArgs = arguments.evalArgs(callingEnv);
 
-        if (arguments.getLine().getChildren().size() != params.size()) {
-            throw new SplException("Arguments length does not match parameters. ", arguments.getLineFile());
+        return call(evaluatedArgs, callingEnv, arguments.getLineFile());
+    }
+
+    public TypeValue call(TypeValue[] evaluatedArgs, Environment callingEnv, LineFile argLineFile) {
+        FunctionEnvironment scope = new FunctionEnvironment(definitionEnv);
+        if (evaluatedArgs.length != params.size()) {
+            throw new SplException("Arguments length does not match parameters. ", argLineFile);
         }
 
         for (int i = 0; i < params.size(); ++i) {
             Declaration param = params.get(i);
             String paramName = param.getLeft().getName();
             param.evaluate(scope);  // declare param
-            Node argNode = arguments.getLine().getChildren().get(i);
-            TypeValue arg = argNode.evaluate(callingEnv);
-            scope.setVar(paramName, arg, lineFile);
+            scope.setVar(paramName, evaluatedArgs[i], lineFile);
         }
 
         body.evaluate(scope);

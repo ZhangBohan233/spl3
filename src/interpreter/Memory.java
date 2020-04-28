@@ -59,6 +59,12 @@ public class Memory {
         return ptr;
     }
 
+    public Pointer allocateObject(SplObject object) {
+        Pointer ptr = allocate(1);
+        set(ptr, object);
+        return ptr;
+    }
+
     public void printMemory() {
         System.out.println(Arrays.toString(heap));
     }

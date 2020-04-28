@@ -9,23 +9,32 @@ import interpreter.types.CallableType;
 import interpreter.types.TypeError;
 import util.LineFile;
 
-public class FuncCall extends BinaryExpr {
+public class FuncCall extends Node {
+
+    Node callObj;
+    Arguments arguments;
 
     public FuncCall(LineFile lineFile) {
-        super("call", lineFile);
+        super(lineFile);
+    }
+
+    public void setCallObj(Node callObj) {
+        this.callObj = callObj;
+    }
+
+    public void setArguments(Arguments arguments) {
+        this.arguments = arguments;
     }
 
     @Override
     public TypeValue evaluate(Environment env) {
-        TypeValue leftTv = left.evaluate(env);
+        TypeValue leftTv = callObj.evaluate(env);
         if (!(leftTv.getType() instanceof CallableType)) {
             throw new TypeError("Type '" + leftTv.getType() + "' is not callable. ", getLineFile());
         }
         Function function = (Function) env.getMemory().get((Pointer) leftTv.getValue());
 
-        TypeValue result = function.call((Arguments) right, env);
-
-        return result;
+        return function.call(arguments, env);
     }
 
     @Override
@@ -33,4 +42,16 @@ public class FuncCall extends BinaryExpr {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return callObj + "(" + arguments + ")";
+    }
+
+    public Arguments getArguments() {
+        return arguments;
+    }
+
+    public Node getCallObj() {
+        return callObj;
+    }
 }
