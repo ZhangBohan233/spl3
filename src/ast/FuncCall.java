@@ -28,6 +28,8 @@ public class FuncCall extends Node {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         TypeValue leftTv = callObj.evaluate(env);
         if (!(leftTv.getType() instanceof CallableType)) {
             throw new TypeError("Type '" + leftTv.getType() + "' is not callable. ", getLineFile());

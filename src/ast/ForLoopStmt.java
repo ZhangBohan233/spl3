@@ -5,22 +5,19 @@ import interpreter.env.Environment;
 import interpreter.types.TypeValue;
 import util.LineFile;
 
-public class ReturnStmt extends UnaryExpr {
+public class ForLoopStmt extends ConditionalStmt {
 
-    public ReturnStmt(LineFile lineFile) {
-        super("return", true, lineFile);
+    public ForLoopStmt(LineFile lineFile) {
+        super(lineFile);
     }
 
     @Override
     public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
-
-        env.setReturn(value.evaluate(env));
         return null;
     }
 
     @Override
     public Node preprocess(FakeEnv env) {
-        return this;
+        return null;
     }
 }

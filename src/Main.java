@@ -21,6 +21,7 @@ public class Main {
             TokenList tokenList = tokenizer.tokenize();
             Parser parser = new Parser(tokenList);
             BlockStmt root = parser.parse();
+            System.out.println("===== Ast =====");
             System.out.println(root);
             System.out.println("===== End of ast =====");
 //            FakeGlobalEnv environment = new FakeGlobalEnv();

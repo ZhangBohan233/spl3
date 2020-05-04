@@ -3,6 +3,7 @@ package parser;
 import ast.BinaryOperator;
 import ast.BlockStmt;
 import ast.Declaration;
+import ast.IfStmt;
 import lexer.*;
 import util.LineFile;
 
@@ -33,12 +34,15 @@ public class Parser {
         boolean classHeader = false;
         boolean implementing = false;
         boolean extending = false;
+        boolean conditioning = false;
+        boolean isElse = false;
 
         Stack<Integer> paramBrackets = new Stack<>();
         Stack<Integer> callBrackets = new Stack<>();
         Stack<Integer> funcBodyBraces = new Stack<>();
         Stack<Integer> moduleBraces = new Stack<>();
         Stack<Integer> classBraces = new Stack<>();
+        Stack<Integer> condBraces = new Stack<>();
 
         for (int i = 0; i < tokens.size(); ++i) {
             Token token = tokens.get(i);
@@ -100,6 +104,14 @@ public class Parser {
                                 }
                                 builder.addBraceBlock();
                                 classBraces.push(braceCount);
+                            } else if (conditioning) {
+                                conditioning = false;
+                                builder.buildConditionTitle();
+                                builder.addBraceBlock();
+                                condBraces.push(braceCount);
+                            } else if (isElse) {
+                                isElse = false;
+                                builder.addBraceBlock();
                             }
                             break;
                         case "}":
@@ -115,6 +127,19 @@ public class Parser {
                                 classBraces.pop();
                                 builder.buildBraceBlock();
                                 builder.buildClass(lineFile);
+                            } else if (isThisStack(condBraces, braceCount)) {
+                                condBraces.pop();
+                                builder.buildBraceBlock();
+                                builder.buildConditionBody();
+                            } else {
+                                builder.buildBraceBlock();
+                            }
+                            if (i < tokens.size() - 1) {
+                                Token nextTk = tokens.get(i + 1);
+                                if (!(nextTk instanceof IdToken) ||
+                                        !((IdToken) nextTk).getIdentifier().equals("else")) {
+                                    builder.finishLine();  // fill the end line terminator
+                                }
                             }
 
                             braceCount--;
@@ -139,8 +164,53 @@ public class Parser {
                         case "=":
                             builder.addAssignment(lineFile);
                             break;
+                        case "true":
+                            builder.addBoolean(true, lineFile);
+                            break;
+                        case "false":
+                            builder.addBoolean(false, lineFile);
+                            break;
                         case "const":
                             varLevel = Declaration.CONST;
+                            break;
+                        case "if":
+                            conditioning = true;
+                            builder.addIf(lineFile);
+                            break;
+                        case "else":
+                            builder.addElse(lineFile);
+                            isElse = true;
+//                            IdToken next = (IdToken) tokens.get(i + 1);
+//                            i += 1;
+//                            IfStmt ifStmt = builder.getActiveIfStmt();
+//
+//                            if (next.getIdentifier().equals("{")) {
+//                                builder.addBraceBlock();
+//                                BlockStmt innermost = builder.getInnermostBlock();
+//                                ifStmt.setElseBlock(innermost);
+//                                braceCount += 1;
+////                            } else if (next.getIdentifier().equals("if")) {
+////                                // This part should be identical with the 'if' case
+////                                // #####
+////                                conditioning = true;
+////                                IfStmt ifs = builder.addIf(lineFile);
+////                                // #####
+////                                ifStmt.setElseBlock(ifs);
+//                            } else {
+//                                throw new ParseError("Else must follow '{' or 'if'. ", lineFile);
+//                            }
+                            break;
+                        case "while":
+                            conditioning = true;
+                            builder.addWhile(lineFile);
+                            break;
+                        case "for":
+                            break;
+                        case "break":
+                            builder.addBreak(lineFile);
+                            break;
+                        case "continue":
+                            builder.addContinue(lineFile);
                             break;
                         case "fn":
                             Token fnNameTk = tokens.get(i + 1);

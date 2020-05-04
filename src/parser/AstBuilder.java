@@ -83,9 +83,9 @@ public class AstBuilder {
         }
     }
 
-    void addBoolean(long value, LineFile lineFile) {
+    void addBoolean(boolean value, LineFile lineFile) {
         if (inner == null) {
-            stack.add(new IntNode(value, lineFile));
+            stack.add(new BoolStmt(value, lineFile));
         } else {
             inner.addBoolean(value, lineFile);
         }
@@ -380,6 +380,147 @@ public class AstBuilder {
         }
     }
 
+    IfStmt addIf(LineFile lineFile) {
+        if (inner == null) {
+            IfStmt res = new IfStmt(lineFile);
+            stack.add(res);
+            inner = new AstBuilder();
+            return res;
+        } else {
+            return inner.addIf(lineFile);
+        }
+    }
+
+    void buildConditionTitle() {
+        if (inner.inner == null) {
+            Node stmt = stack.get(stack.size() - 1);
+            if (stmt instanceof IfStmt) {
+                inner.finishPart();
+                Line line = inner.getLine();
+                inner = null;
+                ((IfStmt) stmt).setCondition(line);
+            } else if (stmt instanceof WhileStmt) {
+                inner.finishPart();
+                Line line = inner.getLine();
+                inner = null;
+                ((WhileStmt) stmt).setCondition(line);
+            }
+        } else {
+            inner.buildConditionTitle();
+        }
+    }
+
+    void buildConditionBody() {
+        if (inner == null) {
+            assert stack.size() >= 2;
+            ConditionalStmt cond = (ConditionalStmt) stack.get(stack.size() - 2);
+            BlockStmt blockStmt = (BlockStmt) stack.remove(stack.size() - 1);
+            cond.setBodyBlock(blockStmt);
+        } else {
+            inner.buildConditionBody();
+        }
+    }
+
+//    IfStmt getActiveIfStmt() {
+//        if (inner == null) {
+////            System.out.println(stack);
+//            return (IfStmt) stack.get(stack.size() - 1);
+//        } else {
+//            return inner.getActiveIfStmt();
+//        }
+//    }
+
+    void addElse(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new ElseStmt(lineFile));
+        } else {
+            inner.addElse(lineFile);
+        }
+    }
+
+    void checkElse() {
+        if (inner == null) {
+            if (stack.size() > 2 && stack.get(stack.size() - 2) instanceof ElseStmt) {
+                IfStmt ifStmt = (IfStmt) stack.get(stack.size() - 3);
+                BlockStmt elseBlock = (BlockStmt) stack.remove(stack.size() - 1);
+                stack.remove(stack.size() - 1);  // remove the 'else' marker
+                ifStmt.setElseBlock(elseBlock);
+            }
+        } else {
+            inner.checkElse();
+        }
+    }
+
+    void addWhile(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new WhileStmt(lineFile));
+            inner = new AstBuilder();
+        } else {
+            inner.addWhile(lineFile);
+        }
+    }
+
+    void addBreak(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new BreakStmt(lineFile));
+        } else {
+            inner.addBreak(lineFile);
+        }
+    }
+
+    void addContinue(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new ContinueStmt(lineFile));
+        } else {
+            inner.addContinue(lineFile);
+        }
+    }
+
+//    void addElse(LineFile lineFile) {
+//        if (inner == null) {
+////            stack.add(new ElseStmt(lineFile));
+//            assert stack.size() > 0;
+//            Node ifs = stack.get(stack.size() - 1);
+//            markElse(ifs);
+//        } else {
+//            inner.addElse(lineFile);
+//        }
+//    }
+//
+//    void checkElse() {
+//        if (inner == null) {
+//            if (stack.size() > 1) {
+//                if (placeElse(stack.get(stack.size() - 2), stack.get(stack.size() - 1))) {
+//                    stack.remove(stack.size() - 1);
+//                }
+//            }
+//        } else {
+//            inner.checkElse();
+//        }
+//    }
+
+//    void checkElse() {
+//        if (inner == null) {
+//            System.out.println(stack);
+//            if (stack.size() >= 3) {
+////                System.out.println("ggg" + stack);
+//                Node els = stack.get(stack.size() - 2);
+//                if (els instanceof ElseStmt) {
+//                    Node ifs = stack.get(stack.size() - 3);
+//                    if (ifs instanceof IfStmt) {
+//                        IfStmt ifStmt = (IfStmt) ifs;
+//                        ifStmt.setElseBlock(stack.remove(stack.size() - 1));  // remove the else block
+//                        stack.remove(stack.size() - 1);  // remove the ElseStmt
+//                    } else {
+//                        throw new ParseError("Else statement must follow an if statement. ", els.getLineFile());
+//                    }
+//                }
+//            }
+//        } else {
+//            inner.checkElse();
+//        }
+//    }
+
     void addNamespace(LineFile lineFile) {
         if (inner == null) {
             stack.add(new NamespaceNode(lineFile));
@@ -388,8 +529,13 @@ public class AstBuilder {
         }
     }
 
+    /**
+     * This method would clear the active line.
+     */
     void finishLine() {
         if (inner == null) {
+            if (!stack.isEmpty()) finishPart();
+
             baseBlock.addLine(activeLine);
             activeLine = new Line();
         } else {
@@ -405,6 +551,17 @@ public class AstBuilder {
         return baseBlock;
     }
 
+    BlockStmt getInnermostBlock() {
+        if (inner == null) {
+            return baseBlock;
+        } else {
+            return inner.getInnermostBlock();
+        }
+    }
+
+    /**
+     * This method would build all expressions in the active stack and clear the stack.
+     */
     void finishPart() {
         if (inner == null) {
             if (!stack.isEmpty()) {
@@ -415,6 +572,7 @@ public class AstBuilder {
                 if (hasExpr) {
                     buildExpr(stack);
                 }
+                checkElse();
                 activeLine.getChildren().addAll(stack);
                 stack.clear();
             }
@@ -472,4 +630,34 @@ public class AstBuilder {
             throw e;
         }
     }
+
+//    private static boolean markElse(Node node) {
+//        if (node instanceof IfStmt) {
+//            IfStmt ifs = (IfStmt) node;
+//            if (markElse(ifs.getBodyBlock())) return true;
+//            if (ifs.getElseBlock() == null) {
+//                ifs.setHasElse(true);
+//                return true;
+//            } else {
+//                markElse(ifs.getElseBlock());
+//            }
+//        }
+//        return false;
+//    }
+//
+//    private static boolean placeElse(Node node, Node element) {
+//        if (node instanceof IfStmt) {
+//            IfStmt ifs = (IfStmt) node;
+//            if (placeElse(ifs.getBodyBlock(), element)) return true;
+//            if (ifs.hasElse()) {
+//                if (ifs.getElseBlock() == null) {
+//                    ifs.setElseBlock(element);
+//                    return true;
+//                } else {
+//                    return placeElse(ifs.getElseBlock(), element);
+//                }
+//            }
+//        }
+//        return false;
+//    }
 }

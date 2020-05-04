@@ -3,7 +3,6 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
 import interpreter.primitives.Char;
-import interpreter.primitives.Int;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Instance;
 import interpreter.splObjects.SplArray;
@@ -13,8 +12,6 @@ import interpreter.types.PrimitiveType;
 import interpreter.types.TypeValue;
 import util.LineFile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class StringLiteral extends LiteralNode {
@@ -29,6 +26,8 @@ public class StringLiteral extends LiteralNode {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         // create spl char array
         ArrayType arrayType = new ArrayType(PrimitiveType.TYPE_CHAR);
         Pointer arrPtr = SplArray.createArray(arrayType, List.of(charArray.length), env.getMemory());

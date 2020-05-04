@@ -5,9 +5,9 @@ import interpreter.env.Environment;
 import interpreter.types.TypeValue;
 import parser.ParseError;
 
-public class Implements extends Node {
+public class Implements extends NonEvaluate {
 
-    private Line extending;
+    private final Line extending;
 
     public Implements(Line extending) {
         super(extending.getLineFile());
@@ -17,11 +17,6 @@ public class Implements extends Node {
 
     public Line getExtending() {
         return extending;
-    }
-
-    @Override
-    public TypeValue evaluate(Environment env) {
-        throw new ParseError("Extends is not evaluate-able. ", getLineFile());
     }
 
     @Override

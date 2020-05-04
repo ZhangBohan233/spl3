@@ -37,6 +37,8 @@ public class IndexingNode extends Node implements TypeRepresent {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         TypeValue callRes = getCallObj().evaluate(env);
         List<Node> arguments = getArgs().getChildren();
         int index = getIndex(callRes, arguments, env, getLineFile());

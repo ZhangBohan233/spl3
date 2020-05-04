@@ -58,6 +58,8 @@ public class ClassStmt extends Node {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         validateExtending();
 
         ClassType superclassPointer;

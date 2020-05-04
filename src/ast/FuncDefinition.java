@@ -42,6 +42,8 @@ public class FuncDefinition extends Node {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         List<Declaration> params = new ArrayList<>();
         List<Type> paramTypes = new ArrayList<>();
         for (int i = 0; i < parameters.getChildren().size(); ++i) {

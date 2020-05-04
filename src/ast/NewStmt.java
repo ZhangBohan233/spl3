@@ -21,6 +21,8 @@ public class NewStmt extends UnaryExpr {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         return initClass(value, env, env, getLineFile());
     }
 

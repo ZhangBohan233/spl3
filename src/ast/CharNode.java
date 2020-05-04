@@ -19,6 +19,7 @@ public class CharNode extends LiteralNode {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
         return new TypeValue(PrimitiveType.TYPE_CHAR, new Char(ch));
     }
 

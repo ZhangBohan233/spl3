@@ -17,6 +17,11 @@ public class InstanceEnvironment extends MainAbstractEnvironment {
     }
 
     @Override
+    public boolean interrupted() {
+        return false;
+    }
+
+    @Override
     protected TypeValue innerGet(String name, boolean isFirst, boolean includeConst, LineFile lineFile) {
         TypeValue tv = searchSuper(name);
         if (tv == null)

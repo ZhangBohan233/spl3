@@ -47,4 +47,20 @@ public abstract class MainAbstractEnvironment extends Environment {
     protected void setInNamespaces(String name, TypeValue typeValue) {
 
     }
+
+    public void breakLoop() {
+        throw new EnvironmentError("Break outside loop");
+    }
+
+    public void resumeLoop() {
+        throw new EnvironmentError("Outside function");
+    }
+
+    public void pauseLoop() {
+        throw new EnvironmentError("Continue outside function");
+    }
+
+    public void invalidate() {
+        throw new EnvironmentError();
+    }
 }

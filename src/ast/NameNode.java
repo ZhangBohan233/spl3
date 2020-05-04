@@ -25,6 +25,8 @@ public class NameNode extends LeafNode implements TypeRepresent {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         return env.get(name, getLineFile());
     }
 

@@ -17,6 +17,8 @@ public class Dot extends BinaryExpr implements TypeRepresent {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         TypeValue leftTv = left.evaluate(env);
         if (!leftTv.getType().isPrimitive()) {
             PointerType type = (PointerType) leftTv.getType();

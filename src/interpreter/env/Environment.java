@@ -31,6 +31,16 @@ public abstract class Environment {
 
     public abstract void setReturn(TypeValue typeValue);
 
+    public abstract boolean interrupted();
+
+    public abstract void breakLoop();
+
+    public abstract void resumeLoop();
+
+    public abstract void pauseLoop();
+
+    public abstract void invalidate();
+
     public void defineVar(String name, Type type, LineFile lineFile) {
         if (innerGet(name, true, true, lineFile) != null)
             throw new EnvironmentError("Variable '" + name + "' already defined. ", lineFile);

@@ -5,17 +5,15 @@ import interpreter.env.Environment;
 import interpreter.types.TypeValue;
 import util.LineFile;
 
-public class ReturnStmt extends UnaryExpr {
+public class ContinueStmt extends LeafNode {
 
-    public ReturnStmt(LineFile lineFile) {
-        super("return", true, lineFile);
+    public ContinueStmt(LineFile lineFile) {
+        super(lineFile);
     }
 
     @Override
     public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
-
-        env.setReturn(value.evaluate(env));
+        env.pauseLoop();
         return null;
     }
 

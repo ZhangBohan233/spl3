@@ -26,6 +26,8 @@ public class ImportStmt extends Node {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         ModuleEnvironment moduleScope = new ModuleEnvironment(env);
         content.evaluate(moduleScope);
         SplModule module = new SplModule(importName, moduleScope);

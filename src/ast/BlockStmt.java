@@ -39,6 +39,8 @@ public class BlockStmt extends Node {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         for (Line line : children) {
             line.evaluate(env);
         }

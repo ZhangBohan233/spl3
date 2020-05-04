@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Line extends Node {
-    private List<Node> children = new ArrayList<>();
+    private final List<Node> children = new ArrayList<>();
 
     public Line(LineFile lineFile) {
         super(lineFile);
@@ -30,6 +30,8 @@ public class Line extends Node {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         TypeValue res = null;
         for (Node node : children) {
             res = node.evaluate(env);
@@ -39,9 +41,9 @@ public class Line extends Node {
 
     @Override
     public Line preprocess(FakeEnv env) {
-        for (int i = 0 ; i < children.size(); ++i) {
-            children.set(i, children.get(i).preprocess(env));
-        }
+//        for (int i = 0 ; i < children.size(); ++i) {
+//            children.set(i, children.get(i).preprocess(env));
+//        }
         return this;
     }
 }

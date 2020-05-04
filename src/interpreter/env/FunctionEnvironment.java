@@ -18,4 +18,9 @@ public class FunctionEnvironment extends MainAbstractEnvironment {
     public void setReturn(TypeValue typeValue) {
         returnValue = typeValue;
     }
+
+    @Override
+    public boolean interrupted() {
+        return returnValue != null;
+    }
 }

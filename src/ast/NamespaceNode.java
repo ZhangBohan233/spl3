@@ -15,6 +15,8 @@ public class NamespaceNode extends UnaryExpr {
 
     @Override
     public TypeValue evaluate(Environment env) {
+        if (env.interrupted()) return null;
+
         TypeValue moduleTv = value.evaluate(env);
         SplModule module = (SplModule) env.getMemory().get((Pointer) moduleTv.getValue());
         env.addNamespace(module.getEnv());

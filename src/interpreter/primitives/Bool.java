@@ -1,6 +1,11 @@
 package interpreter.primitives;
 
+import interpreter.types.TypeValue;
+
 public class Bool extends Primitive {
+
+    public static final Bool TRUE = new Bool(true);
+    public static final Bool FALSE = new Bool(false);
 
     public final boolean value;
 
@@ -28,6 +33,10 @@ public class Bool extends Primitive {
         return intValue();
     }
 
+    public boolean booleanValue() {
+        return value;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -36,5 +45,9 @@ public class Bool extends Primitive {
         Bool anInt = (Bool) o;
 
         return value == anInt.value;
+    }
+
+    public static TypeValue boolTvValueOf(boolean b) {
+        return b ? TypeValue.BOOL_TRUE : TypeValue.BOOL_FALSE;
     }
 }
