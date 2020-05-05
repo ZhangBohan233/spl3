@@ -10,7 +10,7 @@ import java.util.List;
 
 public class BlockStmt extends Node {
 
-    private List<Line> children = new ArrayList<>();
+    private final List<Line> children = new ArrayList<>();
 
     public BlockStmt(LineFile lineFile) {
         super(lineFile);
@@ -22,6 +22,10 @@ public class BlockStmt extends Node {
 
     public void addLine(Line line) {
         children.add(line);
+    }
+
+    public List<Line> getLines() {
+        return children;
     }
 
     @Override

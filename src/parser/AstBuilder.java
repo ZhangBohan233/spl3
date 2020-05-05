@@ -404,6 +404,12 @@ public class AstBuilder {
                 Line line = inner.getLine();
                 inner = null;
                 ((WhileStmt) stmt).setCondition(line);
+            } else if (stmt instanceof ForLoopStmt) {
+                inner.finishPart();
+                inner.finishLine();
+                BlockStmt blockStmt = inner.getBaseBlock();
+                inner = null;
+                ((ForLoopStmt) stmt).setCondition(blockStmt);
             }
         } else {
             inner.buildConditionTitle();
@@ -457,6 +463,15 @@ public class AstBuilder {
             inner = new AstBuilder();
         } else {
             inner.addWhile(lineFile);
+        }
+    }
+
+    void addFor(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new ForLoopStmt(lineFile));
+            inner = new AstBuilder();
+        } else {
+            inner.addFor(lineFile);
         }
     }
 

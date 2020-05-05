@@ -205,6 +205,8 @@ public class Parser {
                             builder.addWhile(lineFile);
                             break;
                         case "for":
+                            conditioning = true;
+                            builder.addFor(lineFile);
                             break;
                         case "break":
                             builder.addBreak(lineFile);

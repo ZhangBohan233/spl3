@@ -1,12 +1,12 @@
 fn main() int {
-    i: int = 0;
 
-    while i < 10 {
-        i = i + 1;
-        if i == 5 {
-            continue;
+
+    for j: int = 0, i: int = 0; j < 10; j = j + 1, i = i + 1 {
+
+        if j == 3 {
+            return j;
         }
-        System.println(i);
+        System.println(j);
     }
 
     return 1;
