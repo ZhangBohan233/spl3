@@ -8,6 +8,7 @@ fn main() int {
     ss: String = "334asd";
     //System.fuck().gg();
     System.println(123);
+    System.println(ss);
 
     return ss.length;
 }

@@ -34,8 +34,10 @@ public class Instance extends SplObject {
         return "Instance<" + type + ">";
     }
 
-    public static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType, Environment env, LineFile lineFile) {
-        SplObject obj = env.getMemory().get(clazzType.getClazzPointer());
+    public static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType,
+                                                              Environment outerEnv,
+                                                              LineFile lineFile) {
+        SplObject obj = outerEnv.getMemory().get(clazzType.getClazzPointer());
         if (!(obj instanceof SplClass)) throw new TypeError();
         SplClass clazz = (SplClass) obj;
         InstanceEnvironment instanceEnv = new InstanceEnvironment(clazz.getDefinitionEnv());
@@ -55,8 +57,8 @@ public class Instance extends SplObject {
         }
 
         Instance instance = new Instance(clazzType, instanceEnv);
-        Pointer instancePtr = env.getMemory().allocate(1);
-        env.getMemory().set(instancePtr, instance);
+        Pointer instancePtr = outerEnv.getMemory().allocate(1);
+        outerEnv.getMemory().set(instancePtr, instance);
 
         TypeValue instanceTv = new TypeValue(clazzType, instancePtr);
 
@@ -64,7 +66,7 @@ public class Instance extends SplObject {
 
         ClassType scp = clazz.getSuperclassType();
         if (scp != null) {
-            InstanceTypeValue scItv = createInstanceAndAllocate(scp, env, lineFile);
+            InstanceTypeValue scItv = createInstanceAndAllocate(scp, outerEnv, lineFile);
             TypeValue scInstance = scItv.typeValue;
             instance.getEnv().directDefineConstAndSet("super", scInstance);
         }

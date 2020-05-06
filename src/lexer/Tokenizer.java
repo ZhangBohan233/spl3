@@ -1,6 +1,5 @@
 package lexer;
 
-import parser.ParseError;
 import util.LineFile;
 import util.Utilities;
 
@@ -9,10 +8,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 public class Tokenizer {
 
@@ -77,9 +74,9 @@ public class Tokenizer {
         tokens.clear();
 
         if (importLang) {
-            tokens.add(new IdToken("import", LineFile.LF_TOKENIZE));
-            tokens.add(new IdToken("namespace", LineFile.LF_TOKENIZE));
-            tokens.add(new StrToken("lang", LineFile.LF_TOKENIZE));
+            tokens.add(new IdToken("import", LineFile.LF_TOKENIZER));
+            tokens.add(new IdToken("namespace", LineFile.LF_TOKENIZER));
+            tokens.add(new StrToken("lang", LineFile.LF_TOKENIZER));
             findImport(0, 3);
         }
 

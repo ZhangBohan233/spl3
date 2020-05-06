@@ -1,6 +1,7 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
+import interpreter.Memory;
 import interpreter.env.Environment;
 import interpreter.primitives.Char;
 import interpreter.primitives.Pointer;
@@ -29,6 +30,13 @@ public class StringLiteral extends LiteralNode {
         if (env.interrupted()) return null;
 
         // create spl char array
+        TypeValue arrTv = createCharArrayAndAllocate(charArray, env, getLineFile());
+
+        // create String instance
+        return createStringInstance(arrTv, env, getLineFile());
+    }
+
+    public static TypeValue createCharArrayAndAllocate(char[] charArray, Environment env, LineFile lineFile) {
         ArrayType arrayType = new ArrayType(PrimitiveType.TYPE_CHAR);
         Pointer arrPtr = SplArray.createArray(arrayType, List.of(charArray.length), env.getMemory());
         for (int i = 0; i < charArray.length; ++i) {
@@ -39,17 +47,18 @@ public class StringLiteral extends LiteralNode {
                     arrayType,
                     new TypeValue(PrimitiveType.TYPE_CHAR, c),
                     env,
-                    getLineFile()
+                    lineFile
             );
         }
-        TypeValue arrTv = new TypeValue(arrayType, arrPtr);
+        return new TypeValue(arrayType, arrPtr);
+    }
 
-        // create String instance
-        NameNode clazzNode = new NameNode("String", getLineFile());
+    public static TypeValue createStringInstance(TypeValue charArrTv, Environment env, LineFile lineFile) {
+        NameNode clazzNode = new NameNode("String", lineFile);
         ClassType classType = (ClassType) clazzNode.evalType(env);
-        Instance.InstanceTypeValue instanceTv = Instance.createInstanceAndAllocate(classType, env, getLineFile());
+        Instance.InstanceTypeValue instanceTv = Instance.createInstanceAndAllocate(classType, env, lineFile);
 
-        Instance.callInit(instanceTv.instance, new TypeValue[]{arrTv}, env, getLineFile());
+        Instance.callInit(instanceTv.instance, new TypeValue[]{charArrTv}, env, lineFile);
 
         return instanceTv.typeValue;
     }
