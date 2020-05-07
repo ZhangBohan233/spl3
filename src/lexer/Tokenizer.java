@@ -51,6 +51,12 @@ public class Tokenizer {
             OTHERS
     );
 
+    public static final Set<String> ALL_BINARY = Utilities.mergeSets(
+            NUMERIC_BINARY,
+            LOGICAL_BINARY,
+            LAZY_BINARY
+    );
+
     public static final Set<String> RESERVED = Set.of(
             "class", "fn", "if", "else", "new", "extends", "return", "break", "continue",
             "true", "false", "null", "operator", "while", "for", "import", "namespace",

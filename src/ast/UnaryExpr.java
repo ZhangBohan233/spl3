@@ -1,19 +1,17 @@
 package ast;
 
-import ast.fakeEnv.FakeEnv;
-import interpreter.env.Environment;
 import util.LineFile;
 
 public abstract class UnaryExpr extends Expr {
 
-    protected final String op;
+    protected final String operator;
     protected Node value;
     public final boolean atLeft;
 
-    public UnaryExpr(String op, boolean operatorAtLeft, LineFile lineFile) {
+    public UnaryExpr(String operator, boolean operatorAtLeft, LineFile lineFile) {
         super(lineFile);
 
-        this.op = op;
+        this.operator = operator;
         this.atLeft = operatorAtLeft;
     }
 
@@ -25,14 +23,14 @@ public abstract class UnaryExpr extends Expr {
     @Override
     public String toString() {
         if (atLeft) {
-            return String.format("UE(%s %s)", op, value);
+            return String.format("UE(%s %s)", operator, value);
         } else {
-            return String.format("UE(%s %s)", value, op);
+            return String.format("UE(%s %s)", value, operator);
         }
     }
 
     public String getOperator() {
-        return op;
+        return operator;
     }
 
     public void setValue(Node value) {

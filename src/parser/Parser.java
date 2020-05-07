@@ -1,9 +1,6 @@
 package parser;
 
-import ast.BinaryOperator;
-import ast.BlockStmt;
-import ast.Declaration;
-import ast.IfStmt;
+import ast.*;
 import lexer.*;
 import util.LineFile;
 
@@ -51,11 +48,22 @@ public class Parser {
             if (token instanceof IdToken) {
                 String identifier = ((IdToken) token).getIdentifier();
 
-                if (Tokenizer.NUMERIC_BINARY.contains(identifier)) {
+                if (identifier.equals("-")) {
+                    // special case, since "-" can both binary (subtraction) or unary (negation)
+                    if (i > 0 && isUnary(tokens.get(i - 1))) {
+                        // negation
+                        builder.addUnaryOperator("neg", RegularUnaryOperator.NUMERIC, lineFile);
+                    } else {
+                        // subtraction
+                        builder.addBinaryOperator("-", BinaryOperator.NUMERIC, lineFile);
+                    }
+                } else if (Tokenizer.LOGICAL_UNARY.contains(identifier)) {
+                    builder.addUnaryOperator(identifier, RegularUnaryOperator.LOGICAL, lineFile);
+                } else if (Tokenizer.NUMERIC_BINARY.contains(identifier)) {
                     builder.addBinaryOperator(identifier, BinaryOperator.NUMERIC, lineFile);
                 } else if (Tokenizer.LOGICAL_BINARY.contains(identifier)) {
                     builder.addBinaryOperator(identifier, BinaryOperator.LOGICAL, lineFile);
-                }  else if (Tokenizer.LAZY_BINARY.contains(identifier)) {
+                } else if (Tokenizer.LAZY_BINARY.contains(identifier)) {
                     builder.addBinaryOperator(identifier, BinaryOperator.LAZY, lineFile);
                 } else if (Tokenizer.FAKE_TERNARY.contains(identifier)) {
                     builder.addFakeTernary(identifier, lineFile);
@@ -72,6 +80,8 @@ public class Parser {
                             } else if (isCall(tokens.get(i - 1))) {
                                 builder.addCall(lineFile);
                                 callBrackets.push(bracketCount);
+                            } else {
+                                builder.addParenthesis();
                             }
                             break;
                         case ")":
@@ -81,6 +91,8 @@ public class Parser {
                             } else if (isThisStack(callBrackets, bracketCount)) {
                                 callBrackets.pop();
                                 builder.buildCall();
+                            } else {
+                                builder.buildParenthesis(lineFile);
                             }
                             bracketCount--;
                             break;
@@ -323,5 +335,25 @@ public class Parser {
             return Tokenizer.StringTypes.isIdentifier(identifier) && !Tokenizer.RESERVED.contains(identifier);
         }
         return false;
+    }
+
+    private static boolean isUnary(Token token) {
+        if (token instanceof IdToken) {
+            String identifier = ((IdToken) token).getIdentifier();
+            switch (identifier) {
+                case ";":
+                case "=":
+                case "(":
+                case "[":
+                case "{":
+                case "}":
+                case ".":
+                case ",":
+                    return true;
+                default:
+                    return Tokenizer.ALL_BINARY.contains(identifier) ||
+                            Tokenizer.RESERVED.contains(identifier);
+            }
+        } else return !(token instanceof IntToken) && !(token instanceof FloatToken);
     }
 }

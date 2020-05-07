@@ -28,9 +28,9 @@ public class BinaryOperator extends BinaryExpr {
     public TypeValue evaluate(Environment env) {
         if (env.interrupted()) return null;
 
-        TypeValue leftTv = left.evaluate(env);
-        TypeValue rightTv = right.evaluate(env);
         if (type == NUMERIC) {
+            TypeValue leftTv = left.evaluate(env);
+            TypeValue rightTv = right.evaluate(env);
             if (leftTv.getType().equals(PrimitiveType.TYPE_INT)) {
                 Primitive result;
                 switch (operator) {
@@ -56,6 +56,8 @@ public class BinaryOperator extends BinaryExpr {
                 return new TypeValue(PrimitiveType.TYPE_INT, result);
             }
         } else if (type == LOGICAL) {
+            TypeValue leftTv = left.evaluate(env);
+            TypeValue rightTv = right.evaluate(env);
             boolean result = false;
             if (leftTv.getType().equals(PrimitiveType.TYPE_INT)) {
                 long leftV = leftTv.getValue().intValue();
@@ -92,13 +94,13 @@ public class BinaryOperator extends BinaryExpr {
                 d.setLeft(BoolStmt.BOOL_STMT_TRUE);
                 d.setRight(right);
             } else {
-                throw new SyntaxError("Unsupported binary operator '" + operator + "' between " +
-                        leftTv.getType() + " and " + rightTv.getType() + ". ", getLineFile());
+                throw new SyntaxError("Unsupported lazy binary operator '" + operator +
+                        ". ", getLineFile());
             }
             fto.setRight(d);
             return fto.evaluate(env);
         }
-        throw new SplException("Unexpected error. ", getLineFile());
+        throw new SyntaxError("Unexpected error. ", getLineFile());
     }
 
     @Override

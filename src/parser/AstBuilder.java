@@ -1,6 +1,7 @@
 package parser;
 
 import ast.*;
+import lexer.SyntaxError;
 import util.LineFile;
 import util.Utilities;
 
@@ -37,6 +38,14 @@ public class AstBuilder {
             "||", 5
     );
 
+    private static final Map<String, Integer> PCD_UNARY_NUMERIC = Map.of(
+            "neg", 200
+    );
+
+    private static final Map<String, Integer> PCD_UNARY_LOGICAL = Map.of(
+            "!", 200
+    );
+
     private static final Map<String, Integer> PCD_UNARY_SPECIAL = Map.of(
             "new", 150,
             "namespace", 150,
@@ -47,11 +56,11 @@ public class AstBuilder {
 
     private static final Map<String, Integer> PRECEDENCES = Utilities.mergeMaps(
             PCD_BIN_NUMERIC, PCD_BIN_LOGICAL, PCD_BIN_SPECIAL, PCD_BIN_LAZY,
-            PCD_UNARY_SPECIAL
+            PCD_UNARY_NUMERIC, PCD_UNARY_LOGICAL, PCD_UNARY_SPECIAL
     );
 
-    private BlockStmt baseBlock = new BlockStmt();
-    private List<Node> stack = new ArrayList<>();
+    private final BlockStmt baseBlock = new BlockStmt();
+    private final List<Node> stack = new ArrayList<>();
     private Line activeLine = new Line();
     private AstBuilder inner;
 
@@ -119,6 +128,14 @@ public class AstBuilder {
         }
     }
 
+    void addUnaryOperator(String op, int type, LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new RegularUnaryOperator(op, type, lineFile));
+        } else {
+            inner.addUnaryOperator(op, type, lineFile);
+        }
+    }
+
     void addBinaryOperator(String op, int type, LineFile lineFile) {
         if (inner == null) {
             stack.add(new BinaryOperator(op, type, lineFile));
@@ -133,12 +150,6 @@ public class AstBuilder {
         } else {
             inner.addFakeTernary(op, lineFile);
         }
-    }
-
-    void addUnaryOperator(String op, LineFile lineFile) {
-//        if (inner == null) {
-//            stack.add(new )
-//        }
     }
 
     void addReturnStmt(LineFile lineFile) {
@@ -392,6 +403,27 @@ public class AstBuilder {
         }
     }
 
+    void addParenthesis() {
+        if (inner == null) {
+            inner = new AstBuilder();
+        } else {
+            inner.addParenthesis();
+        }
+    }
+
+    void buildParenthesis(LineFile lineFile) {
+        if (inner.inner == null) {
+            inner.finishPart();
+            Line line = inner.getLine();
+            inner = null;
+            if (line.getChildren().size() != 1)
+                throw new SyntaxError("Parenthesis must have exactly 1 element. ", lineFile);
+            stack.add(line.getChildren().get(0));
+        } else {
+            inner.buildParenthesis(lineFile);
+        }
+    }
+
     IfStmt addIf(LineFile lineFile) {
         if (inner == null) {
             IfStmt res = new IfStmt(lineFile);
@@ -578,14 +610,6 @@ public class AstBuilder {
         return baseBlock;
     }
 
-    BlockStmt getInnermostBlock() {
-        if (inner == null) {
-            return baseBlock;
-        } else {
-            return inner.getInnermostBlock();
-        }
-    }
-
     /**
      * This method would build all expressions in the active stack and clear the stack.
      */
@@ -638,13 +662,13 @@ public class AstBuilder {
 
                 Expr expr = (Expr) list.get(index);
                 if (expr instanceof UnaryExpr) {
+                    Node value;
                     if (((UnaryExpr) expr).atLeft) {
-                        Node value = list.remove(index + 1);
-                        ((UnaryExpr) expr).setValue(value);
+                        value = list.remove(index + 1);
                     } else {
-                        Node value = list.remove(index - 1);
-                        ((UnaryExpr) expr).setValue(value);
+                        value = list.remove(index - 1);
                     }
+                    ((UnaryExpr) expr).setValue(value);
                 } else if (expr instanceof BinaryExpr) {
                     Node right = list.remove(index + 1);
                     Node left = list.remove(index - 1);
