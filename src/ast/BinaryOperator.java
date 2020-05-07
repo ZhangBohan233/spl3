@@ -8,12 +8,14 @@ import interpreter.env.Environment;
 import interpreter.types.TypeValue;
 import interpreter.primitives.Int;
 import interpreter.primitives.Primitive;
+import lexer.SyntaxError;
 import util.LineFile;
 
 public class BinaryOperator extends BinaryExpr {
 
     public static final int NUMERIC = 1;
     public static final int LOGICAL = 2;
+    public static final int LAZY = 3;
     private final int type;
 
     public BinaryOperator(String operator, int type, LineFile lineFile) {
@@ -48,7 +50,7 @@ public class BinaryOperator extends BinaryExpr {
                         result = new Int(leftTv.getValue().intValue() % rightTv.getValue().intValue());
                         break;
                     default:
-                        throw new SplException("Unsupported binary operator '" + operator + "' between " +
+                        throw new SyntaxError("Unsupported binary operator '" + operator + "' between " +
                                 leftTv.getType() + " and " + rightTv.getType() + ". ", getLineFile());
                 }
                 return new TypeValue(PrimitiveType.TYPE_INT, result);
@@ -70,17 +72,33 @@ public class BinaryOperator extends BinaryExpr {
                             result = leftV < rightV;
                             break;
                         default:
-                            throw new SplException("Unsupported binary operator '" + operator + "' between " +
+                            throw new SyntaxError("Unsupported binary operator '" + operator + "' between " +
                                     leftTv.getType() + " and " + rightTv.getType() + ". ", getLineFile());
                     }
                 }
             }
             return Bool.boolTvValueOf(result);
-        } else {
-            throw new SplException("Unexpected error. ", getLineFile());
-        }
+        } else if (type == LAZY) {
+            // a && b = a ? b : false
+            // a || b = a ? true : b
+            FakeTernaryOperator fto = new FakeTernaryOperator("?", getLineFile());
+            fto.setLeft(left);
 
-        return null;
+            Declaration d = new Declaration(Declaration.USELESS, getLineFile());
+            if (operator.equals("&&")) {
+                d.setLeft(right);
+                d.setRight(BoolStmt.BOOL_STMT_FALSE);
+            } else if (operator.equals("||")) {
+                d.setLeft(BoolStmt.BOOL_STMT_TRUE);
+                d.setRight(right);
+            } else {
+                throw new SyntaxError("Unsupported binary operator '" + operator + "' between " +
+                        leftTv.getType() + " and " + rightTv.getType() + ". ", getLineFile());
+            }
+            fto.setRight(d);
+            return fto.evaluate(env);
+        }
+        throw new SplException("Unexpected error. ", getLineFile());
     }
 
     @Override

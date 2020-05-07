@@ -2,11 +2,14 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
+import interpreter.primitives.Bool;
+import interpreter.types.PrimitiveType;
+import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
 import util.LineFile;
 
 public abstract class Node {
-    private LineFile lineFile;
+    private final LineFile lineFile;
 
     static int spaceCount = 0;  // used for printing ast
 

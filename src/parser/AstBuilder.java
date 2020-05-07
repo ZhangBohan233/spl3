@@ -28,21 +28,25 @@ public class AstBuilder {
 
     private static final Map<String, Integer> PCD_BIN_SPECIAL = Map.of(
             ".", 500,
-            "call", 400,
-            "index", 50,
             ":", 3,
             "=", 1
+    );
+
+    private static final Map<String, Integer> PCD_BIN_LAZY = Map.of(
+            "&&", 6,
+            "||", 5
     );
 
     private static final Map<String, Integer> PCD_UNARY_SPECIAL = Map.of(
             "new", 150,
             "namespace", 150,
             "extends", 150,
+            "?", 2,
             "return", 0
     );
 
     private static final Map<String, Integer> PRECEDENCES = Utilities.mergeMaps(
-            PCD_BIN_NUMERIC, PCD_BIN_LOGICAL, PCD_BIN_SPECIAL,
+            PCD_BIN_NUMERIC, PCD_BIN_LOGICAL, PCD_BIN_SPECIAL, PCD_BIN_LAZY,
             PCD_UNARY_SPECIAL
     );
 
@@ -120,6 +124,14 @@ public class AstBuilder {
             stack.add(new BinaryOperator(op, type, lineFile));
         } else {
             inner.addBinaryOperator(op, type, lineFile);
+        }
+    }
+
+    void addFakeTernary(String op, LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new FakeTernaryOperator(op, lineFile));
+        } else {
+            inner.addFakeTernary(op, lineFile);
         }
     }
 

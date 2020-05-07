@@ -21,6 +21,10 @@ public class Tokenizer {
             ">", "<", "==", "!=", ">=", "<="
     );
 
+    public static final Set<String> FAKE_TERNARY = Set.of(
+            "?"
+    );
+
     public static final Set<String> LAZY_BINARY = Set.of(
             "&&", "||"
     );
@@ -43,6 +47,7 @@ public class Tokenizer {
             LAZY_BINARY,
             LOGICAL_UNARY,
             SYMBOLS,
+            FAKE_TERNARY,
             OTHERS
     );
 

@@ -41,10 +41,7 @@ public class IfStmt extends ConditionalStmt {
 
     @Override
     public TypeValue evaluate(Environment env) {
-        TypeValue cond = condition.evaluate(env);
-        if (!cond.getType().equals(PrimitiveType.TYPE_BOOLEAN)) throw new TypeError("If statement takes " +
-                "boolean value as condition. ", getLineFile());
-        Bool bool = (Bool) cond.getValue();
+        Bool bool = Bool.evalBoolean(condition, env, getLineFile());
         BlockEnvironment blockEnvironment;
         if (bool.booleanValue()) {
             blockEnvironment = new BlockEnvironment(env);

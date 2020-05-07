@@ -12,8 +12,9 @@ public class Declaration extends BinaryExpr {
 
     public static final int VAR = 1;
     public static final int CONST = 2;
+    public static final int USELESS = 3;
 
-    private int level;
+    private final int level;
 
     public Declaration(int level, LineFile lineFile) {
         super(":", lineFile);

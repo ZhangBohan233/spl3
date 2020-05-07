@@ -47,10 +47,7 @@ public class ForLoopStmt extends ConditionalStmt {
     private void forLoop3Parts(Line init, Line end, Line step, Environment parentEnv,
                                LoopTitleEnvironment titleEnv, BlockEnvironment bodyEnv) {
         init.evaluate(titleEnv);
-        TypeValue cond = end.evaluate(titleEnv);
-        if (!cond.getType().equals(PrimitiveType.TYPE_BOOLEAN)) throw new TypeError("For loop statement " +
-                "takes boolean value as second condition. ", getLineFile());
-        Bool bool = (Bool) cond.getValue();
+        Bool bool = Bool.evalBoolean(condition, titleEnv, getLineFile());
         while (bool.value) {
             bodyEnv.invalidate();
             bodyBlock.evaluate(bodyEnv);

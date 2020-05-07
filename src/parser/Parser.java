@@ -55,6 +55,10 @@ public class Parser {
                     builder.addBinaryOperator(identifier, BinaryOperator.NUMERIC, lineFile);
                 } else if (Tokenizer.LOGICAL_BINARY.contains(identifier)) {
                     builder.addBinaryOperator(identifier, BinaryOperator.LOGICAL, lineFile);
+                }  else if (Tokenizer.LAZY_BINARY.contains(identifier)) {
+                    builder.addBinaryOperator(identifier, BinaryOperator.LAZY, lineFile);
+                } else if (Tokenizer.FAKE_TERNARY.contains(identifier)) {
+                    builder.addFakeTernary(identifier, lineFile);
                 } else {
                     boolean isInterface = false;
                     switch (identifier) {

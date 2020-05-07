@@ -1,6 +1,11 @@
 package interpreter.primitives;
 
+import ast.Node;
+import interpreter.env.Environment;
+import interpreter.types.PrimitiveType;
+import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
+import util.LineFile;
 
 public class Bool extends Primitive {
 
@@ -49,5 +54,12 @@ public class Bool extends Primitive {
 
     public static TypeValue boolTvValueOf(boolean b) {
         return b ? TypeValue.BOOL_TRUE : TypeValue.BOOL_FALSE;
+    }
+
+    public static Bool evalBoolean(Node node, Environment env, LineFile lineFile) {
+        TypeValue cond = node.evaluate(env);
+        if (!cond.getType().equals(PrimitiveType.TYPE_BOOLEAN)) throw new TypeError("Statement takes " +
+                "boolean value as condition. ", lineFile);
+        return (Bool) cond.getValue();
     }
 }

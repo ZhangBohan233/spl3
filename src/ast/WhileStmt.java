@@ -24,10 +24,7 @@ public class WhileStmt extends ConditionalStmt {
         LoopTitleEnvironment titleEnv = new LoopTitleEnvironment(env);
         BlockEnvironment bodyEnv = new BlockEnvironment(titleEnv);
 
-        TypeValue cond = condition.evaluate(titleEnv);
-        if (!cond.getType().equals(PrimitiveType.TYPE_BOOLEAN)) throw new TypeError("While statement takes " +
-                "boolean value as condition. ", getLineFile());
-        Bool bool = (Bool) cond.getValue();
+        Bool bool = Bool.evalBoolean(condition, titleEnv, getLineFile());
         while (bool.value) {
             bodyEnv.invalidate();
             bodyBlock.evaluate(bodyEnv);
