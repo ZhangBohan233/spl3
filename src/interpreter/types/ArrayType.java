@@ -20,7 +20,7 @@ public class ArrayType extends PointerType {
     }
 
     @Override
-    public boolean isSuperclassOfOrEquals(Type child, Environment env) {
+    protected boolean isSuperclassOfOrEqualsNotNull(Type child, Environment env) {
         return child instanceof ArrayType && ((ArrayType) child).eleType.equals(eleType);
     }
 

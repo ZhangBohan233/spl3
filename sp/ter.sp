@@ -7,5 +7,10 @@ fn main() int {
         System.println(false);
     }
 
+    b: String = "123213";
+    if b != null && b.length > 3 {
+        return 3;
+    }
+
     return -a;
 }

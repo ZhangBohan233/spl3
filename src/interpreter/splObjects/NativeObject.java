@@ -5,11 +5,14 @@ import ast.FuncCall;
 import ast.NameNode;
 import ast.Node;
 import interpreter.AttributeError;
+import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
 import util.LineFile;
+import util.SplBaseException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class NativeObject extends SplObject {
@@ -35,9 +38,11 @@ public class NativeObject extends SplObject {
             Method method = obj.getClass().getMethod(methodName, Arguments.class, Environment.class, LineFile.class);
 
             return (TypeValue) method.invoke(obj, arguments, callEnv, lineFile);
-        } catch (Exception e) {
+        } catch (NoSuchMethodException | IllegalAccessException e1) {
             throw new AttributeError("Native class '" + obj.getClass() + "' does not have method '" +
-                    methodName + ". ");
+                    methodName + ". ", lineFile);
+        } catch (InvocationTargetException e) {
+            throw new SplBaseException(e);
         }
     }
 }

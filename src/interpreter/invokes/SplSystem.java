@@ -1,10 +1,8 @@
 package interpreter.invokes;
 
 import ast.Arguments;
-import ast.Node;
 import interpreter.SplException;
 import interpreter.env.Environment;
-import interpreter.primitives.Char;
 import interpreter.primitives.Int;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Function;
@@ -48,13 +46,13 @@ public class SplSystem extends NativeObject {
     public TypeValue println(Arguments arguments, Environment environment, LineFile lineFile) {
         stdout.println(getPrintString(arguments, environment, lineFile));
 
-        return TypeValue.VOID_NULL;
+        return TypeValue.VOID;
     }
 
     public TypeValue print(Arguments arguments, Environment environment, LineFile lineFile) {
         stdout.print(getPrintString(arguments, environment, lineFile));
 
-        return TypeValue.VOID_NULL;
+        return TypeValue.VOID;
     }
 
     public TypeValue clock(Arguments arguments, Environment environment, LineFile lineFile) {
@@ -80,7 +78,9 @@ public class SplSystem extends NativeObject {
             } else {
                 PointerType ptrType = (PointerType) arg.getType();
                 Pointer ptr = (Pointer) arg.getValue();
-                if (ptrType.getPointerType() == PointerType.CLASS_TYPE) {
+                if (ptr.getPtr() == 0) {  // Pointed to null
+                    resArr[i] = "null";
+                } else if (ptrType.getPointerType() == PointerType.CLASS_TYPE) {
                     Instance instance = (Instance) environment.getMemory().get(ptr);
 
                     if (stringType.equals(instance.getType())) {  // is String itself

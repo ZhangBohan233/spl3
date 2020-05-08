@@ -2,10 +2,10 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.primitives.Bool;
-import interpreter.types.PrimitiveType;
+import interpreter.primitives.Pointer;
+import interpreter.types.*;
 import interpreter.SplException;
 import interpreter.env.Environment;
-import interpreter.types.TypeValue;
 import interpreter.primitives.Int;
 import interpreter.primitives.Primitive;
 import lexer.SyntaxError;
@@ -58,26 +58,56 @@ public class BinaryOperator extends BinaryExpr {
         } else if (type == LOGICAL) {
             TypeValue leftTv = left.evaluate(env);
             TypeValue rightTv = right.evaluate(env);
-            boolean result = false;
-            if (leftTv.getType().equals(PrimitiveType.TYPE_INT)) {
-                long leftV = leftTv.getValue().intValue();
-                if (rightTv.getType().equals(PrimitiveType.TYPE_INT)) {
-                    long rightV = rightTv.getValue().intValue();
-                    switch (operator) {
-                        case "==":
-                            result = leftV == rightV;
-                            break;
-                        case ">":
-                            result = leftV > rightV;
-                            break;
-                        case "<":
-                            result = leftV < rightV;
-                            break;
-                        default:
-                            throw new SyntaxError("Unsupported binary operator '" + operator + "' between " +
-                                    leftTv.getType() + " and " + rightTv.getType() + ". ", getLineFile());
+            boolean result;
+            if (leftTv.getType().isPrimitive()) {
+                if (leftTv.getType().equals(PrimitiveType.TYPE_INT) ||
+                        leftTv.getType().equals(PrimitiveType.TYPE_CHAR)) {
+                    long leftV = leftTv.getValue().intValue();
+                    if (rightTv.getType().equals(PrimitiveType.TYPE_INT) ||
+                            rightTv.getType().equals(PrimitiveType.TYPE_CHAR)) {
+                        long rightV = rightTv.getValue().intValue();
+                        result = integerLogical(operator, leftV, rightV, getLineFile());
+                    } else if (rightTv.getType().equals(PrimitiveType.TYPE_FLOAT)) {
+                        double rightV = rightTv.getValue().floatValue();
+                        result = otherLogical(operator, leftV, rightV, leftTv.getType(), rightTv.getType(),
+                                getLineFile());
+                    } else {
+                        throw new TypeError();
                     }
+                } else if (leftTv.getType().equals(PrimitiveType.TYPE_FLOAT)) {
+                    double leftV = leftTv.getValue().floatValue();
+                    if (rightTv.getType().equals(PrimitiveType.TYPE_FLOAT) ||
+                            rightTv.getType().equals(PrimitiveType.TYPE_INT) ||
+                            rightTv.getType().equals(PrimitiveType.TYPE_CHAR)) {
+                        double rightV = rightTv.getValue().intValue();
+                        result = otherLogical(operator, leftV, rightV, leftTv.getType(), rightTv.getType(),
+                                getLineFile());
+                    } else {
+                        throw new TypeError();
+                    }
+                } else if (leftTv.getType().equals(PrimitiveType.TYPE_BOOLEAN)) {
+                    boolean leftV = ((Bool) leftTv.getValue()).booleanValue();
+                    if (rightTv.getType().equals(PrimitiveType.TYPE_BOOLEAN)) {
+                        boolean rightV = ((Bool) rightTv.getValue()).booleanValue();
+                        if (operator.equals("==")) {
+                            result = leftV == rightV;
+                        } else if (operator.equals("!=")) {
+                            result = leftV != rightV;
+                        } else {
+                            throw new TypeError();
+                        }
+                    } else {
+                        throw new TypeError();
+                    }
+                } else {
+                    throw new TypeError();
                 }
+            } else {  // is pointer type
+                Pointer ptr = (Pointer) leftTv.getValue();
+                if (rightTv.getType().isPrimitive())
+                    throw new TypeError("Cannot compare primitive type to pointer type. ", getLineFile());
+                Pointer rightPtr = (Pointer) rightTv.getValue();
+                result = integerLogical(operator, ptr.getPtr(), rightPtr.getPtr(), getLineFile());
             }
             return Bool.boolTvValueOf(result);
         } else if (type == LAZY) {
@@ -101,6 +131,49 @@ public class BinaryOperator extends BinaryExpr {
             return fto.evaluate(env);
         }
         throw new SyntaxError("Unexpected error. ", getLineFile());
+    }
+
+    private static boolean integerLogical(String op, long l, long r, LineFile lineFile) {
+        switch (op) {
+            case "==":
+                return l == r;
+            case "!=":
+                return l != r;
+            case ">":
+                return l > r;
+            case "<":
+                return l < r;
+            case ">=":
+                return l >= r;
+            case "<=":
+                return l <= r;
+            default:
+                throw new SyntaxError("Unsupported binary operator '" + op + "' between int and int. ",
+                        lineFile);
+        }
+    }
+
+    private static boolean otherLogical(String op, double l, double r, Type lt, Type rt, LineFile lineFile) {
+        switch (op) {
+            case "==":
+                return l == r;
+            case "!=":
+                return l != r;
+            case ">":
+                return l > r;
+            case "<":
+                return l < r;
+            case ">=":
+                return l >= r;
+            case "<=":
+                return l <= r;
+            default:
+                throw new SyntaxError(
+                        String.format("Unsupported binary operator '%s' between %s and %s. ",
+                                op, lt, rt),
+                        lineFile
+                );
+        }
     }
 
     @Override

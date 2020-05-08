@@ -17,7 +17,7 @@ public class NativeType extends PointerType {
     }
 
     @Override
-    public boolean isSuperclassOfOrEquals(Type child, Environment env) {
+    public boolean isSuperclassOfOrEqualsNotNull(Type child, Environment env) {
         return equals(child);
     }
 

@@ -1,6 +1,7 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
+import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.splObjects.Instance;
 import interpreter.splObjects.NativeObject;
@@ -22,18 +23,23 @@ public class Dot extends BinaryExpr implements TypeRepresent {
         TypeValue leftTv = left.evaluate(env);
         if (!leftTv.getType().isPrimitive()) {
             PointerType type = (PointerType) leftTv.getType();
+            Pointer ptr = (Pointer) leftTv.getValue();
+            if (ptr.getPtr() == 0) {
+                throw new SplException("Pointer to null does not support attributes operation. ",
+                        getLineFile());
+            }
             switch (type.getPointerType()) {
                 case PointerType.CLASS_TYPE:
-                    Instance instance = (Instance) env.getMemory().get((Pointer) leftTv.getValue());
+                    Instance instance = (Instance) env.getMemory().get(ptr);
                     return right.evaluate(instance.getEnv());
                 case PointerType.MODULE_TYPE:
-                    SplModule module = (SplModule) env.getMemory().get((Pointer) leftTv.getValue());
+                    SplModule module = (SplModule) env.getMemory().get(ptr);
                     return right.evaluate(module.getEnv());
                 case PointerType.ARRAY_TYPE:
-                    SplArray arr = (SplArray) env.getMemory().get((Pointer) leftTv.getValue());
+                    SplArray arr = (SplArray) env.getMemory().get(ptr);
                     return arr.getAttr(right, getLineFile());
                 case PointerType.NATIVE_TYPE:
-                    NativeObject nativeObject = (NativeObject) env.getMemory().get((Pointer) leftTv.getValue());
+                    NativeObject nativeObject = (NativeObject) env.getMemory().get(ptr);
                     return nativeObject.invoke(right, env, getLineFile());
                 default:
                     throw new TypeError("Type '" + type + "' does not support attributes operation. ",

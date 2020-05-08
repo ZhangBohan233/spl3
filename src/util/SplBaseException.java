@@ -6,6 +6,10 @@ public class SplBaseException extends RuntimeException {
         super();
     }
 
+    public SplBaseException(Throwable cause) {
+        super(cause);
+    }
+
     public SplBaseException(String msg) {
         super(msg);
     }

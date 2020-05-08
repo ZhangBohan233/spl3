@@ -303,6 +303,9 @@ public class Parser {
                         case "namespace":
                             builder.addNamespace(lineFile);
                             break;
+                        case "null":
+                            builder.addNull(lineFile);
+                            break;
                         default:  // name
                             builder.addName(identifier, lineFile);
                             break;

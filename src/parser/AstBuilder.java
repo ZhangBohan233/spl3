@@ -24,7 +24,8 @@ public class AstBuilder {
             "<", 25,
             ">=", 25,
             "<=", 25,
-            "==", 20
+            "==", 20,
+            "!=", 20
     );
 
     private static final Map<String, Integer> PCD_BIN_SPECIAL = Map.of(
@@ -585,6 +586,14 @@ public class AstBuilder {
             stack.add(new NamespaceNode(lineFile));
         } else {
             inner.addNamespace(lineFile);
+        }
+    }
+
+    void addNull(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new NullStmt(lineFile));
+        } else {
+            inner.addNull(lineFile);
         }
     }
 

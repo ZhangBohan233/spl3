@@ -28,7 +28,7 @@ public class ClassType extends PointerType {
     }
 
     @Override
-    public boolean isSuperclassOfOrEquals(Type child, Environment env) {
+    public boolean isSuperclassOfOrEqualsNotNull(Type child, Environment env) {
         if (!(child instanceof ClassType)) return false;
         else if (equals(child)) return true;
         else {
