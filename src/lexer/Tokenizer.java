@@ -38,7 +38,7 @@ public class Tokenizer {
     );
 
     public static final Set<String> OTHERS = Set.of(
-            "="
+            "=", "->"
     );
 
     public static final Set<String> EXTRA_IDENTIFIERS = Utilities.mergeSets(
@@ -218,7 +218,8 @@ public class Tokenizer {
 //                        continue;
                     } else if (i < len - 1 && ch == '/' && line.charAt(i + 1) == '/') {
                         // enter comment, end of this line
-                        lineTokenize(nonLiteral.substring(0, nonLiteral.length() - 2), lineFile);
+                        if (nonLiteral.length() > 2)
+                            lineTokenize(nonLiteral.substring(0, nonLiteral.length() - 2), lineFile);
                         nonLiteral.setLength(0);
                         break;
                     } else if (ch == '"') {
@@ -333,6 +334,7 @@ public class Tokenizer {
                 {UNDERSCORE, LETTER},
                 {DIGIT, UNDERSCORE},
                 {UNDERSCORE, DIGIT},
+                {MINUS, GT},
 //                {DIGIT, DOT},
 //                {DOT, DIGIT},
                 {LETTER, DIGIT},

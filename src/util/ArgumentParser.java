@@ -5,6 +5,8 @@ import java.io.File;
 public class ArgumentParser {
     private File mainSrcFile;
     private boolean allValid;
+    private boolean noImportLang;
+    private boolean printAst;
     private String msg;
     private String[] splArgs;
 
@@ -15,11 +17,26 @@ public class ArgumentParser {
     private void parseArgs(String[] args) {
         for (int i = 0; i < args.length; ++i) {
             if (mainSrcFile == null) {
-                mainSrcFile = new File(args[i]);
-                if (!mainSrcFile.exists()) {
-                    msg = "Source file does not exist";
-                    allValid = false;
-                    return;
+                String s = args[i];
+                if (s.length() > 0 && s.charAt(0) == '-') {
+                    switch (s) {
+                        case "-ni":
+                            noImportLang = true;
+                            break;
+                        case "-ast":
+                            printAst = true;
+                            break;
+                        default:
+                            System.out.println("Unknown flag '" + s + "'");
+                            break;
+                    }
+                } else {
+                    mainSrcFile = new File(s);
+                    if (!mainSrcFile.exists()) {
+                        msg = "Source file does not exist";
+                        allValid = false;
+                        return;
+                    }
                 }
             } else {
                 splArgs = new String[args.length - i];
@@ -39,7 +56,11 @@ public class ArgumentParser {
     }
 
     public boolean importLang() {
-        return true;
+        return !noImportLang;
+    }
+
+    public boolean isPrintAst() {
+        return printAst;
     }
 
     public String getMsg() {

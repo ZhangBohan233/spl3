@@ -51,6 +51,7 @@ public class AstBuilder {
             "new", 150,
             "namespace", 150,
             "extends", 150,
+            "->", 4,
             "?", 2,
             "return", 0
     );
@@ -126,6 +127,14 @@ public class AstBuilder {
             stack.add(new Assignment(lineFile));
         } else {
             inner.addAssignment(lineFile);
+        }
+    }
+
+    void addLambdaOperator(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new LambdaOperator(lineFile));
+        } else {
+            inner.addLambdaOperator(lineFile);
         }
     }
 
@@ -220,12 +229,14 @@ public class AstBuilder {
     void addFnRType(LineFile lineFile) {
         if (inner == null) {
             finishPart();
-            if (activeLine.getChildren().size() != 2) {
+            int count = activeLine.getChildren().size();
+            if (count < 2) {
                 System.err.println(activeLine.getChildren());
                 throw new ParseError("Function must have a return type. ", lineFile);
             }
-            FuncDefinition def = (FuncDefinition) activeLine.getChildren().get(0);
-            Node rType = activeLine.getChildren().remove(1);
+//            System.out.println(activeLine);
+            FuncDefinition def = (FuncDefinition) activeLine.getChildren().get(count - 2);
+            Node rType = activeLine.getChildren().remove(count - 1);
             def.setRType(rType);
         } else {
             inner.addFnRType(lineFile);
@@ -254,6 +265,25 @@ public class AstBuilder {
             call.setArguments(arguments);
         } else {
             inner.buildCall();
+        }
+    }
+
+    void addSqrBracketBlock() {
+        if (inner == null) {
+            inner = new AstBuilder();
+        } else {
+            inner.addSqrBracketBlock();
+        }
+    }
+
+    void finishSqrBracketBlock() {
+        if (inner.inner == null) {
+            inner.finishPart();
+            Line line = inner.getLine();
+            inner = null;
+            stack.add(line);
+        } else {
+            inner.finishSqrBracketBlock();
         }
     }
 
@@ -404,6 +434,20 @@ public class AstBuilder {
         }
     }
 
+    void finishFunctionOuterBlock() {
+        if (inner.inner == null) {
+            BlockStmt blockStmt = inner.getBaseBlock();
+            inner = null;
+            assert blockStmt.getLines().size() == 1;
+            Line fd = blockStmt.getLines().get(0);
+            stack.add(fd);
+            finishPart();
+            finishLine();
+        } else {
+            inner.finishFunctionOuterBlock();
+        }
+    }
+
     void addParenthesis() {
         if (inner == null) {
             inner = new AstBuilder();
@@ -418,7 +462,8 @@ public class AstBuilder {
             Line line = inner.getLine();
             inner = null;
             if (line.getChildren().size() != 1)
-                throw new SyntaxError("Parenthesis must have exactly 1 element. ", lineFile);
+                throw new SyntaxError("Parenthesis must have exactly 1 element, got " +
+                        line.getChildren().size() + ". ", lineFile);
             stack.add(line.getChildren().get(0));
         } else {
             inner.buildParenthesis(lineFile);

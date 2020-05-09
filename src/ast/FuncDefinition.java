@@ -15,7 +15,7 @@ import java.util.List;
 
 public class FuncDefinition extends Node {
 
-    private String name;
+    private final String name;
     private TypeRepresent rType;
     private Line parameters;
     private BlockStmt body;

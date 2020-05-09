@@ -21,13 +21,19 @@ public class Main {
     public static void main(String[] args) throws Exception {
         ArgumentParser argumentParser = new ArgumentParser(args);
         if (argumentParser.isAllValid()) {
-            Tokenizer tokenizer = new Tokenizer(argumentParser.getMainSrcFile(), true, argumentParser.importLang());
+            Tokenizer tokenizer = new Tokenizer(
+                    argumentParser.getMainSrcFile(),
+                    true,
+                    argumentParser.importLang()
+            );
             TokenList tokenList = tokenizer.tokenize();
             Parser parser = new Parser(tokenList);
             BlockStmt root = parser.parse();
-            System.out.println("===== Ast =====");
-            System.out.println(root);
-            System.out.println("===== End of ast =====");
+            if (argumentParser.isPrintAst()) {
+                System.out.println("===== Ast =====");
+                System.out.println(root);
+                System.out.println("===== End of ast =====");
+            }
 //            FakeGlobalEnv environment = new FakeGlobalEnv();
 //            root.preprocess(environment);
             Memory memory = new Memory();

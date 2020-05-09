@@ -40,6 +40,7 @@ public class Parser {
         Stack<Integer> moduleBraces = new Stack<>();
         Stack<Integer> classBraces = new Stack<>();
         Stack<Integer> condBraces = new Stack<>();
+        Stack<Integer> funcTypeSqrBrackets = new Stack<>();
 
         for (int i = 0; i < tokens.size(); ++i) {
             Token token = tokens.get(i);
@@ -74,7 +75,6 @@ public class Parser {
                             bracketCount++;
                             if (fnHeader) {  // declaring function
                                 fnHeader = false;
-                                fnRType = true;
                                 paramBrackets.push(bracketCount);
                                 builder.addParameterBracket();
                             } else if (isCall(tokens.get(i - 1))) {
@@ -88,6 +88,7 @@ public class Parser {
                             if (isThisStack(paramBrackets, bracketCount)) {
                                 paramBrackets.pop();
                                 builder.buildParameterBracket();
+                                fnRType = true;
                             } else if (isThisStack(callBrackets, bracketCount)) {
                                 callBrackets.pop();
                                 builder.buildCall();
@@ -135,6 +136,7 @@ public class Parser {
                                 funcBodyBraces.pop();
                                 builder.buildBraceBlock();
                                 builder.finishFunction(lineFile);
+                                builder.finishFunctionOuterBlock();
                             } else if (isThisStack(moduleBraces, braceCount)) {
                                 moduleBraces.pop();
                                 builder.buildBraceBlock();
@@ -163,12 +165,21 @@ public class Parser {
                         case "[":
                             sqrBracketCount++;
 
-                            builder.addIndexing(lineFile);
+                            if (i > 0 && isFuncType(tokens.get(i - 1))) {
+                                funcTypeSqrBrackets.push(sqrBracketCount);
+                                builder.addSqrBracketBlock();
+                            } else {
+                                builder.addIndexing(lineFile);
+                            }
                             break;
                         case "]":
 
-                            builder.buildIndexing();
-
+                            if (isThisStack(funcTypeSqrBrackets, sqrBracketCount)) {
+                                funcTypeSqrBrackets.pop();
+                                builder.finishSqrBracketBlock();
+                            } else {
+                                builder.buildIndexing();
+                            }
                             sqrBracketCount--;
                             break;
                         case ".":
@@ -179,6 +190,9 @@ public class Parser {
                             break;
                         case "=":
                             builder.addAssignment(lineFile);
+                            break;
+                        case "->":
+                            builder.addLambdaOperator(lineFile);
                             break;
                         case "true":
                             builder.addBoolean(true, lineFile);
@@ -240,6 +254,7 @@ public class Parser {
                             } else {
                                 fnName = null;
                             }
+                            builder.addBraceBlock();  // give the function a whole block
                             builder.addFunction(fnName, lineFile);
                             fnHeader = true;
                             break;
@@ -335,7 +350,10 @@ public class Parser {
     private static boolean isCall(Token token) {
         if (token instanceof IdToken) {
             String identifier = ((IdToken) token).getIdentifier();
-            return Tokenizer.StringTypes.isIdentifier(identifier) && !Tokenizer.RESERVED.contains(identifier);
+            if (Tokenizer.StringTypes.isIdentifier(identifier) &&
+                    !Tokenizer.RESERVED.contains(identifier))
+                return true;
+            else return identifier.equals(")") || identifier.equals("]");
         }
         return false;
     }
@@ -346,6 +364,7 @@ public class Parser {
             switch (identifier) {
                 case ";":
                 case "=":
+                case "->":
                 case "(":
                 case "[":
                 case "{":
@@ -358,5 +377,16 @@ public class Parser {
                             Tokenizer.RESERVED.contains(identifier);
             }
         } else return !(token instanceof IntToken) && !(token instanceof FloatToken);
+    }
+
+    private static boolean isFuncType(Token token) {
+        if (token instanceof IdToken) {
+            String identifier = ((IdToken) token).getIdentifier();
+            if (identifier.equals(")")) return true;
+            else if (identifier.equals(":")) return true;
+            else return false;
+        } else {
+            return false;
+        }
     }
 }
