@@ -9,10 +9,7 @@ import interpreter.splObjects.Function;
 import interpreter.splObjects.Instance;
 import interpreter.splObjects.NativeObject;
 import interpreter.splObjects.SplArray;
-import interpreter.types.ClassType;
-import interpreter.types.PointerType;
-import interpreter.types.PrimitiveType;
-import interpreter.types.TypeValue;
+import interpreter.types.*;
 import util.LineFile;
 
 import java.io.InputStream;
@@ -62,6 +59,29 @@ public class SplSystem extends NativeObject {
         }
         Int v = new Int(System.currentTimeMillis());
         return new TypeValue(PrimitiveType.TYPE_INT, v);
+    }
+
+    public TypeValue free(Arguments arguments, Environment environment, LineFile lineFile) {
+        if (arguments.getLine().getChildren().size() != 1) {
+            throw new SplException("System.free(ptr) takes 1 argument, " +
+                    arguments.getLine().getChildren().size() + " given. ", lineFile);
+        }
+        TypeValue tv = arguments.getLine().getChildren().get(0).evaluate(environment);
+        if (tv.getType().isPrimitive())
+            throw new TypeError("System.free(ptr) takes object pointer as argument. ", lineFile);
+
+        PointerType type = (PointerType) tv.getType();
+        Pointer ptr = (Pointer) tv.getValue();
+        int freeLength;
+        if (type.getPointerType() == PointerType.ARRAY_TYPE) {
+            SplArray array = (SplArray) environment.getMemory().get(ptr);
+            freeLength = array.length + 1;
+        } else {
+            freeLength = 1;
+        }
+        environment.getMemory().free(ptr, freeLength);
+
+        return TypeValue.VOID;
     }
 
     private String getPrintString(Arguments arguments, Environment environment, LineFile lineFile) {

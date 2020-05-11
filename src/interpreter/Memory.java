@@ -1,5 +1,6 @@
 package interpreter;
 
+import interpreter.env.Environment;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Function;
 import interpreter.splObjects.SplCallable;
@@ -13,7 +14,7 @@ public class Memory {
     private static final int defaultHeapSize = 256;
     private int heapSize;
 
-    private SplObject[] heap;
+    private final SplObject[] heap;
 
     private AvailableList available;
 
@@ -54,6 +55,17 @@ public class Memory {
         return heap[addr];
     }
 
+    public void free(Pointer ptr, int length) {
+        System.out.println(ptr);
+        System.out.println(available);
+        available.addAva(ptr.getPtr(), length);
+        System.out.println(available);
+    }
+
+    public void gc(Environment env) {
+
+    }
+
     public Pointer allocateFunction(SplCallable function) {
         Pointer ptr = allocate(1);
         set(ptr, function);
@@ -82,7 +94,7 @@ public class Memory {
 
     private static class AvailableList {
 
-        private LnkNode head;
+        private final LnkNode head;
 
         AvailableList(int size) {
             LnkNode last = null;

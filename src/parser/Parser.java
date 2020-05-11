@@ -9,7 +9,7 @@ import java.util.Stack;
 
 public class Parser {
 
-    private List<Token> tokens;
+    private final List<Token> tokens;
 
     public Parser(TokenList tokenList) {
         tokens = tokenList.getTokens();

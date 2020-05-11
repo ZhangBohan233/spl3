@@ -45,4 +45,9 @@ public abstract class NativeFunction extends SplCallable {
 
         return callFunc(arguments, callingEnv);
     }
+
+    @Override
+    public String toString() {
+        return "NativeFunction{" + name + "}";
+    }
 }
