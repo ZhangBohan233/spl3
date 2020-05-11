@@ -56,10 +56,10 @@ public class Memory {
     }
 
     public void free(Pointer ptr, int length) {
-        System.out.println(ptr);
-        System.out.println(available);
+//        System.out.println(ptr);
+//        System.out.println(available);
         available.addAva(ptr.getPtr(), length);
-        System.out.println(available);
+//        System.out.println(available);
     }
 
     public void gc(Environment env) {
