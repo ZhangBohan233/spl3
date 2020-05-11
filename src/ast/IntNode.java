@@ -17,9 +17,7 @@ public class IntNode extends LiteralNode {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
-
+    protected TypeValue internalEval(Environment env) {
         return new TypeValue(PrimitiveType.TYPE_INT, new Int(value));
     }
 

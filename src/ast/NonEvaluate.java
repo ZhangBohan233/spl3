@@ -12,7 +12,7 @@ public abstract class NonEvaluate extends Node {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         throw new SplException("Not evaluate-able. ", getLineFile());
     }
 }

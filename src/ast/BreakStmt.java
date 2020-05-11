@@ -12,7 +12,7 @@ public class BreakStmt extends LeafNode {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         env.breakLoop();
         return null;
     }

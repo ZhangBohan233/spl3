@@ -17,8 +17,7 @@ public class Dot extends BinaryExpr implements TypeRepresent {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         TypeValue leftTv = left.evaluate(env);
         if (!leftTv.getType().isPrimitive()) {

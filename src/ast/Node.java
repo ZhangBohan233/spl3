@@ -17,7 +17,19 @@ public abstract class Node {
         this.lineFile = lineFile;
     }
 
-    public abstract TypeValue evaluate(Environment env);
+    public final TypeValue evaluate(Environment env) {
+        // pre
+        if (env.interrupted()) return TypeValue.INTERRUPTED;
+
+        // essential
+        TypeValue typeValue = internalEval(env);
+
+        // post
+
+        return typeValue;
+    }
+
+    protected abstract TypeValue internalEval(Environment env);
 
     /**
      * Preprocess this node and return the new node of this

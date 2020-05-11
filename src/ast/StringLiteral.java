@@ -26,8 +26,7 @@ public class StringLiteral extends LiteralNode {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         // create spl char array
         TypeValue arrTv = createCharArrayAndAllocate(charArray, env, getLineFile());

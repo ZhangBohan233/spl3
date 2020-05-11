@@ -12,7 +12,7 @@ public class ContinueStmt extends LeafNode {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         env.pauseLoop();
         return null;
     }

@@ -28,8 +28,7 @@ public class FuncCall extends Node {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         TypeValue leftTv = callObj.evaluate(env);
         if (!(leftTv.getType() instanceof CallableType)) {

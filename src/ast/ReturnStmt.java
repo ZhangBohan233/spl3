@@ -12,9 +12,7 @@ public class ReturnStmt extends UnaryExpr {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
-
+    protected TypeValue internalEval(Environment env) {
         env.setReturn(value.evaluate(env));
         return null;
     }

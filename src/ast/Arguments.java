@@ -29,7 +29,7 @@ public class Arguments extends Node {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         return null;
     }
 

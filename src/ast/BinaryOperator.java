@@ -24,8 +24,7 @@ public class BinaryOperator extends BinaryExpr {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         if (type == NUMERIC) {
             TypeValue leftTv = left.evaluate(env);

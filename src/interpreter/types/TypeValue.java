@@ -11,6 +11,7 @@ public class TypeValue {
     public static final TypeValue POINTER_NULL = new TypeValue(NullType.NULL_TYPE, Pointer.NULL_PTR);
     public static final TypeValue BOOL_TRUE = new TypeValue(PrimitiveType.TYPE_BOOLEAN, Bool.TRUE);
     public static final TypeValue BOOL_FALSE = new TypeValue(PrimitiveType.TYPE_BOOLEAN, Bool.FALSE);
+    public static final TypeValue INTERRUPTED = new TypeValue(PrimitiveType.TYPE_VOID, Pointer.NULL_PTR);
 
     private final Type type;
     private Primitive value;

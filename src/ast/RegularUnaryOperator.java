@@ -23,7 +23,7 @@ public class RegularUnaryOperator extends UnaryExpr {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         TypeValue valueTv = value.evaluate(env);
         if (type == NUMERIC) {
             if (valueTv.getType().equals(PrimitiveType.TYPE_INT)) {

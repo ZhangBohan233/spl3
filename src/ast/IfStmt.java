@@ -40,7 +40,7 @@ public class IfStmt extends ConditionalStmt {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         Bool bool = Bool.evalBoolean(condition, env, getLineFile());
         BlockEnvironment blockEnvironment;
         if (bool.booleanValue()) {

@@ -24,7 +24,7 @@ public class ForLoopStmt extends ConditionalStmt {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         LoopTitleEnvironment titleEnv = new LoopTitleEnvironment(env);
         BlockEnvironment bodyEnv = new BlockEnvironment(titleEnv);
 
@@ -47,7 +47,7 @@ public class ForLoopStmt extends ConditionalStmt {
     private void forLoop3Parts(Line init, Line end, Line step, Environment parentEnv,
                                LoopTitleEnvironment titleEnv, BlockEnvironment bodyEnv) {
         init.evaluate(titleEnv);
-        Bool bool = Bool.evalBoolean(condition, titleEnv, getLineFile());
+        Bool bool = Bool.evalBoolean(end, titleEnv, getLineFile());
         while (bool.value) {
             bodyEnv.invalidate();
             bodyBlock.evaluate(bodyEnv);

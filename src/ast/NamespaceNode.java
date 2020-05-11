@@ -14,8 +14,7 @@ public class NamespaceNode extends UnaryExpr {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         TypeValue moduleTv = value.evaluate(env);
         SplModule module = (SplModule) env.getMemory().get((Pointer) moduleTv.getValue());

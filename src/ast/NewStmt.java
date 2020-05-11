@@ -20,8 +20,7 @@ public class NewStmt extends UnaryExpr {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         return initClass(value, env, env, getLineFile());
     }

@@ -42,8 +42,7 @@ public class BlockStmt extends Node {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         for (Line line : children) {
             line.evaluate(env);

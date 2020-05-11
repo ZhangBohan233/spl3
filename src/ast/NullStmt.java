@@ -12,7 +12,7 @@ public class NullStmt extends LeafNode {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         return TypeValue.POINTER_NULL;
     }
 

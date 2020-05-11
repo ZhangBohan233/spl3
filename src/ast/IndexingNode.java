@@ -36,8 +36,7 @@ public class IndexingNode extends Node implements TypeRepresent {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         TypeValue callRes = getCallObj().evaluate(env);
         List<Node> arguments = getArgs().getChildren();

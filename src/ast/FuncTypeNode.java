@@ -18,7 +18,7 @@ public class FuncTypeNode extends BinaryExpr implements TypeRepresent {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         return null;
     }
 

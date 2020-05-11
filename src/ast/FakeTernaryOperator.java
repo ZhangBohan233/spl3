@@ -15,7 +15,7 @@ public class FakeTernaryOperator extends BinaryExpr {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         if (operator.equals("?")) {
             if (!(right instanceof Declaration)) throw new SyntaxError(
                     "Usage: 'expr ? if true : if false'. ", getLineFile()

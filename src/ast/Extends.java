@@ -13,7 +13,7 @@ public class Extends extends UnaryExpr {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         throw new ParseError("Extend node not evaluate-able. ", getLineFile());
     }
 

@@ -20,7 +20,7 @@ public class BoolStmt extends LiteralNode {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         return typeValue;
     }
 

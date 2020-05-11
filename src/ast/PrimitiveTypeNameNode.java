@@ -38,7 +38,7 @@ public class PrimitiveTypeNameNode extends LeafNode implements TypeRepresent {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
+    protected TypeValue internalEval(Environment env) {
         // Returns the conversion function
         return env.get(toString(), getLineFile());
     }

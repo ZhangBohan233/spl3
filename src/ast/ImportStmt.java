@@ -11,7 +11,7 @@ import util.LineFile;
 
 public class ImportStmt extends Node {
 
-    private String importName;
+    private final String importName;
     private BlockStmt content;
 
     public ImportStmt(String importName, LineFile lineFile) {
@@ -25,8 +25,7 @@ public class ImportStmt extends Node {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         ModuleEnvironment moduleScope = new ModuleEnvironment(env);
         content.evaluate(moduleScope);

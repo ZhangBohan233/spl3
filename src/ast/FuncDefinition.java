@@ -41,8 +41,7 @@ public class FuncDefinition extends Node {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         List<Declaration> params = new ArrayList<>();
         List<Type> paramTypes = new ArrayList<>();

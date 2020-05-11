@@ -57,8 +57,7 @@ public class ClassStmt extends Node {
     }
 
     @Override
-    public TypeValue evaluate(Environment env) {
-        if (env.interrupted()) return null;
+    protected TypeValue internalEval(Environment env) {
 
         validateExtending();
 
