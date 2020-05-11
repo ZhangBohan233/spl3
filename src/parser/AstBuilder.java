@@ -130,11 +130,11 @@ public class AstBuilder {
         }
     }
 
-    void addLambdaOperator(LineFile lineFile) {
+    void addFuncTypeNode(LineFile lineFile) {
         if (inner == null) {
-            stack.add(new LambdaOperator(lineFile));
+            stack.add(new FuncTypeNode(lineFile));
         } else {
-            inner.addLambdaOperator(lineFile);
+            inner.addFuncTypeNode(lineFile);
         }
     }
 

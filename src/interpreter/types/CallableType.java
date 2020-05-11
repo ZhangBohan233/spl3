@@ -7,12 +7,22 @@ import java.util.Objects;
 
 public class CallableType extends PointerType {
 
-    private List<Type> paramTypes;
+    private final List<Type> paramTypes;
 
-    private Type rType;
+    private final Type rType;
 
     public CallableType(List<Type> paramTypes, Type rType) {
         this.paramTypes = paramTypes;
+        this.rType = rType;
+    }
+
+    /**
+     * Constructor for native function.
+     *
+     * @param rType the returning type
+     */
+    public CallableType(Type rType) {
+        this.paramTypes = null;
         this.rType = rType;
     }
 

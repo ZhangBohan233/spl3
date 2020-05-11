@@ -3,6 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.splObjects.Function;
 import interpreter.env.Environment;
+import interpreter.splObjects.SplCallable;
 import interpreter.types.TypeValue;
 import interpreter.primitives.Pointer;
 import interpreter.types.CallableType;
@@ -34,7 +35,7 @@ public class FuncCall extends Node {
         if (!(leftTv.getType() instanceof CallableType)) {
             throw new TypeError("Type '" + leftTv.getType() + "' is not callable. ", getLineFile());
         }
-        Function function = (Function) env.getMemory().get((Pointer) leftTv.getValue());
+        SplCallable function = (SplCallable) env.getMemory().get((Pointer) leftTv.getValue());
 
         return function.call(arguments, env);
     }

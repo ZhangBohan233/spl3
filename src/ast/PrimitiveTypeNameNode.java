@@ -11,7 +11,7 @@ import util.LineFile;
 
 public class PrimitiveTypeNameNode extends LeafNode implements TypeRepresent {
 
-    private PrimitiveType type;
+    private final PrimitiveType type;
 
     public PrimitiveTypeNameNode(String typeName, LineFile lineFile) {
         super(lineFile);
@@ -39,7 +39,8 @@ public class PrimitiveTypeNameNode extends LeafNode implements TypeRepresent {
 
     @Override
     public TypeValue evaluate(Environment env) {
-        throw new SplException("Type self is not evaluate-able. ", getLineFile());
+        // Returns the conversion function
+        return env.get(toString(), getLineFile());
     }
 
     @Override

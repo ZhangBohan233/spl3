@@ -11,9 +11,9 @@ import util.LineFile;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LambdaOperator extends BinaryExpr implements TypeRepresent {
+public class FuncTypeNode extends BinaryExpr implements TypeRepresent {
 
-    public LambdaOperator(LineFile lineFile) {
+    public FuncTypeNode(LineFile lineFile) {
         super("->", lineFile);
     }
 

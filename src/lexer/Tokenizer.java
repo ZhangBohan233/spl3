@@ -58,9 +58,9 @@ public class Tokenizer {
     );
 
     public static final Set<String> RESERVED = Set.of(
-            "class", "fn", "if", "else", "new", "extends", "return", "break", "continue",
-            "true", "false", "null", "operator", "while", "for", "import", "namespace",
-            "abstract", "const", "var", "assert", "as", "super", "this"
+            "class", "fn", "if", "else", "new", "extends", "implements", "return", "break",
+            "continue", "true", "false", "null", "while", "for", "import", "namespace",
+            "abstract", "const", "var", "assert", "as", "super", "this", "lambda"
     );
 
     private static final String IMPORT_USAGE = "Usage of import: 'import \"path\"' or 'import \"path\" as <module>' " +

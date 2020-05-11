@@ -41,4 +41,8 @@ public class PrimitiveType implements Type {
     public String toString() {
         return Primitive.typeToString(type);
     }
+
+    public boolean isIntLike() {
+        return type == Primitive.INT || type == Primitive.CHAR;
+    }
 }

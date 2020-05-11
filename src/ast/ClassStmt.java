@@ -16,10 +16,10 @@ import java.util.List;
 
 public class ClassStmt extends Node {
 
-    private String className;
+    private final String className;
     private Implements implementations;
     private TypeRepresent superclass;
-    private boolean isInterface;
+    private final boolean isInterface;
     private boolean isAbstract;
     private BlockStmt body;
 

@@ -192,7 +192,7 @@ public class Parser {
                             builder.addAssignment(lineFile);
                             break;
                         case "->":
-                            builder.addLambdaOperator(lineFile);
+                            builder.addFuncTypeNode(lineFile);
                             break;
                         case "true":
                             builder.addBoolean(true, lineFile);
@@ -243,6 +243,9 @@ public class Parser {
                             break;
                         case "continue":
                             builder.addContinue(lineFile);
+                            break;
+                        case "lambda":
+                            System.out.println(123);
                             break;
                         case "fn":
                             Token fnNameTk = tokens.get(i + 1);

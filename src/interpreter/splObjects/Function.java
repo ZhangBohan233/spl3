@@ -12,23 +12,23 @@ import util.LineFile;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Function extends SplObject {
+public class Function extends SplCallable {
 
     /**
      * The environment where this function is defined
      */
-    private Environment definitionEnv;
+    private final Environment definitionEnv;
 
-    private List<Declaration> params;
-    private CallableType funcType;
-    private BlockStmt body;
-    private LineFile lineFile;
+    private final List<Declaration> params;
+    private final BlockStmt body;
+    private final LineFile lineFile;
 
     public Function(BlockStmt body, List<Declaration> params, CallableType funcType, Environment definitionEnv,
                     LineFile lineFile) {
+        super(funcType);
+
         this.body = body;
         this.params = params;
-        this.funcType = funcType;
         this.definitionEnv = definitionEnv;
         this.lineFile = lineFile;
     }

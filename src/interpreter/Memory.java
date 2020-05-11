@@ -2,6 +2,7 @@ package interpreter;
 
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Function;
+import interpreter.splObjects.SplCallable;
 import interpreter.splObjects.SplObject;
 
 import java.util.Arrays;
@@ -53,7 +54,7 @@ public class Memory {
         return heap[addr];
     }
 
-    public Pointer allocateFunction(Function function) {
+    public Pointer allocateFunction(SplCallable function) {
         Pointer ptr = allocate(1);
         set(ptr, function);
         return ptr;

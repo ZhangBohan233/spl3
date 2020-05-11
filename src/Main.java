@@ -1,10 +1,13 @@
 import ast.*;
 import interpreter.Memory;
+import interpreter.env.Environment;
 import interpreter.env.GlobalEnvironment;
 import interpreter.invokes.SplSystem;
+import interpreter.primitives.Int;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Function;
 import interpreter.splObjects.Instance;
+import interpreter.splObjects.NativeFunction;
 import interpreter.splObjects.SplArray;
 import interpreter.types.*;
 import lexer.TokenList;
@@ -52,6 +55,8 @@ public class Main {
     }
 
     private static void initNatives(GlobalEnvironment globalEnvironment) {
+        initNativeFunctions(globalEnvironment);
+
         SplSystem system = new SplSystem();
 
         Memory memory = globalEnvironment.getMemory();
@@ -61,6 +66,26 @@ public class Main {
                 "System",
                 new TypeValue(new NativeType(SplSystem.class), sysPtr),
                 LineFile.LF_INTERPRETER);
+    }
+
+    private static void initNativeFunctions(GlobalEnvironment ge) {
+        NativeFunction toInt = new NativeFunction("int",
+                new CallableType(PrimitiveType.TYPE_INT) , 1) {
+            @Override
+            protected TypeValue callFunc(Arguments arguments, Environment callingEnv) {
+                TypeValue arg = arguments.getLine().getChildren().get(0).evaluate(callingEnv);
+                if (arg.getType().isPrimitive()) {
+                    return new TypeValue(PrimitiveType.TYPE_INT, new Int(arg.getValue().intValue()));
+                } else {
+                    throw new TypeError("Cannot convert pointer type to int. ");
+                }
+            }
+        };
+
+        Memory memory = ge.getMemory();
+        Pointer ptrInt = memory.allocateFunction(toInt);
+
+        ge.defineFunction("int", new TypeValue(toInt.getFuncType(), ptrInt), LineFile.LF_INTERPRETER);
     }
 
     private static void callMain(String[] args, GlobalEnvironment globalEnvironment) {
@@ -75,11 +100,6 @@ public class Main {
 
             Function mainFunc = (Function) globalEnvironment.getMemory().get((Pointer) mainTv.getValue());
             TypeValue rtn = mainFunc.call(splArg, globalEnvironment, LineFile.LF_INTERPRETER);
-
-//            FuncCall mainCall = new FuncCall(LineFile.LF_INTERPRETER);
-//            mainCall.setCallObj(new NameNode("main", LineFile.LF_INTERPRETER));
-//            mainCall.setArguments(splArg);
-//            TypeValue rtn = mainCall.evaluate(globalEnvironment);
 
             System.out.println("Process finished with exit value " + rtn.getValue());
         }

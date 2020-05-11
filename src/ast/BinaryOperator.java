@@ -1,15 +1,14 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
-import interpreter.primitives.Bool;
-import interpreter.primitives.Pointer;
+import interpreter.primitives.*;
 import interpreter.types.*;
 import interpreter.SplException;
 import interpreter.env.Environment;
-import interpreter.primitives.Int;
-import interpreter.primitives.Primitive;
 import lexer.SyntaxError;
 import util.LineFile;
+
+import java.util.Set;
 
 public class BinaryOperator extends BinaryExpr {
 
@@ -31,40 +30,45 @@ public class BinaryOperator extends BinaryExpr {
         if (type == NUMERIC) {
             TypeValue leftTv = left.evaluate(env);
             TypeValue rightTv = right.evaluate(env);
-            if (leftTv.getType().equals(PrimitiveType.TYPE_INT)) {
-                Primitive result;
-                switch (operator) {
-                    case "+":
-                        result = new Int(leftTv.getValue().intValue() + rightTv.getValue().intValue());
-                        break;
-                    case "-":
-                        result = new Int(leftTv.getValue().intValue() - rightTv.getValue().intValue());
-                        break;
-                    case "*":
-                        result = new Int(leftTv.getValue().intValue() * rightTv.getValue().intValue());
-                        break;
-                    case "/":
-                        result = new Int(leftTv.getValue().intValue() / rightTv.getValue().intValue());
-                        break;
-                    case "%":
-                        result = new Int(leftTv.getValue().intValue() % rightTv.getValue().intValue());
-                        break;
-                    default:
-                        throw new SyntaxError("Unsupported binary operator '" + operator + "' between " +
-                                leftTv.getType() + " and " + rightTv.getType() + ". ", getLineFile());
-                }
+            if (!leftTv.getType().isPrimitive() || !rightTv.getType().isPrimitive())
+                throw new TypeError("Pointer type arithmetic is not supported. ",
+                        getLineFile());
+            PrimitiveType lt = (PrimitiveType) leftTv.getType();
+            PrimitiveType rt = (PrimitiveType) rightTv.getType();
+
+            if (lt.isIntLike()) {
+                Primitive result = new Int(integerArithmetic(
+                        operator,
+                        leftTv.getValue().intValue(),
+                        rightTv.getValue().intValue(),
+                        rt.isIntLike(),
+                        getLineFile()
+                ));
                 return new TypeValue(PrimitiveType.TYPE_INT, result);
+            } else if (lt.equals(PrimitiveType.TYPE_FLOAT)) {
+                Primitive result = new SplFloat(floatArithmetic(
+                        operator,
+                        leftTv.getValue().floatValue(),
+                        rightTv.getValue().floatValue(),
+                        getLineFile()
+                ));
+                return new TypeValue(PrimitiveType.TYPE_FLOAT, result);
+            } else {
+                throw new TypeError();
             }
         } else if (type == LOGICAL) {
             TypeValue leftTv = left.evaluate(env);
             TypeValue rightTv = right.evaluate(env);
             boolean result;
             if (leftTv.getType().isPrimitive()) {
-                if (leftTv.getType().equals(PrimitiveType.TYPE_INT) ||
-                        leftTv.getType().equals(PrimitiveType.TYPE_CHAR)) {
+                if (!rightTv.getType().isPrimitive())
+                    throw new TypeError("Primitive type cannot compare to pointer type. ",
+                            getLineFile());
+                PrimitiveType lt = (PrimitiveType) leftTv.getType();
+                PrimitiveType rt = (PrimitiveType) rightTv.getType();
+                if (lt.isIntLike()) {
                     long leftV = leftTv.getValue().intValue();
-                    if (rightTv.getType().equals(PrimitiveType.TYPE_INT) ||
-                            rightTv.getType().equals(PrimitiveType.TYPE_CHAR)) {
+                    if (rt.isIntLike()) {
                         long rightV = rightTv.getValue().intValue();
                         result = integerLogical(operator, leftV, rightV, getLineFile());
                     } else if (rightTv.getType().equals(PrimitiveType.TYPE_FLOAT)) {
@@ -131,6 +135,52 @@ public class BinaryOperator extends BinaryExpr {
             return fto.evaluate(env);
         }
         throw new SyntaxError("Unexpected error. ", getLineFile());
+    }
+
+    private static long integerArithmetic(String op, long l, long r, boolean rIsInt, LineFile lineFile) {
+        switch (op) {
+            case "+":
+                return l + r;
+            case "-":
+                return l - r;
+            case "*":
+                return l * r;
+            case "/":
+                return l / r;
+            case "%":
+                return l % r;
+            case "<<":
+                if (rIsInt) return l << r;
+            case ">>":
+                if (rIsInt) return l >> r;
+            case ">>>":
+                if (rIsInt) return l >>> r;
+            case "&":
+                if (rIsInt) return l & r;
+            case "|":
+                if (rIsInt) return l | r;
+            case "^":
+                if (rIsInt) return l ^ r;
+            default:
+                throw new TypeError("Unsupported operation '" + op + "'. ", lineFile);
+        }
+    }
+
+    private static double floatArithmetic(String op, double l, double r,  LineFile lineFile) {
+        switch (op) {
+            case "+":
+                return l + r;
+            case "-":
+                return l - r;
+            case "*":
+                return l * r;
+            case "/":
+                return l / r;
+            case "%":
+                return l % r;
+            default:
+                throw new TypeError("Unsupported operation '" + op + "'. ", lineFile);
+        }
     }
 
     private static boolean integerLogical(String op, long l, long r, LineFile lineFile) {
