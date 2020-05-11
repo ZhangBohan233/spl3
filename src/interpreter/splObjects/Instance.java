@@ -57,7 +57,7 @@ public class Instance extends SplObject {
         }
 
         Instance instance = new Instance(clazzType, instanceEnv);
-        Pointer instancePtr = outerEnv.getMemory().allocate(1);
+        Pointer instancePtr = outerEnv.getMemory().allocate(1, instanceEnv);
         outerEnv.getMemory().set(instancePtr, instance);
 
         TypeValue instanceTv = new TypeValue(clazzType, instancePtr);

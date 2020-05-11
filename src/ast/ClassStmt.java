@@ -81,7 +81,7 @@ public class ClassStmt extends Node {
         // TODO: check implementations
 
         SplClass clazz = new SplClass(className, superclassPointer, interfacePointers, body, env);
-        Pointer clazzPtr = env.getMemory().allocate(1);
+        Pointer clazzPtr = env.getMemory().allocate(1, env);
         env.getMemory().set(clazzPtr, clazz);
         ClassType clazzType = new ClassType(clazzPtr);
 

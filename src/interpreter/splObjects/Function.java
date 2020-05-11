@@ -1,6 +1,7 @@
 package interpreter.splObjects;
 
 import ast.*;
+import interpreter.Memory;
 import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.env.FunctionEnvironment;
@@ -45,6 +46,7 @@ public class Function extends SplCallable {
     }
 
     public TypeValue call(TypeValue[] evaluatedArgs, Environment callingEnv, LineFile argLineFile) {
+        callingEnv.getMemory().increaseStack();
         FunctionEnvironment scope = new FunctionEnvironment(definitionEnv);
         if (evaluatedArgs.length != params.size()) {
             throw new SplException("Arguments length does not match parameters. ", argLineFile);
@@ -63,6 +65,7 @@ public class Function extends SplCallable {
             throw new TypeError("Declared return type: " + funcType.getRType() + ", actual returning " +
                     "type: " + rtnVal.getType() + ". ", argLineFile);
         }
+        callingEnv.getMemory().decreaseStack();
 
         return rtnVal;
     }

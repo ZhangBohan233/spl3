@@ -84,6 +84,28 @@ public class SplSystem extends NativeObject {
         return TypeValue.VOID;
     }
 
+    public TypeValue gc(Arguments arguments, Environment environment, LineFile lineFile) {
+        if (arguments.getLine().getChildren().size() != 0) {
+            throw new SplException("System.gc() takes 0 arguments, " +
+                    arguments.getLine().getChildren().size() + " given. ", lineFile);
+        }
+
+        environment.getMemory().gc(environment);
+
+        return TypeValue.VOID;
+    }
+
+    public TypeValue memoryView(Arguments arguments, Environment environment, LineFile lineFile) {
+        if (arguments.getLine().getChildren().size() != 0) {
+            throw new SplException("System.memoryView() takes 0 arguments, " +
+                    arguments.getLine().getChildren().size() + " given. ", lineFile);
+        }
+
+        stdout.println("Memory: " + environment.getMemory().memoryView());
+        stdout.println("Available: " + environment.getMemory().availableView());
+        return TypeValue.VOID;
+    }
+
     private String getPrintString(Arguments arguments, Environment environment, LineFile lineFile) {
         TypeValue[] args = arguments.evalArgs(environment);
 

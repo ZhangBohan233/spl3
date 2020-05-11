@@ -3,6 +3,9 @@ package interpreter.env;
 import interpreter.Memory;
 import interpreter.types.TypeValue;
 import util.LineFile;
+import util.Utilities;
+
+import java.util.Map;
 
 public abstract class SubAbstractEnvironment extends Environment {
 

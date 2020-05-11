@@ -6,13 +6,13 @@ import interpreter.types.Type;
 import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
 import util.LineFile;
+import util.Utilities;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Environment {
 
-    protected Environment outer;
+    public final Environment outer;
     protected Memory memory;
 
     protected Map<String, TypeValue> variables = new HashMap<>();
@@ -40,6 +40,14 @@ public abstract class Environment {
     public abstract void pauseLoop();
 
     public abstract void invalidate();
+
+    public Set<TypeValue> attributes() {
+        Set<TypeValue> set = new HashSet<>();
+        set.addAll(constants.values());
+        set.addAll(variables.values());
+
+        return set;
+    }
 
     public void defineVar(String name, Type type, LineFile lineFile) {
         if (innerGet(name, true, true, lineFile) != null)

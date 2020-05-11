@@ -31,7 +31,7 @@ public class ImportStmt extends Node {
         content.evaluate(moduleScope);
         SplModule module = new SplModule(importName, moduleScope);
 
-        Pointer ptr = env.getMemory().allocate(1);
+        Pointer ptr = env.getMemory().allocate(1, moduleScope);
         env.getMemory().set(ptr, module);
 
         ModuleType moduleType = new ModuleType();

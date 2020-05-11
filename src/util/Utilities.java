@@ -1,6 +1,7 @@
 package util;
 
 import interpreter.primitives.Int;
+import interpreter.types.TypeValue;
 
 import java.util.*;
 
@@ -50,6 +51,13 @@ public class Utilities {
     public static Map<String, Integer> mergeMaps(Map<String, Integer>... maps) {
         Map<String, Integer> res = new HashMap<>();
         for (Map<String, Integer> m : maps) res.putAll(m);
+        return res;
+    }
+
+    @SafeVarargs
+    public static Map<String, TypeValue> mergeMapsTV(Map<String, TypeValue>... maps) {
+        Map<String, TypeValue> res = new HashMap<>();
+        for (Map<String, TypeValue> m : maps) res.putAll(m);
         return res;
     }
 }

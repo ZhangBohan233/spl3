@@ -101,7 +101,6 @@ public class Tokenizer {
 
             lineNum++;
         }
-        if (main) System.out.println(tokens);
         return new TokenList(tokens);
     }
 

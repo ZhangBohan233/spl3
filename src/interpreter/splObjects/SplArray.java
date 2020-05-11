@@ -37,16 +37,17 @@ public class SplArray extends SplObject {
         return "SplArray{" + length + '}';
     }
 
-    public static Pointer createArray(ArrayType arrayType, List<Integer> dimensions, Memory memory) {
-        return createArray(arrayType.getEleType(), dimensions, memory, 0);
+    public static Pointer createArray(ArrayType arrayType, List<Integer> dimensions, Environment env) {
+        return createArray(arrayType.getEleType(), dimensions, env, 0);
     }
 
-    private static Pointer createArray(Type eleType, List<Integer> dimensions, Memory memory, int proceedingIndex) {
+    private static Pointer createArray(Type eleType, List<Integer> dimensions, Environment env, int proceedingIndex) {
         int arrSize = dimensions.get(proceedingIndex);
         if (arrSize == -1) {
             return Pointer.NULL_PTR;
         } else {
-            Pointer arrPtr = memory.allocate(arrSize + 1);
+            Memory memory = env.getMemory();
+            Pointer arrPtr = memory.allocate(arrSize + 1, env);
             SplArray arrIns = new SplArray(arrSize);
             memory.set(arrPtr, arrIns);
             if (proceedingIndex == dimensions.size() - 1) {
@@ -56,7 +57,7 @@ public class SplArray extends SplObject {
                 for (int i = 0; i < arrSize; ++i) {
                     Pointer innerArrPtr = createArray(((ArrayType) eleType).getEleType(),
                             dimensions,
-                            memory,
+                            env,
                             proceedingIndex + 1);
                     memory.set(firstEleAddr + i, new ReadOnlyPrimitiveWrapper(innerArrPtr));
                 }

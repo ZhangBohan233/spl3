@@ -69,7 +69,7 @@ public class NewStmt extends UnaryExpr {
         ArrayType arrayType = (ArrayType) node.evalType(classDefEnv);
         List<Integer> dimensions = new ArrayList<>();
         traverseArrayCreation(node, dimensions, callEnv, lineFile);
-        Pointer arrPtr = SplArray.createArray(arrayType, dimensions, callEnv.getMemory());
+        Pointer arrPtr = SplArray.createArray(arrayType, dimensions, callEnv);
 
         return new TypeValue(arrayType, arrPtr);
     }

@@ -37,7 +37,7 @@ public class StringLiteral extends LiteralNode {
 
     public static TypeValue createCharArrayAndAllocate(char[] charArray, Environment env, LineFile lineFile) {
         ArrayType arrayType = new ArrayType(PrimitiveType.TYPE_CHAR);
-        Pointer arrPtr = SplArray.createArray(arrayType, List.of(charArray.length), env.getMemory());
+        Pointer arrPtr = SplArray.createArray(arrayType, List.of(charArray.length), env);
         for (int i = 0; i < charArray.length; ++i) {
             Char c = new Char(charArray[i]);
             SplArray.setItemAtIndex(

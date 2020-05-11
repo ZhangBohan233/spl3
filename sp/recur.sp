@@ -9,7 +9,7 @@ fn fib(n: int) int {
 fn main() int {
     t0: int = System.clock();
 
-    f: int = fib(8);
+    f: int = fib(30);
     System.println(f);
 
     t1: int = System.clock();

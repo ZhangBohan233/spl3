@@ -30,6 +30,9 @@ public class Main {
                     argumentParser.importLang()
             );
             TokenList tokenList = tokenizer.tokenize();
+            if (argumentParser.isPrintTokens()) {
+                System.out.println(tokenList);
+            }
             Parser parser = new Parser(tokenList);
             BlockStmt root = parser.parse();
             if (argumentParser.isPrintAst()) {
@@ -47,8 +50,11 @@ public class Main {
 
             callMain(argumentParser.getSplArgs(), globalEnvironment);
 
-            globalEnvironment.printVars();
-            memory.printMemory();
+//            globalEnvironment.printVars();
+
+            if (argumentParser.isPrintMem()) {
+                memory.printMemory();
+            }
         } else {
             System.out.println(argumentParser.getMsg());
         }
@@ -60,7 +66,7 @@ public class Main {
         SplSystem system = new SplSystem();
 
         Memory memory = globalEnvironment.getMemory();
-        Pointer sysPtr = memory.allocateObject(system);
+        Pointer sysPtr = memory.allocateObject(system, globalEnvironment);
 
         globalEnvironment.defineConstAndSet(
                 "System",
@@ -83,7 +89,7 @@ public class Main {
         };
 
         Memory memory = ge.getMemory();
-        Pointer ptrInt = memory.allocateFunction(toInt);
+        Pointer ptrInt = memory.allocateFunction(toInt, ge);
 
         ge.defineFunction("int", new TypeValue(toInt.getFuncType(), ptrInt), LineFile.LF_INTERPRETER);
     }
@@ -109,7 +115,7 @@ public class Main {
         TypeValue stringTv = globalEnvironment.get("String", LineFile.LF_INTERPRETER);
         ClassType stringType = (ClassType) stringTv.getType();
         ArrayType type = new ArrayType(stringType);
-        Pointer argPtr = SplArray.createArray(type, List.of(args.length), globalEnvironment.getMemory());
+        Pointer argPtr = SplArray.createArray(type, List.of(args.length), globalEnvironment);
         TypeValue arrTv = new TypeValue(type, argPtr);
         for (int i = 0; i < args.length; ++i) {
             // create spl char array

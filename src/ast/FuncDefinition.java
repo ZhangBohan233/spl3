@@ -59,7 +59,7 @@ public class FuncDefinition extends Node {
         CallableType funcType = new CallableType(paramTypes, rtype);
 
         Function function = new Function(body, params, funcType, env, getLineFile());
-        Pointer funcPtr = env.getMemory().allocateFunction(function);
+        Pointer funcPtr = env.getMemory().allocateFunction(function, env);
 
         TypeValue funcTv = new TypeValue(funcType, funcPtr);
         env.defineFunction(name, funcTv, getLineFile());

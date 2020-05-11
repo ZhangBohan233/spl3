@@ -7,6 +7,8 @@ public class ArgumentParser {
     private boolean allValid;
     private boolean noImportLang;
     private boolean printAst;
+    private boolean printTokens;
+    private boolean printMem;
     private String msg;
     private String[] splArgs;
 
@@ -20,11 +22,20 @@ public class ArgumentParser {
                 String s = args[i];
                 if (s.length() > 0 && s.charAt(0) == '-') {
                     switch (s) {
-                        case "-ni":
+                        case "-nl":
+                        case "--noLang":
                             noImportLang = true;
                             break;
                         case "-ast":
                             printAst = true;
+                            break;
+                        case "-tk":
+                        case "--tokens":
+                            printTokens = true;
+                            break;
+                        case "-pm":
+                        case "--printMem":
+                            printMem = true;
                             break;
                         default:
                             System.out.println("Unknown flag '" + s + "'");
@@ -61,6 +72,14 @@ public class ArgumentParser {
 
     public boolean isPrintAst() {
         return printAst;
+    }
+
+    public boolean isPrintMem() {
+        return printMem;
+    }
+
+    public boolean isPrintTokens() {
+        return printTokens;
     }
 
     public String getMsg() {
