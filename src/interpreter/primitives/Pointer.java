@@ -1,5 +1,7 @@
 package interpreter.primitives;
 
+import interpreter.types.TypeError;
+
 public class Pointer extends Primitive {
 
     private final int ptr;
@@ -17,12 +19,12 @@ public class Pointer extends Primitive {
 
     @Override
     public long intValue() {
-        return 0;
+        return ptr;
     }
 
     @Override
     public double floatValue() {
-        return 0;
+        throw new TypeError("Cannot convert pointer to float. ");
     }
 
     @Override

@@ -1,12 +1,15 @@
 fn main() int {
     a: String = "asd";
 
+
+    b: String;
     for i: int = 0; i < 5; i = i + 1 {
-        b: String = "bb";
+        b = "bb";
     }
     System.memoryView();
     System.gc();
     System.memoryView();
+    System.println(System.id(b));
 
-    return a.length;
+    return b.length;
 }

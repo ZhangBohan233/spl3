@@ -9,7 +9,6 @@ import interpreter.types.Type;
 import interpreter.types.TypeValue;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Set;
 
 public class Memory {
@@ -88,31 +87,39 @@ public class Memory {
     }
 
     public void gc(Environment env) {
-        markFalseMem();
-        markTrueEnv(env);
+        initGcMark();
+        markGcByEnv(env);
         garbageCollect();
     }
 
     private void garbageCollect() {
+        available.clear();
+        AvailableList.LnkNode curLast = null;
         int occupied = 0;
         for (int p = 1; p < heapSize; ++p) {
             SplObject obj = get(p);
             if (obj != null) {
-                if (obj.gcCount > 0) occupied++;
-                else set(p, null);
+                if (obj.gcCount > 0) {
+                    occupied++;
+                } else {
+                    curLast = available.addLast(p, curLast);
+                    set(p, null);
+                }
+            } else {
+                curLast = available.addLast(p, curLast);
             }
         }
-        System.out.println(occupied);
+        System.out.print(occupied + ", ");
         System.out.println(heapSize - occupied);
     }
 
-    private void markFalseMem() {
+    private void initGcMark() {
         for (SplObject obj : heap) {
             if (obj != null) obj.gcCount = 0;
         }
     }
 
-    private void markTrueEnv(Environment env) {
+    private void markGcByEnv(Environment env) {
         if (env == null) return;
 
         Set<TypeValue> attr = env.attributes();
@@ -124,7 +131,7 @@ public class Memory {
                 markTrueSplObj(type, obj, ptr.getPtr());
             }
         }
-        markTrueEnv(env.outer);
+        markGcByEnv(env.outer);
     }
 
     private void markTrueSplObj(PointerType type, SplObject obj, int objAddr) {
@@ -161,12 +168,12 @@ public class Memory {
                 break;
             case PointerType.MODULE_TYPE:
                 SplModule module = (SplModule) obj;
-                markTrueEnv(module.getEnv());
+                markGcByEnv(module.getEnv());
                 break;
             case PointerType.CLASS_TYPE:
                 if (obj instanceof Instance) {
                     Instance instance = (Instance) obj;
-                    markTrueEnv(instance.getEnv());
+                    markGcByEnv(instance.getEnv());
                 }
                 break;
         }
@@ -219,6 +226,26 @@ public class Memory {
                 last = node;
             }
             head = last;
+        }
+
+        void clear() {
+            head.next = null;
+        }
+
+        /**
+         * Add last and returns the temp last
+         *
+         * @param addr    addr to add
+         * @param curLast the current last node, null if it is the head (fixed)
+         * @return the current last node
+         */
+        LnkNode addLast(int addr, LnkNode curLast) {
+            LnkNode node = new LnkNode();
+            node.value = addr;
+            if (curLast == null) curLast = head;
+
+            curLast.next = node;
+            return node;
         }
 
         int firstAva() {

@@ -96,14 +96,28 @@ public class SplSystem extends NativeObject {
     }
 
     public TypeValue memoryView(Arguments arguments, Environment environment, LineFile lineFile) {
-        if (arguments.getLine().getChildren().size() != 0) {
-            throw new SplException("System.memoryView() takes 0 arguments, " +
-                    arguments.getLine().getChildren().size() + " given. ", lineFile);
-        }
+        checkArgCount(arguments, 0, "memoryView", lineFile);
 
         stdout.println("Memory: " + environment.getMemory().memoryView());
         stdout.println("Available: " + environment.getMemory().availableView());
         return TypeValue.VOID;
+    }
+
+    public TypeValue id(Arguments arguments, Environment environment, LineFile lineFile) {
+        checkArgCount(arguments, 1, "id", lineFile);
+
+        TypeValue typeValue = arguments.getLine().getChildren().get(0).evaluate(environment);
+        if (typeValue.getType().isPrimitive())
+            throw new TypeError("System.id() takes a pointer as argument. ", lineFile);
+
+        return new TypeValue(PrimitiveType.TYPE_INT, new Int(typeValue.getValue().intValue()));
+    }
+
+    private static void checkArgCount(Arguments arguments, int expectArgc, String fnName, LineFile lineFile) {
+        if (arguments.getLine().getChildren().size() != expectArgc) {
+            throw new SplException("System." + fnName + "() takes " + expectArgc + " arguments, " +
+                    arguments.getLine().getChildren().size() + " given. ", lineFile);
+        }
     }
 
     private String getPrintString(Arguments arguments, Environment environment, LineFile lineFile) {
