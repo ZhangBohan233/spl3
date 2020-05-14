@@ -1,5 +1,6 @@
 package interpreter;
 
+import ast.Node;
 import interpreter.env.Environment;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.*;
@@ -81,7 +82,7 @@ public class Memory {
     public void free(Pointer ptr, int length) {
 //        System.out.println(ptr);
 //        System.out.println(available);
-        available.addAva(ptr.getPtr(), length);
+        available.addAvaNoSort(ptr.getPtr(), length);
         set(ptr, null);
 //        System.out.println(available);
     }
@@ -207,7 +208,7 @@ public class Memory {
         AvailableList availableList = new AvailableList(16);
         System.out.println(availableList.findAva(3));
         System.out.println(availableList);
-        availableList.addAva(0, 1);
+        availableList.addAvaSorted(0, 1);
         System.out.println(availableList);
         System.out.println(availableList.findAva(2));
         System.out.println(availableList);
@@ -255,7 +256,21 @@ public class Memory {
             return node.value;
         }
 
-        void addAva(int ptr, int intervalsCount) {
+        void addAvaNoSort(int ptr, int intervalsCount) {
+            LnkNode last = new LnkNode();
+            LnkNode firstOfAdd = last;
+            last.value = ptr;
+            for (int i = 1; i < intervalsCount ; ++i) {
+                LnkNode n = new LnkNode();
+                n.value = ptr + i * INTERVAL;
+                last.next = n;
+                last = n;
+            }
+            last.next = head.next;
+            head.next = firstOfAdd;
+        }
+
+        void addAvaSorted(int ptr, int intervalsCount) {
             LnkNode h = head;
             while (h.next.value < ptr) {
                 h = h.next;
