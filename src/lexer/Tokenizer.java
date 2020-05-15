@@ -38,7 +38,7 @@ public class Tokenizer {
     );
 
     public static final Set<String> OTHERS = Set.of(
-            "=", "->"
+            "=", "->", ":="
     );
 
     public static final Set<String> EXTRA_IDENTIFIERS = Utilities.mergeSets(
@@ -327,8 +327,8 @@ public class Tokenizer {
         private static final int TYPE = 24;
         private static final int UNDEFINED = 0;
 
-        private static int[] SELF_CONCATENATE = {DIGIT, LETTER, GT, EQ, LT, AND, OR, UNDERSCORE, PLUS, MINUS};
-        private static int[][] CROSS_CONCATENATE = {
+        private static final int[] SELF_CONCATENATE = {DIGIT, LETTER, GT, EQ, LT, AND, OR, UNDERSCORE, PLUS, MINUS};
+        private static final int[][] CROSS_CONCATENATE = {
                 {LETTER, UNDERSCORE},
                 {UNDERSCORE, LETTER},
                 {DIGIT, UNDERSCORE},
@@ -342,11 +342,12 @@ public class Tokenizer {
                 {NOT, EQ},
                 {PLUS, EQ},
                 {MINUS, EQ},
-                {OTHER_ARITHMETIC, EQ}
+                {OTHER_ARITHMETIC, EQ},
+                {TYPE, EQ}
         };
 
-        private char ch;
-        private int type;
+        private final char ch;
+        private final int type;
 
         CharTypeIdentifier(char ch) {
             this.ch = ch;

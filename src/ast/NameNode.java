@@ -2,6 +2,7 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
+import interpreter.types.Type;
 import interpreter.types.TypeValue;
 import interpreter.types.PointerType;
 import util.LineFile;
@@ -27,6 +28,11 @@ public class NameNode extends LeafNode implements TypeRepresent {
     protected TypeValue internalEval(Environment env) {
 
         return env.get(name, getLineFile());
+    }
+
+    @Override
+    protected Type inferredType(Environment env) {
+        return env.get(name, getLineFile()).getType();
     }
 
     @Override

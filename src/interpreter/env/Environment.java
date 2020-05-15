@@ -57,6 +57,13 @@ public abstract class Environment {
         variables.put(name, typeValue);
     }
 
+    public void defineVarAndSet(String name, TypeValue typeValue, LineFile lineFile) {
+        if (innerGet(name, true, true, lineFile) != null)
+            throw new EnvironmentError("Variable '" + name + "' already defined. ", lineFile);
+
+        variables.put(name, typeValue);
+    }
+
     public void defineConst(String name, Type type, LineFile lineFile) {
         if (innerGet(name, true, true, lineFile) != null)
             throw new EnvironmentError("Constant '" + name + "' already defined. ", lineFile);
@@ -101,6 +108,13 @@ public abstract class Environment {
         return innerGet(name, true, true, lineFile) != null;
     }
 
+    /**
+     * @param name         the name
+     * @param isFirst      whether this is called by another function. {@code false} if this call is self recursion
+     * @param includeConst whether allowing to set the uninitialized constants
+     * @param lineFile     line and file for error information
+     * @return the type value
+     */
     protected TypeValue innerGet(String name, boolean isFirst, boolean includeConst, LineFile lineFile) {
         TypeValue tv = constants.get(name);
         if (!includeConst && tv != null && tv.getValue() != null) {

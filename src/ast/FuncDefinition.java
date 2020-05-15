@@ -45,15 +45,7 @@ public class FuncDefinition extends Node {
 
         List<Declaration> params = new ArrayList<>();
         List<Type> paramTypes = new ArrayList<>();
-        for (int i = 0; i < parameters.getChildren().size(); ++i) {
-            Node node = parameters.getChildren().get(i);
-            if (node instanceof Declaration) {
-                params.add((Declaration) node);
-                paramTypes.add(((Declaration) node).getRight().evalType(env));
-            } else {
-                throw new ParseError("Unexpected parameter syntax. ", node.getLineFile());
-            }
-        }
+        Function.evalParamTypes(parameters, params, paramTypes, env);
 
         Type rtype = rType.evalType(env);
         CallableType funcType = new CallableType(paramTypes, rtype);

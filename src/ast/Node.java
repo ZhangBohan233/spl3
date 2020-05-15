@@ -4,6 +4,7 @@ import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
 import interpreter.primitives.Bool;
 import interpreter.types.PrimitiveType;
+import interpreter.types.Type;
 import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
 import util.LineFile;
@@ -30,6 +31,10 @@ public abstract class Node {
     }
 
     protected abstract TypeValue internalEval(Environment env);
+
+    protected Type inferredType(Environment env) {
+        return PrimitiveType.TYPE_VOID;
+    }
 
     /**
      * Preprocess this node and return the new node of this

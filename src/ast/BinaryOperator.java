@@ -136,6 +136,17 @@ public class BinaryOperator extends BinaryExpr {
         throw new SyntaxError("Unexpected error. ", getLineFile());
     }
 
+    @Override
+    protected Type inferredType(Environment env) {
+        if (type == NUMERIC) {
+            return left.inferredType(env);
+        } else if (type == LOGICAL) {
+            return PrimitiveType.TYPE_BOOLEAN;
+        } else {
+            throw new TypeError();
+        }
+    }
+
     private static long integerArithmetic(String op, long l, long r, boolean rIsInt, LineFile lineFile) {
         switch (op) {
             case "+":

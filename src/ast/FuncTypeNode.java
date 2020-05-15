@@ -2,10 +2,10 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
-import interpreter.types.CallableType;
-import interpreter.types.Type;
-import interpreter.types.TypeError;
-import interpreter.types.TypeValue;
+import interpreter.env.FunctionEnvironment;
+import interpreter.primitives.Pointer;
+import interpreter.splObjects.Function;
+import interpreter.types.*;
 import util.LineFile;
 
 import java.util.ArrayList;
@@ -17,9 +17,32 @@ public class FuncTypeNode extends BinaryExpr implements TypeRepresent {
         super("->", lineFile);
     }
 
+    private boolean isLambdaOperator() {
+        return left instanceof LambdaExpr;
+    }
+
     @Override
     protected TypeValue internalEval(Environment env) {
-        return null;
+        if (!isLambdaOperator()) throw new TypeError();
+
+        Line parameters = ((LambdaExpr) left).getParameters();
+
+        List<Declaration> params = new ArrayList<>();
+        List<Type> paramTypes = new ArrayList<>();
+        Function.evalParamTypes(parameters, params, paramTypes, env);
+
+        FunctionEnvironment fakeEnv = new FunctionEnvironment(env);
+        for (Declaration d : params) d.evaluate(fakeEnv);
+        Type rt = right.inferredType(fakeEnv);
+
+        CallableType lambdaType = new CallableType(paramTypes, rt);
+
+        Function function = new Function(right, params, lambdaType, env, getLineFile());
+        Pointer funcPtr = env.getMemory().allocateFunction(function, env);
+
+        TypeValue funcTv = new TypeValue(lambdaType, funcPtr);
+//        env.defineFunction(name, funcTv, getLineFile());
+        return funcTv;
     }
 
     @Override
@@ -29,6 +52,7 @@ public class FuncTypeNode extends BinaryExpr implements TypeRepresent {
 
     @Override
     public Type evalType(Environment environment) {
+        if (isLambdaOperator()) throw new TypeError();
         if (!(right instanceof TypeRepresent)) throw new TypeError();
         Type rType = ((TypeRepresent) right).evalType(environment);
         List<Node> paramNodes = ((Line) left).getChildren();

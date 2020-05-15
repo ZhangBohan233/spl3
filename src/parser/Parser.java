@@ -25,7 +25,8 @@ public class Parser {
 
         int varLevel = Declaration.VAR;
 
-        boolean fnHeader = false;
+        boolean fnParams = false;
+        boolean lambdaParams = false;
         boolean fnRType = false;
         boolean importingModule = false;
         boolean classHeader = false;
@@ -35,6 +36,7 @@ public class Parser {
         boolean isElse = false;
 
         Stack<Integer> paramBrackets = new Stack<>();
+        Stack<Integer> lambdaParamBrackets = new Stack<>();
         Stack<Integer> callBrackets = new Stack<>();
         Stack<Integer> funcBodyBraces = new Stack<>();
         Stack<Integer> moduleBraces = new Stack<>();
@@ -73,9 +75,13 @@ public class Parser {
                     switch (identifier) {
                         case "(":
                             bracketCount++;
-                            if (fnHeader) {  // declaring function
-                                fnHeader = false;
+                            if (fnParams) {  // declaring function
+                                fnParams = false;
                                 paramBrackets.push(bracketCount);
+                                builder.addParameterBracket();
+                            } else if (lambdaParams) {
+                                lambdaParams = false;
+                                lambdaParamBrackets.push(bracketCount);
                                 builder.addParameterBracket();
                             } else if (isCall(tokens.get(i - 1))) {
                                 builder.addCall(lineFile);
@@ -89,6 +95,9 @@ public class Parser {
                                 paramBrackets.pop();
                                 builder.buildParameterBracket();
                                 fnRType = true;
+                            } else if (isThisStack(lambdaParamBrackets, bracketCount)) {
+                                lambdaParamBrackets.pop();
+                                builder.buildParameterBracket();
                             } else if (isThisStack(callBrackets, bracketCount)) {
                                 callBrackets.pop();
                                 builder.buildCall();
@@ -191,6 +200,9 @@ public class Parser {
                         case "=":
                             builder.addAssignment(lineFile);
                             break;
+                        case ":=":
+                            builder.addQuickAssignment(lineFile);
+                            break;
                         case "->":
                             builder.addFuncTypeNode(lineFile);
                             break;
@@ -245,7 +257,8 @@ public class Parser {
                             builder.addContinue(lineFile);
                             break;
                         case "lambda":
-                            System.out.println(123);
+                            builder.addLambdaHeader(lineFile);
+                            lambdaParams = true;
                             break;
                         case "fn":
                             Token fnNameTk = tokens.get(i + 1);
@@ -259,7 +272,7 @@ public class Parser {
                             }
                             builder.addBraceBlock();  // give the function a whole block
                             builder.addFunction(fnName, lineFile);
-                            fnHeader = true;
+                            fnParams = true;
                             break;
                         case "interface":
                             isInterface = true;

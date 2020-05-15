@@ -31,6 +31,7 @@ public class AstBuilder {
     private static final Map<String, Integer> PCD_BIN_SPECIAL = Map.of(
             ".", 500,
             ":", 3,
+            ":=", 1,
             "=", 1
     );
 
@@ -130,6 +131,14 @@ public class AstBuilder {
         }
     }
 
+    void addQuickAssignment(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new QuickAssignment(lineFile));
+        } else {
+            inner.addQuickAssignment(lineFile);
+        }
+    }
+
     void addFuncTypeNode(LineFile lineFile) {
         if (inner == null) {
             stack.add(new FuncTypeNode(lineFile));
@@ -203,6 +212,14 @@ public class AstBuilder {
         }
     }
 
+    void addLambdaHeader(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new LambdaExpr(lineFile));
+        } else {
+            inner.addLambdaHeader(lineFile);
+        }
+    }
+
     void addParameterBracket() {
         if (inner == null) {
             inner = new AstBuilder();
@@ -214,12 +231,17 @@ public class AstBuilder {
     void buildParameterBracket() {
         if (inner.inner == null) {
             Node lastNode = stack.get(stack.size() - 1);
-            if (!(lastNode instanceof FuncDefinition))
-                throw new ParseError("Unexpected syntax. ", lastNode.getLineFile());
-            FuncDefinition defNode = (FuncDefinition) lastNode;
             inner.finishPart();
             Line line = inner.getLine();
-            defNode.setParameters(line);
+            if (lastNode instanceof FuncDefinition) {
+                FuncDefinition defNode = (FuncDefinition) lastNode;
+                defNode.setParameters(line);
+            } else if (lastNode instanceof LambdaExpr) {
+                LambdaExpr lambdaExpr = (LambdaExpr) lastNode;
+                lambdaExpr.setParameters(line);
+            } else {
+                throw new ParseError("Unexpected syntax. ", lastNode.getLineFile());
+            }
             inner = null;
         } else {
             inner.buildParameterBracket();
