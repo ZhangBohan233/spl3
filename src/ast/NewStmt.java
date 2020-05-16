@@ -72,7 +72,6 @@ public class NewStmt extends UnaryExpr {
         Type scType = scClazzNode.evalType(classDefEnv);
         if (!(scType instanceof ClassType)) throw new TypeError();
         ClassType scClazzType = (ClassType) scType;
-        System.out.println(scClazzType);
 
         // define the anonymous class
         // Note that the definition env of the anonymous class is the current calling env

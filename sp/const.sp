@@ -1,8 +1,16 @@
+b: int;
 
+class A {
+    const a: int;
 
+    fn init(a: int) void {
+        this.a = a;
+        const b: float = 3.3;
+    }
+}
 
 fn main() int {
-    const a: int = 4;
-    //a = 3;
-    return a;
+    aa := new A(3);
+
+    return aa.a;
 }

@@ -11,7 +11,7 @@ c: C = new C();
 System.println(c.a);  // this currently prints 5
 ```
 
-Function parameters name scope.
+~~Function parameters name scope.~~  Fixed.
 ```
 class C {
     a: int;

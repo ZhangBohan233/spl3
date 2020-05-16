@@ -26,6 +26,11 @@ public abstract class MainAbstractEnvironment extends Environment {
     }
 
     @Override
+    public boolean isSub() {
+        return false;
+    }
+
+    @Override
     public void setReturn(TypeValue typeValue) {
         throw new EnvironmentError("Return outside function. ");
     }

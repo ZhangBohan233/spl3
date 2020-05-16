@@ -19,10 +19,14 @@ public abstract class SubAbstractEnvironment extends Environment {
     }
 
     @Override
+    public boolean isSub() {
+        return true;
+    }
+
+    @Override
     public void setReturn(TypeValue typeValue) {
         outer.setReturn(typeValue);
     }
-
 
     @Override
     public void addNamespace(ModuleEnvironment moduleEnvironment) {

@@ -10,5 +10,5 @@
 
 ### Stage 2
 
-* Function overloading
+* ~~Function overloading~~   _**discarded**_
 * Type inference for `new` expression

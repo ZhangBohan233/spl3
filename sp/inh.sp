@@ -7,10 +7,10 @@ class B {
 }
 
 class C extends B {
-    a: int;
+    const a: int = 1;
 
     fn init(x: int) void {
-        this.a = x;
+        a = x;
     }
 
     fn t() int {
@@ -26,14 +26,9 @@ class C extends B {
     }
 }
 
-class D extends C {
-    fn init() void {
-        //super.init(2);
-    }
-}
 
 fn main() int {
-    a: C = new D();
+    a: C = new C(2);
 
 
     return a.t();

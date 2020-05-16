@@ -4,10 +4,10 @@ fn test(a: int, f: [int] -> int) int {
 
 
 class C {
-    x: int = 1;
+    const x: int = 0;
 
-    fn init(a: int) void {
-        this.x = a;
+    fn init(x: int) void {
+        this.x = x;
     }
 
     fn ff() void {
@@ -25,7 +25,7 @@ fn main() int {
     a := 3;
     b: [int, int] -> int = lambda(x: int, y: int) -> x + y;
 
-    origC := new C(3);
+    //origC := new C(3);
 
     c: C = new C(2) <- {
         fn ff() void {

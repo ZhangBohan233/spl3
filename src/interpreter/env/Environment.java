@@ -29,6 +29,8 @@ public abstract class Environment {
 
     public abstract void defineFunction(String name, TypeValue funcTv, LineFile lineFile);
 
+    public abstract boolean isSub();
+
     public abstract void setReturn(TypeValue typeValue);
 
     public abstract boolean interrupted();
@@ -50,7 +52,7 @@ public abstract class Environment {
     }
 
     public void defineVar(String name, Type type, LineFile lineFile) {
-        if (innerGet(name, true, true, lineFile) != null)
+        if (localHasName(name, lineFile))
             throw new EnvironmentError("Variable '" + name + "' already defined. ", lineFile);
 
         TypeValue typeValue = new TypeValue(type);
@@ -58,14 +60,14 @@ public abstract class Environment {
     }
 
     public void defineVarAndSet(String name, TypeValue typeValue, LineFile lineFile) {
-        if (innerGet(name, true, true, lineFile) != null)
+        if (localHasName(name, lineFile))
             throw new EnvironmentError("Variable '" + name + "' already defined. ", lineFile);
 
         variables.put(name, typeValue);
     }
 
     public void defineConst(String name, Type type, LineFile lineFile) {
-        if (innerGet(name, true, true, lineFile) != null)
+        if (localHasName(name, lineFile))
             throw new EnvironmentError("Constant '" + name + "' already defined. ", lineFile);
 
         TypeValue typeValue = new TypeValue(type);
@@ -73,7 +75,7 @@ public abstract class Environment {
     }
 
     public void defineConstAndSet(String name, TypeValue typeValue, LineFile lineFile) {
-        if (innerGet(name, true, true, lineFile) != null)
+        if (localHasName(name, lineFile))
             throw new EnvironmentError("Constant '" + name + "' already defined. ", lineFile);
 
         constants.put(name, typeValue);
@@ -109,6 +111,10 @@ public abstract class Environment {
     }
 
     /**
+     * Get a type value pair by name.
+     * <p>
+     * Note that this method is overridden in {@code InstanceEnvironment}
+     *
      * @param name         the name
      * @param isFirst      whether this is called by another function. {@code false} if this call is self recursion
      * @param includeConst whether allowing to set the uninitialized constants
@@ -130,6 +136,21 @@ public abstract class Environment {
             }
         }
         return tv;
+    }
+
+    protected TypeValue localInnerGet(String name, LineFile lineFile) {
+        TypeValue tv = constants.get(name);
+        if (tv == null) tv = variables.get(name);
+        if (tv == null) {
+            if (outer != null && outer.isSub()) {
+                tv = outer.localInnerGet(name, lineFile);
+            }
+        }
+        return tv;
+    }
+
+    protected final boolean localHasName(String name, LineFile lineFile) {
+        return localInnerGet(name, lineFile) != null;
     }
 
     public void printVars() {
