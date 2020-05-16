@@ -6,6 +6,7 @@ import interpreter.primitives.Bool;
 import interpreter.primitives.Int;
 import interpreter.primitives.SplFloat;
 import interpreter.types.PrimitiveType;
+import interpreter.types.Type;
 import interpreter.types.TypeValue;
 import lexer.SyntaxError;
 import util.LineFile;
@@ -45,6 +46,11 @@ public class RegularUnaryOperator extends UnaryExpr {
             }
         }
         throw new SyntaxError("Operator error. ", getLineFile());
+    }
+
+    @Override
+    protected Type inferredType(Environment env) {
+        return value.inferredType(env);
     }
 
     @Override

@@ -2,6 +2,8 @@ package ast;
 
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
+import interpreter.types.PrimitiveType;
+import interpreter.types.Type;
 import interpreter.types.TypeValue;
 import util.LineFile;
 
@@ -22,6 +24,11 @@ public class BoolStmt extends LiteralNode {
     @Override
     protected TypeValue internalEval(Environment env) {
         return typeValue;
+    }
+
+    @Override
+    protected Type inferredType(Environment env) {
+        return PrimitiveType.TYPE_BOOLEAN;
     }
 
     @Override
