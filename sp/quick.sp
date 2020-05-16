@@ -4,7 +4,7 @@ fn test(a: int, f: [int] -> int) int {
 
 
 class C {
-    const x: int = 0;
+    const x: int;
 
     fn init(x: int) void {
         this.x = x;
