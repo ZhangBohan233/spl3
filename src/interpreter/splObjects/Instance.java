@@ -42,15 +42,29 @@ public class Instance extends SplObject {
         SplClass clazz = (SplClass) obj;
         InstanceEnvironment instanceEnv = new InstanceEnvironment(clazz.getDefinitionEnv());
 
+//        System.out.println(clazz.getBody());
         clazz.getBody().evaluate(instanceEnv);  // most important step
 
         if (!instanceEnv.hasName("init", lineFile)) {
             // If class no constructor, put an empty default constructor
-            // TODO: call super() in constructor
             FuncDefinition fd = new FuncDefinition("init", LineFile.LF_INTERPRETER);
             fd.setParameters(new Line());
             fd.setRType(new PrimitiveTypeNameNode("void", LineFile.LF_INTERPRETER));
             BlockStmt constBody = new BlockStmt(LineFile.LF_INTERPRETER);
+
+            // call super.init()
+            // if super.init(...) has arguments, this causes an error intentionally
+            Dot dot = new Dot(LineFile.LF_INTERPRETER);
+            dot.setLeft(new NameNode("super", LineFile.LF_INTERPRETER));
+            FuncCall supInit = new FuncCall(LineFile.LF_INTERPRETER);
+            supInit.setCallObj(new NameNode("init", LineFile.LF_INTERPRETER));
+            supInit.setArguments(new Arguments(new Line()));
+            dot.setRight(supInit);
+
+            Line constLine = new Line();
+            constLine.getChildren().add(dot);
+            constBody.addLine(constLine);
+
             fd.setBody(constBody);
 
             fd.evaluate(instanceEnv);
@@ -75,8 +89,9 @@ public class Instance extends SplObject {
     }
 
     public static void callInit(Instance instance, Arguments arguments, Environment callEnv, LineFile lineFile) {
-        TypeValue constructorTv = instance.getEnv().get("init", lineFile);
-        Function constructor = (Function) callEnv.getMemory().get((Pointer) constructorTv.getValue());
+//        TypeValue constructorTv = instance.getEnv().get("init", lineFile);
+//        Function constructor = (Function) callEnv.getMemory().get((Pointer) constructorTv.getValue());
+        Function constructor = getConstructor(instance, lineFile);
         constructor.call(arguments, callEnv);
     }
 
@@ -84,9 +99,28 @@ public class Instance extends SplObject {
                                 TypeValue[] evaluatedArgs,
                                 Environment callEnv,
                                 LineFile lineFile) {
-        TypeValue constructorTv = instance.getEnv().get("init", lineFile);
-        Function constructor = (Function) callEnv.getMemory().get((Pointer) constructorTv.getValue());
+
+        Function constructor = getConstructor(instance, lineFile);
         constructor.call(evaluatedArgs, callEnv, lineFile);
+    }
+
+    private static Function getConstructor(Instance instance, LineFile lineFile) {
+        InstanceEnvironment env = instance.getEnv();
+        TypeValue constructorTv = env.get("init", lineFile);
+        Function constructor = (Function) env.getMemory().get((Pointer) constructorTv.getValue());
+
+        // TODO: check available super
+//        if (env.hasName("super", lineFile)) {
+//            TypeValue superTv = env.get("super", lineFile);
+//            Instance supIns = (Instance) env.getMemory().get((Pointer) superTv.getValue());
+//            InstanceEnvironment supEnv = supIns.getEnv();
+//            TypeValue supConstTv = supEnv.get("init", lineFile);
+//            Function supConst = (Function) env.getMemory().get((Pointer) supConstTv.getValue());
+//            if (supConst.)
+//        }
+
+
+        return constructor;
     }
 
     public static class InstanceTypeValue {

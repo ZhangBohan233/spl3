@@ -3,14 +3,12 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.SplException;
 import interpreter.env.Environment;
-import interpreter.env.InstanceEnvironment;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.*;
 import interpreter.types.*;
 import util.LineFile;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class NewStmt extends UnaryExpr {
@@ -21,11 +19,15 @@ public class NewStmt extends UnaryExpr {
 
     @Override
     protected TypeValue internalEval(Environment env) {
-
-        return initClass(value, env, env, getLineFile());
+        if (value instanceof AnonymousClassExpr) {
+            AnonymousClassExpr ace = (AnonymousClassExpr) value;
+            return initAnonymousClass(ace.left, ace.getContent(), env, env, getLineFile());
+        } else {
+            return directInitClass(value, env, env, getLineFile());
+        }
     }
 
-    private static TypeValue initClass(Node node, Environment classDefEnv, Environment callEnv, LineFile lineFile) {
+    private static TypeValue directInitClass(Node node, Environment classDefEnv, Environment callEnv, LineFile lineFile) {
         if (node instanceof FuncCall) {
             return instanceCreation((FuncCall) node, classDefEnv, callEnv, lineFile);
         } else if (node instanceof IndexingNode) {
@@ -35,15 +37,57 @@ public class NewStmt extends UnaryExpr {
             TypeValue dotLeft = dot.left.evaluate(classDefEnv);
             if (!(dotLeft.getType() instanceof ModuleType)) throw new TypeError();
             SplModule module = (SplModule) classDefEnv.getMemory().get((Pointer) dotLeft.getValue());
-            return initClass(dot.right, module.getEnv(), callEnv, lineFile);
+            return directInitClass(dot.right, module.getEnv(), callEnv, lineFile);
         } else {
             throw new SplException("Class instantiation must be a call. Got " + node + " instead. ", lineFile);
         }
     }
 
-    @Override
-    public Node preprocess(FakeEnv env) {
-        return null;
+    private static TypeValue initAnonymousClass(Node node,
+                                                BlockStmt classBody,
+                                                Environment classDefEnv,
+                                                Environment callEnv,
+                                                LineFile lineFile) {
+        if (node instanceof FuncCall) {
+            return anonymousInstanceCreation((FuncCall) node, classBody, classDefEnv, callEnv, lineFile);
+        } else if (node instanceof Dot) {
+            Dot dot = (Dot) node;
+            TypeValue dotLeft = dot.left.evaluate(classDefEnv);
+            if (!(dotLeft.getType() instanceof ModuleType)) throw new TypeError();
+            SplModule module = (SplModule) classDefEnv.getMemory().get((Pointer) dotLeft.getValue());
+            return initAnonymousClass(dot.right, classBody, module.getEnv(), callEnv, lineFile);
+        } else {
+            throw new SplException("Anonymous class instantiation must have a call to its parent constructor. " +
+                    "Got " + node + " instead. ", lineFile);
+        }
+    }
+
+    private static TypeValue anonymousInstanceCreation(FuncCall call,
+                                                    BlockStmt classBody,
+                                                    Environment classDefEnv,
+                                                    Environment callEnv,
+                                                    LineFile lineFile) {
+
+        TypeRepresent scClazzNode = (TypeRepresent) call.callObj;
+        Type scType = scClazzNode.evalType(classDefEnv);
+        if (!(scType instanceof ClassType)) throw new TypeError();
+        ClassType scClazzType = (ClassType) scType;
+        System.out.println(scClazzType);
+
+        // define the anonymous class
+        // Note that the definition env of the anonymous class is the current calling env
+        SplClass anClazz = new SplClass(null, scClazzType, new ArrayList<>(), classBody, callEnv);
+        Pointer anClazzPtr = callEnv.getMemory().allocateObject(anClazz, callEnv);
+        ClassType anClazzType = new ClassType(anClazzPtr);
+
+        Instance.InstanceTypeValue instanceTv = Instance.createInstanceAndAllocate(anClazzType, callEnv, lineFile);
+        Instance instance = instanceTv.instance;
+
+        TypeValue supTv = instance.getEnv().get("super", lineFile);
+        Instance supIns = (Instance) instance.getEnv().getMemory().get((Pointer) supTv.getValue());
+
+        Instance.callInit(supIns, call.arguments, callEnv, lineFile);
+        return instanceTv.typeValue;
     }
 
     private static TypeValue instanceCreation(FuncCall call,
@@ -113,11 +157,8 @@ public class NewStmt extends UnaryExpr {
         }
     }
 
-    private FuncCall getValue() {
-        if (value instanceof FuncCall) {
-            return (FuncCall) value;
-        } else {
-            throw new SplException("Class instantiation must be a call. ", getLineFile());
-        }
+    @Override
+    public Node preprocess(FakeEnv env) {
+        return null;
     }
 }

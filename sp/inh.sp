@@ -9,8 +9,8 @@ class B {
 class C extends B {
     a: int;
 
-    fn init() void {
-        a = 2;
+    fn init(x: int) void {
+        this.a = x;
     }
 
     fn t() int {
@@ -26,14 +26,15 @@ class C extends B {
     }
 }
 
-fn main() int {
-    a: C = new C();
-    v: int = 1;
-    b: imp.Imp = new imp.Imp(v);
-    c: imp.Imp[] = new imp.Imp[2];
-    a.self().set(6);
+class D extends C {
+    fn init() void {
+        //super.init(2);
+    }
+}
 
-    //cl:int = System.clock();
+fn main() int {
+    a: C = new D();
+
 
     return a.t();
 }

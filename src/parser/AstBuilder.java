@@ -30,6 +30,9 @@ public class AstBuilder {
 
     private static final Map<String, Integer> PCD_BIN_SPECIAL = Map.of(
             ".", 500,
+            "<-", 160,  // must bigger than 'new'
+            "->", 4,
+            "?", 2,
             ":", 3,
             ":=", 1,
             "=", 1
@@ -52,8 +55,6 @@ public class AstBuilder {
             "new", 150,
             "namespace", 150,
             "extends", 150,
-            "->", 4,
-            "?", 2,
             "return", 0
     );
 
@@ -66,6 +67,10 @@ public class AstBuilder {
     private final List<Node> stack = new ArrayList<>();
     private Line activeLine = new Line();
     private AstBuilder inner;
+
+    private void setIndependence(boolean independence) {
+        baseBlock.setIndependence(independence);
+    }
 
     void addName(String name, LineFile lineFile) {
         if (inner == null) {
@@ -144,6 +149,14 @@ public class AstBuilder {
             stack.add(new FuncTypeNode(lineFile));
         } else {
             inner.addFuncTypeNode(lineFile);
+        }
+    }
+
+    void addAnonymousClass(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new AnonymousClassExpr(lineFile));
+        } else {
+            inner.addAnonymousClass(lineFile);
         }
     }
 
@@ -314,6 +327,15 @@ public class AstBuilder {
             inner = new AstBuilder();
         } else {
             inner.addBraceBlock();
+        }
+    }
+
+    void addIndependenceBraceBlock() {
+        if (inner == null) {
+            inner = new AstBuilder();
+            inner.setIndependence(true);
+        } else {
+            inner.addIndependenceBraceBlock();
         }
     }
 

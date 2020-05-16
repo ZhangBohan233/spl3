@@ -138,6 +138,8 @@ public class Parser {
                             } else if (isElse) {
                                 isElse = false;
                                 builder.addBraceBlock();
+                            } else {
+                                builder.addIndependenceBraceBlock();
                             }
                             break;
                         case "}":
@@ -205,6 +207,9 @@ public class Parser {
                             break;
                         case "->":
                             builder.addFuncTypeNode(lineFile);
+                            break;
+                        case "<-":
+                            builder.addAnonymousClass(lineFile);
                             break;
                         case "true":
                             builder.addBoolean(true, lineFile);

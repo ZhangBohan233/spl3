@@ -19,7 +19,8 @@ public abstract class MainAbstractEnvironment extends Environment {
 
     @Override
     public void defineFunction(String name, TypeValue funcTv, LineFile lineFile) {
-        if (hasName(name, lineFile)) throw new EnvironmentError();
+        if (hasName(name, lineFile)) throw new EnvironmentError("Function '" + name + "' has already defined" +
+                "in this scope. ", lineFile);
 
         constants.put(name, funcTv);
     }

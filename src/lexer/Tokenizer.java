@@ -38,7 +38,7 @@ public class Tokenizer {
     );
 
     public static final Set<String> OTHERS = Set.of(
-            "=", "->", ":="
+            "=", "->", "<-", ":="
     );
 
     public static final Set<String> EXTRA_IDENTIFIERS = Utilities.mergeSets(
@@ -334,6 +334,7 @@ public class Tokenizer {
                 {DIGIT, UNDERSCORE},
                 {UNDERSCORE, DIGIT},
                 {MINUS, GT},
+                {LT, MINUS},
 //                {DIGIT, DOT},
 //                {DOT, DIGIT},
                 {LETTER, DIGIT},

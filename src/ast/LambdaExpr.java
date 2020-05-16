@@ -22,6 +22,11 @@ public class LambdaExpr extends Node {
     }
 
     @Override
+    public String toString() {
+        return "lambda(" + parameters + ')';
+    }
+
+    @Override
     protected TypeValue internalEval(Environment env) {
         return null;
     }

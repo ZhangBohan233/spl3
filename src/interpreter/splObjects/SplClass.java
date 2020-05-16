@@ -8,11 +8,11 @@ import java.util.List;
 
 public class SplClass extends SplObject {
 
-    private ClassType superclassType;
-    private List<ClassType> interfacePointers;
-    private BlockStmt body;
-    private String className;
-    private Environment definitionEnv;
+    private final ClassType superclassType;
+    private final List<ClassType> interfacePointers;
+    private final BlockStmt body;
+    private final String className;
+    private final Environment definitionEnv;
 
     public SplClass(String className, ClassType superclassType, List<ClassType> interfacePointers,
                     BlockStmt body, Environment definitionEnv) {
