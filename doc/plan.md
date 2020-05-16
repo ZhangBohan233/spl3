@@ -1,9 +1,14 @@
 # Plan
 
-### Stage 1
+### ~~Stage 1~~
 
-* Native function invoke (via object)
-* Array
-* Create spl object via interpreter
-* String (using char array)
-* const
+* ~~Native function invoke (via object)~~
+* ~~Array~~
+* ~~Create spl object via interpreter~~
+* ~~String (using char array)~~
+* ~~const~~
+
+### Stage 2
+
+* Function overloading
+* Type inference for `new` expression

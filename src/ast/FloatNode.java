@@ -4,6 +4,7 @@ import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
 import interpreter.primitives.SplFloat;
 import interpreter.types.PrimitiveType;
+import interpreter.types.Type;
 import interpreter.types.TypeValue;
 import util.LineFile;
 
@@ -21,6 +22,11 @@ public class FloatNode extends LiteralNode {
     protected TypeValue internalEval(Environment env) {
 
         return new TypeValue(PrimitiveType.TYPE_FLOAT, new SplFloat(value));
+    }
+
+    @Override
+    protected Type inferredType(Environment env) {
+        return PrimitiveType.TYPE_FLOAT;
     }
 
     @Override

@@ -4,6 +4,7 @@ import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
 import interpreter.primitives.Char;
 import interpreter.types.PrimitiveType;
+import interpreter.types.Type;
 import interpreter.types.TypeValue;
 import util.LineFile;
 
@@ -20,6 +21,11 @@ public class CharNode extends LiteralNode {
     @Override
     protected TypeValue internalEval(Environment env) {
         return new TypeValue(PrimitiveType.TYPE_CHAR, new Char(ch));
+    }
+
+    @Override
+    protected Type inferredType(Environment env) {
+        return PrimitiveType.TYPE_CHAR;
     }
 
     @Override

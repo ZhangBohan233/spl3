@@ -4,6 +4,7 @@ import ast.fakeEnv.FakeEnv;
 import interpreter.splObjects.Function;
 import interpreter.env.Environment;
 import interpreter.splObjects.SplCallable;
+import interpreter.types.Type;
 import interpreter.types.TypeValue;
 import interpreter.primitives.Pointer;
 import interpreter.types.CallableType;
@@ -37,6 +38,16 @@ public class FuncCall extends Node {
         SplCallable function = (SplCallable) env.getMemory().get((Pointer) leftTv.getValue());
 
         return function.call(arguments, env);
+    }
+
+    @Override
+    protected Type inferredType(Environment env) {
+        Type leftT = callObj.inferredType(env);
+        if (leftT instanceof CallableType) {
+            return ((CallableType) leftT).getRType();
+        } else {
+            throw new TypeError("Not callable. ", getLineFile());
+        }
     }
 
     @Override
