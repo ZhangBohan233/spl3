@@ -58,6 +58,10 @@ public class Function extends SplCallable {
         isLambda = true;
     }
 
+    public Node getBody() {
+        return body;
+    }
+
     @Override
     public String toString() {
         return "Function{" + funcType + "}";
@@ -78,7 +82,7 @@ public class Function extends SplCallable {
 
         for (int i = 0; i < params.size(); ++i) {
             Declaration param = params.get(i);
-            String paramName = param.getLeft().getName();
+            String paramName = param.getLeftName().getName();
             param.evaluate(scope);  // declare param
             scope.setVar(paramName, evaluatedArgs[i], lineFile);
         }
@@ -103,7 +107,7 @@ public class Function extends SplCallable {
             Node node = parameters.getChildren().get(i);
             if (node instanceof Declaration) {
                 params.add((Declaration) node);
-                paramTypes.add(((Declaration) node).getRight().evalType(env));
+                paramTypes.add(((Declaration) node).getRightTypeRep().evalType(env));
             } else {
                 throw new ParseError("Unexpected parameter syntax. ", node.getLineFile());
             }

@@ -26,7 +26,7 @@ public class Assignment extends BinaryExpr {
         } else if (left instanceof Declaration) {
             left.evaluate(env);
 
-            env.setVar(((Declaration) left).getLeft().getName(), rightRes, getLineFile());
+            env.setVar(((Declaration) left).getLeftName().getName(), rightRes, getLineFile());
         } else if (left instanceof Dot) {
             TypeValue leftLeft = ((Dot) left).left.evaluate(env);
             PointerType leftLeftType = (PointerType) leftLeft.getType();

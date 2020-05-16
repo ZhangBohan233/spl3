@@ -24,11 +24,11 @@ public class Declaration extends BinaryExpr {
 
     @Override
     protected TypeValue internalEval(Environment env) {
-        Type rightEv = getRight().evalType(env);
+        Type rightEv = getRightTypeRep().evalType(env);
         if (level == VAR) {
-            env.defineVar(getLeft().getName(), rightEv, getLineFile());
+            env.defineVar(getLeftName().getName(), rightEv, getLineFile());
         } else if (level == CONST) {
-            env.defineConst(getLeft().getName(), rightEv, getLineFile());
+            env.defineConst(getLeftName().getName(), rightEv, getLineFile());
         } else {
             throw new SplException("Unknown declaration type. ", getLineFile());
         }
@@ -48,12 +48,12 @@ public class Declaration extends BinaryExpr {
         return this;
     }
 
-    public NameNode getLeft() {
+    public NameNode getLeftName() {
         if (!(left instanceof NameNode)) throw new EnvironmentError();
         return (NameNode) left;
     }
 
-    public TypeRepresent getRight() {
+    public TypeRepresent getRightTypeRep() {
         if (!(right instanceof TypeRepresent)) throw new EnvironmentError("Not a type");
         return (TypeRepresent) right;
     }

@@ -15,6 +15,11 @@ class C {
     }
 }
 
+class D extends C {
+    fn init() void {
+        super.init(12);
+    }
+}
 
 fn main() int {
     a := 3;
@@ -29,6 +34,9 @@ fn main() int {
     }
     System.println(c.x);
     c.ff();
+
+    d := new D();
+    System.println(d.x);
 
     return test(5, lambda(x: int) -> x + a);
 }

@@ -22,6 +22,14 @@ public abstract class BinaryExpr extends Expr {
         return left == null || right == null;
     }
 
+    public Node getLeft() {
+        return left;
+    }
+
+    public Node getRight() {
+        return right;
+    }
+
     public String getOperator() {
         return operator;
     }
