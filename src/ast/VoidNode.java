@@ -5,20 +5,16 @@ import interpreter.env.Environment;
 import interpreter.types.TypeValue;
 import util.LineFile;
 
-public class ReturnStmt extends UnaryExpr {
+public class VoidNode extends LeafNode {
 
-    public ReturnStmt(LineFile lineFile) {
-        super("return", true, lineFile);
-    }
+    public static final VoidNode VOID_NODE = new VoidNode(LineFile.LF_PARSER);
 
-    @Override
-    public boolean voidAble() {
-        return true;
+    public VoidNode(LineFile lineFile) {
+        super(lineFile);
     }
 
     @Override
     protected TypeValue internalEval(Environment env) {
-        env.setReturn(value.evaluate(env));
         return null;
     }
 

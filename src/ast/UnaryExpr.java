@@ -15,6 +15,13 @@ public abstract class UnaryExpr extends Expr {
         this.atLeft = operatorAtLeft;
     }
 
+    /**
+     * @return {@code true} if and only if this {@code UnaryExpr} can take no value.
+     */
+    public boolean voidAble() {
+        return false;
+    }
+
     @Override
     public boolean notFulfilled() {
         return value == null;

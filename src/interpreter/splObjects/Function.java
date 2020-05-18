@@ -88,16 +88,26 @@ public class Function extends SplCallable {
         }
 
         TypeValue evalResult = body.evaluate(scope);
+        callingEnv.getMemory().decreaseStack();
+
         if (isLambda) return evalResult;
 
         TypeValue rtnVal = scope.getReturnValue();
-        if (rtnVal != null && !funcType.getRType().isSuperclassOfOrEquals(rtnVal.getType(), callingEnv)) {
-            throw new TypeError("Declared return type: " + funcType.getRType() + ", actual returning " +
-                    "type: " + rtnVal.getType() + ". ", argLineFile);
+        if (funcType.getRType().equals(PrimitiveType.TYPE_VOID)) {
+            if (rtnVal == null) {
+                return TypeValue.VOID;
+            } else {
+                throw new TypeError("Function with void return type returns non-void value. ", lineFile);
+            }
+        } else {
+            if (rtnVal == null) {
+                throw new TypeError("Function with non-void return type returns nothing. ", lineFile);
+            } else if (!funcType.getRType().isSuperclassOfOrEquals(rtnVal.getType(), callingEnv)) {
+                throw new TypeError("Declared return type: " + funcType.getRType() + ", actual returning " +
+                        "type: " + rtnVal.getType() + ". ", argLineFile);
+            }
+            return rtnVal;
         }
-        callingEnv.getMemory().decreaseStack();
-
-        return rtnVal;
     }
 
     public static void evalParamTypes(Line parameters, List<Declaration> params, List<Type> paramTypes,

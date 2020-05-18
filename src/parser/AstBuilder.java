@@ -16,7 +16,19 @@ public class AstBuilder {
             "/", 100,
             "%", 100,
             "+", 50,
-            "-", 50
+            "-", 50,
+            ">>", 40,
+            ">>>", 40,
+            "<<", 40
+    );
+
+    private static final Map<String, Integer> PCD_BIN_NUMERIC_BITWISE = Map.of(
+            ">>", 40,
+            ">>>", 40,
+            "<<", 40,
+            "&", 17,
+            "^", 16,
+            "|", 15
     );
 
     private static final Map<String, Integer> PCD_BIN_LOGICAL = Map.of(
@@ -38,6 +50,23 @@ public class AstBuilder {
             "=", 1
     );
 
+    private static final Map<String, Integer> PCD_BINARY_ASSIGN_NORMAL = Map.of(
+            "+=", 3,
+            "-=", 3,
+            "*=", 3,
+            "/=", 3,
+            "%=", 3
+    );
+
+    private static final Map<String, Integer> PCD_BINARY_ASSIGN_BITWISE = Map.of(
+            ">>=", 3,
+            ">>>=", 3,
+            "<<=", 3,
+            "&=", 3,
+            "|=", 3,
+            "^=", 3
+    );
+
     private static final Map<String, Integer> PCD_BIN_LAZY = Map.of(
             "&&", 6,
             "||", 5
@@ -52,6 +81,8 @@ public class AstBuilder {
     );
 
     private static final Map<String, Integer> PCD_UNARY_SPECIAL = Map.of(
+            "++", 300,
+            "--", 300,
             "new", 150,
             "namespace", 150,
             "extends", 150,
@@ -59,7 +90,8 @@ public class AstBuilder {
     );
 
     private static final Map<String, Integer> PRECEDENCES = Utilities.mergeMaps(
-            PCD_BIN_NUMERIC, PCD_BIN_LOGICAL, PCD_BIN_SPECIAL, PCD_BIN_LAZY,
+            PCD_BIN_NUMERIC, PCD_BIN_NUMERIC_BITWISE, PCD_BIN_LOGICAL, PCD_BIN_SPECIAL, PCD_BIN_LAZY,
+            PCD_BINARY_ASSIGN_NORMAL, PCD_BINARY_ASSIGN_BITWISE,
             PCD_UNARY_NUMERIC, PCD_UNARY_LOGICAL, PCD_UNARY_SPECIAL
     );
 
@@ -760,13 +792,18 @@ public class AstBuilder {
 
                 Expr expr = (Expr) list.get(index);
                 if (expr instanceof UnaryExpr) {
+                    UnaryExpr ue = (UnaryExpr) expr;
                     Node value;
-                    if (((UnaryExpr) expr).atLeft) {
-                        value = list.remove(index + 1);
+                    if (ue.atLeft) {
+                        if (list.size() <= index + 1 && ue.voidAble()) {
+                            value = VoidNode.VOID_NODE;
+                        } else {
+                            value = list.remove(index + 1);
+                        }
                     } else {
                         value = list.remove(index - 1);
                     }
-                    ((UnaryExpr) expr).setValue(value);
+                    ue.setValue(value);
                 } else if (expr instanceof BinaryExpr) {
                     Node right = list.remove(index + 1);
                     Node left = list.remove(index - 1);
