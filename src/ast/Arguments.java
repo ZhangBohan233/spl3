@@ -4,6 +4,8 @@ import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
 import interpreter.types.TypeValue;
 
+import java.util.Arrays;
+
 public class Arguments extends Node {
 
     private final Line line;

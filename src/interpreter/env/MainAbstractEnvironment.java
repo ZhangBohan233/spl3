@@ -1,6 +1,7 @@
 package interpreter.env;
 
 import interpreter.Memory;
+import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
 import util.LineFile;
 import util.Utilities;
@@ -11,6 +12,10 @@ import java.util.Set;
 
 public abstract class MainAbstractEnvironment extends Environment {
 
+    public static final Set<String> NON_OVERRIDE_FUNCTIONS = Set.of(
+            "init"
+    );
+
     protected Set<ModuleEnvironment> namespaces = new HashSet<>();
 
     public MainAbstractEnvironment(Memory memory, Environment outer) {
@@ -19,8 +24,13 @@ public abstract class MainAbstractEnvironment extends Environment {
 
     @Override
     public void defineFunction(String name, TypeValue funcTv, LineFile lineFile) {
-        if (hasName(name, lineFile)) throw new EnvironmentError("Function '" + name + "' has already defined" +
-                "in this scope. ", lineFile);
+        if (!NON_OVERRIDE_FUNCTIONS.contains(name) && hasName(name, lineFile)) {
+            TypeValue superFn = get(name, lineFile);
+            if (!superFn.getType().equals(funcTv.getType())) {
+                throw new TypeError("Function '" + name + "' does not overrides its super function, but has " +
+                        "identical names. ", lineFile);
+            }
+        }
 
         constants.put(name, funcTv);
     }

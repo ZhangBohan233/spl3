@@ -13,3 +13,5 @@
 * ~~Function overloading~~   _**discarded**_
 * Type inference for `new` expression
 * `++`, `--`, `+=`, `-=`, etc.
+* String concatenation
+* Override type check (not using equal)

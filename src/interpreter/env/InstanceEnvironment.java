@@ -44,4 +44,8 @@ public class InstanceEnvironment extends MainAbstractEnvironment {
             }
         } else return tv;
     }
+
+    public boolean selfContains(String name) {
+        return variables.containsKey(name) || constants.containsKey(name);
+    }
 }

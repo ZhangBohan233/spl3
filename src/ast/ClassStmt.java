@@ -20,14 +20,15 @@ public class ClassStmt extends Node {
     private Implements implementations;
     private TypeRepresent superclass;
     private final boolean isInterface;
-    private boolean isAbstract;
+    private final boolean isAbstract;
     private BlockStmt body;
 
-    public ClassStmt(String className, boolean isInterface, LineFile lineFile) {
+    public ClassStmt(String className, boolean isInterface, boolean isAbstract, LineFile lineFile) {
         super(lineFile);
 
         this.className = className;
         this.isInterface = isInterface;
+        this.isAbstract = isAbstract;
     }
 
     public void setBody(BlockStmt body) {

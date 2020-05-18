@@ -3,12 +3,9 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.SplException;
 import interpreter.env.Environment;
-import interpreter.splObjects.Instance;
-import interpreter.splObjects.NativeObject;
-import interpreter.splObjects.SplArray;
+import interpreter.splObjects.*;
 import interpreter.types.*;
 import interpreter.primitives.Pointer;
-import interpreter.splObjects.SplModule;
 import util.LineFile;
 
 public class Dot extends BinaryExpr implements TypeRepresent {
@@ -30,10 +27,12 @@ public class Dot extends BinaryExpr implements TypeRepresent {
             switch (type.getPointerType()) {
                 case PointerType.CLASS_TYPE:
                     Instance instance = (Instance) env.getMemory().get(ptr);
-                    return right.evaluate(instance.getEnv());
+                    return crossEnvEval(right, instance.getEnv(), env, getLineFile());
+//                    return right.evaluate(instance.getEnv());
                 case PointerType.MODULE_TYPE:
                     SplModule module = (SplModule) env.getMemory().get(ptr);
-                    return right.evaluate(module.getEnv());
+                    return crossEnvEval(right, module.getEnv(), env, getLineFile());
+//                    return right.evaluate(module.getEnv());
                 case PointerType.ARRAY_TYPE:
                     SplArray arr = (SplArray) env.getMemory().get(ptr);
                     return arr.getAttr(right, getLineFile());
@@ -46,6 +45,20 @@ public class Dot extends BinaryExpr implements TypeRepresent {
             }
         } else {
             throw new TypeError("Only pointer type supports attributes operation. ", getLineFile());
+        }
+    }
+
+    private static TypeValue crossEnvEval(Node right, Environment objEnv, Environment oldEnv, LineFile lineFile) {
+        if (right instanceof NameNode) {
+            return right.evaluate(objEnv);
+        } else if (right instanceof FuncCall) {
+            TypeValue funcTv = ((FuncCall) right).getCallObj().evaluate(objEnv);
+            if(!(funcTv.getType() instanceof CallableType))
+                throw new SplException("Class attribute not callable. ", lineFile);
+            SplCallable callable = (SplCallable) objEnv.getMemory().get((Pointer) funcTv.getValue());
+            return callable.call(((FuncCall) right).getArguments(), oldEnv);
+        } else {
+            throw new SplException("Unexpected right side type of dot '" + right.getClass() + "' ", lineFile);
         }
     }
 

@@ -19,11 +19,13 @@ public class FuncDefinition extends Node {
     private TypeRepresent rType;
     private Line parameters;
     private BlockStmt body;
+    private final boolean isAbstract;
 
-    public FuncDefinition(String name, LineFile lineFile) {
+    public FuncDefinition(String name, boolean isAbstract, LineFile lineFile) {
         super(lineFile);
 
         this.name = name;
+        this.isAbstract = isAbstract;
     }
 
     public void setParameters(Line parameters) {
@@ -50,7 +52,12 @@ public class FuncDefinition extends Node {
         Type rtype = rType.evalType(env);
         CallableType funcType = new CallableType(paramTypes, rtype);
 
-        Function function = new Function(body, params, funcType, env, getLineFile());
+        Function function;
+        if (isAbstract) {
+            function = new Function(params, funcType, env, getLineFile());
+        } else {
+            function = new Function(body, params, funcType, env, getLineFile());
+        }
         Pointer funcPtr = env.getMemory().allocateFunction(function, env);
 
         TypeValue funcTv = new TypeValue(funcType, funcPtr);

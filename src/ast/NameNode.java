@@ -8,7 +8,7 @@ import interpreter.types.PointerType;
 import util.LineFile;
 
 public class NameNode extends LeafNode implements TypeRepresent {
-    private String name;
+    private final String name;
 
     public NameNode(String name, LineFile lineFile) {
         super(lineFile);

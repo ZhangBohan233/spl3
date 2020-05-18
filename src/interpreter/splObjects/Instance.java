@@ -44,27 +44,11 @@ public class Instance extends SplObject {
         SplClass clazz = (SplClass) obj;
         InstanceEnvironment instanceEnv = new InstanceEnvironment(clazz.getDefinitionEnv());
 
-//        System.out.println(clazz.getBody());
-        clazz.getBody().evaluate(instanceEnv);  // most important step
-
-        if (!instanceEnv.hasName("init", lineFile)) {
-            // If class no constructor, put an empty default constructor
-            FuncDefinition fd = new FuncDefinition("init", LineFile.LF_INTERPRETER);
-            fd.setParameters(new Line());
-            fd.setRType(new PrimitiveTypeNameNode("void", LineFile.LF_INTERPRETER));
-            BlockStmt constBody = new BlockStmt(LineFile.LF_INTERPRETER);
-
-            fd.setBody(constBody);
-
-            fd.evaluate(instanceEnv);
-        }
-
         Instance instance = new Instance(clazzType, instanceEnv);
         Pointer instancePtr = outerEnv.getMemory().allocate(1, instanceEnv);
         outerEnv.getMemory().set(instancePtr, instance);
 
         TypeValue instanceTv = new TypeValue(clazzType, instancePtr);
-
         instance.getEnv().directDefineConstAndSet("this", instanceTv);
 
         ClassType scp = clazz.getSuperclassType();
@@ -74,12 +58,24 @@ public class Instance extends SplObject {
             instance.getEnv().directDefineConstAndSet("super", scInstance);
         }
 
+        clazz.getBody().evaluate(instanceEnv);  // most important step
+
+        if (!instanceEnv.selfContains("init")) {
+            // If class no constructor, put an empty default constructor
+            FuncDefinition fd = new FuncDefinition("init", false, LineFile.LF_INTERPRETER);
+            fd.setParameters(new Line());
+            fd.setRType(new PrimitiveTypeNameNode("void", LineFile.LF_INTERPRETER));
+            BlockStmt constBody = new BlockStmt(LineFile.LF_INTERPRETER);
+
+            fd.setBody(constBody);
+
+            fd.evaluate(instanceEnv);
+        }
+
         return new InstanceTypeValue(instance, instanceTv);
     }
 
     public static void callInit(Instance instance, Arguments arguments, Environment callEnv, LineFile lineFile) {
-//        TypeValue constructorTv = instance.getEnv().get("init", lineFile);
-//        Function constructor = (Function) callEnv.getMemory().get((Pointer) constructorTv.getValue());
         Function constructor = getConstructor(instance, lineFile);
         constructor.call(arguments, callEnv);
     }
@@ -137,7 +133,7 @@ public class Instance extends SplObject {
 
             Line constLine = new Line();
             constLine.getChildren().add(dot);
-            ((BlockStmt) body).addLine(constLine);
+            ((BlockStmt) body).getLines().add(0, constLine);
         } else {
             throw new SplException("Unexpected syntax. ");
         }

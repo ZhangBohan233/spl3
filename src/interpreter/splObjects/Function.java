@@ -1,7 +1,6 @@
 package interpreter.splObjects;
 
 import ast.*;
-import interpreter.Memory;
 import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.env.FunctionEnvironment;
@@ -9,7 +8,7 @@ import interpreter.types.*;
 import parser.ParseError;
 import util.LineFile;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Function extends SplCallable {
@@ -24,7 +23,11 @@ public class Function extends SplCallable {
     private final LineFile lineFile;
 
     private final boolean isLambda;
+    private final boolean isAbstract;
 
+    /**
+     * Constructor for regular function.
+     */
     public Function(BlockStmt body, List<Declaration> params, CallableType funcType, Environment definitionEnv,
                     LineFile lineFile) {
         super(funcType);
@@ -35,10 +38,27 @@ public class Function extends SplCallable {
         this.lineFile = lineFile;
 
         isLambda = false;
+        isAbstract = false;
     }
 
     /**
-     * Constructor for lambda expression
+     * Constructor for abstract function.
+     */
+    public Function(List<Declaration> params, CallableType funcType, Environment definitionEnv,
+                    LineFile lineFile) {
+        super(funcType);
+
+        this.body = null;
+        this.params = params;
+        this.definitionEnv = definitionEnv;
+        this.lineFile = lineFile;
+
+        isLambda = false;
+        isAbstract = true;
+    }
+
+    /**
+     * Constructor for lambda expression.
      *
      * @param body          one-line function body
      * @param params        parameters
@@ -56,10 +76,15 @@ public class Function extends SplCallable {
         this.lineFile = lineFile;
 
         isLambda = true;
+        isAbstract = false;
     }
 
     public Node getBody() {
         return body;
+    }
+
+    public Environment getDefinitionEnv() {
+        return definitionEnv;
     }
 
     @Override
@@ -74,7 +99,13 @@ public class Function extends SplCallable {
     }
 
     public TypeValue call(TypeValue[] evaluatedArgs, Environment callingEnv, LineFile argLineFile) {
-        callingEnv.getMemory().increaseStack();
+        if (isAbstract) {
+            throw new SplException("Function is not implemented. ", lineFile);
+        }
+        assert body != null;
+
+//        System.out.println(Arrays.toString(evaluatedArgs));
+
         FunctionEnvironment scope = new FunctionEnvironment(definitionEnv);
         if (evaluatedArgs.length != params.size()) {
             throw new SplException("Arguments length does not match parameters. ", argLineFile);
@@ -87,12 +118,14 @@ public class Function extends SplCallable {
             scope.setVar(paramName, evaluatedArgs[i], lineFile);
         }
 
+        scope.getMemory().increaseStack();
         TypeValue evalResult = body.evaluate(scope);
-        callingEnv.getMemory().decreaseStack();
+        scope.getMemory().decreaseStack();
 
         if (isLambda) return evalResult;
 
         TypeValue rtnVal = scope.getReturnValue();
+
         if (funcType.getRType().equals(PrimitiveType.TYPE_VOID)) {
             if (rtnVal == null) {
                 return TypeValue.VOID;

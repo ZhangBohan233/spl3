@@ -57,7 +57,7 @@ public class FuncCall extends Node {
 
     @Override
     public String toString() {
-        return callObj + "(" + arguments + ")";
+        return callObj + " call(" + arguments + ")";
     }
 
     public Arguments getArguments() {

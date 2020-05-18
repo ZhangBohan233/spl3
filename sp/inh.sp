@@ -1,13 +1,15 @@
 import "imp/imp.sp"
 
 class B {
+    const a: int = 0;
+
     fn t() int {
         return 1;
     }
 }
 
 class C extends B {
-    const a: int = 1;
+    const a: int;
 
     fn init(x: int) void {
         a = x;
@@ -29,7 +31,7 @@ class C extends B {
 
 fn main() int {
     a: C = new C(2);
-
+    System.println(a.super.a);
 
     return a.t();
 }

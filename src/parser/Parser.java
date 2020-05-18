@@ -34,6 +34,7 @@ public class Parser {
         boolean extending = false;
         boolean conditioning = false;
         boolean isElse = false;
+        boolean isAbstract = false;
 
         Stack<Integer> paramBrackets = new Stack<>();
         Stack<Integer> lambdaParamBrackets = new Stack<>();
@@ -284,11 +285,14 @@ public class Parser {
                                 fnName = null;
                             }
                             builder.addBraceBlock();  // give the function a whole block
-                            builder.addFunction(fnName, lineFile);
+                            builder.addFunction(fnName, isAbstract, lineFile);
+                            isAbstract = false;
                             fnParams = true;
                             break;
                         case "interface":
                             isInterface = true;
+                            if (isAbstract) throw new SyntaxError("Illegal combination 'abstract interface'. ",
+                                    lineFile);
                         case "class":
                             Token classNameToken = tokens.get(i + 1);
                             i += 1;
@@ -297,7 +301,8 @@ public class Parser {
                             }
                             String className = ((IdToken) classNameToken).getIdentifier();
                             classHeader = true;
-                            builder.addClass(className, isInterface, lineFile);
+                            builder.addClass(className, isInterface, isAbstract, lineFile);
+                            isAbstract = false;
                             break;
                         case "extends":
                             builder.addExtend(lineFile);
@@ -310,6 +315,9 @@ public class Parser {
                             }
                             builder.addImplements();
                             implementing = true;
+                            break;
+                        case "abstract":
+                            isAbstract = true;
                             break;
                         case "import":
                             String importName = ((IdToken) tokens.get(i + 1)).getIdentifier();
@@ -327,10 +335,16 @@ public class Parser {
                             builder.finishPart();
                             break;
                         case ";":
+                            if (isAbstract) {
+                                throw new SyntaxError("Unexpected token 'abstract'. ", lineFile);
+                            }
+
                             builder.finishPart();
                             if (fnRType) {
-                                fnRType = false;  // TODO
+                                fnRType = false;
                                 builder.addFnRType(lineFile);
+                                builder.finishAbstractFunction(lineFile);
+                                builder.finishFunctionOuterBlock();
                             }
 
                             builder.finishLine();

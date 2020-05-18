@@ -264,12 +264,12 @@ public class AstBuilder {
         }
     }
 
-    void addFunction(String name, LineFile lineFile) {
+    void addFunction(String name, boolean isAbstract, LineFile lineFile) {
         if (inner == null) {
-            FuncDefinition funcDefinition = new FuncDefinition(name, lineFile);
+            FuncDefinition funcDefinition = new FuncDefinition(name, isAbstract, lineFile);
             stack.add(funcDefinition);
         } else {
-            inner.addFunction(name, lineFile);
+            inner.addFunction(name, isAbstract, lineFile);
         }
     }
 
@@ -445,11 +445,11 @@ public class AstBuilder {
         }
     }
 
-    void addClass(String className, boolean isInterface, LineFile lineFile) {
+    void addClass(String className, boolean isInterface, boolean isAbstract, LineFile lineFile) {
         if (inner == null) {
-            stack.add(new ClassStmt(className, isInterface, lineFile));
+            stack.add(new ClassStmt(className, isInterface, isAbstract, lineFile));
         } else {
-            inner.addClass(className, isInterface, lineFile);
+            inner.addClass(className, isInterface, isAbstract, lineFile);
         }
     }
 
@@ -523,6 +523,14 @@ public class AstBuilder {
             finishLine();
         } else {
             inner.finishFunction(lineFile);
+        }
+    }
+
+    void finishAbstractFunction(LineFile lineFile) {
+        if (inner == null) {
+            finishLine();
+        } else {
+            inner.finishAbstractFunction(lineFile);
         }
     }
 
