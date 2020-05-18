@@ -208,6 +208,22 @@ public class AstBuilder {
         }
     }
 
+    void addBinaryOperatorAssign(String op, LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new BinaryOperatorAssignment(op, lineFile));
+        } else {
+            inner.addBinaryOperatorAssign(op, lineFile);
+        }
+    }
+
+    void addIncDecOperator(boolean isIncrement, LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new IncDecOperator(isIncrement, lineFile));
+        } else {
+            inner.addIncDecOperator(isIncrement, lineFile);
+        }
+    }
+
     void addFakeTernary(String op, LineFile lineFile) {
         if (inner == null) {
             stack.add(new FakeTernaryOperator(op, lineFile));
@@ -784,6 +800,17 @@ public class AstBuilder {
                                 maxPre = pre;
                                 index = i;
                             }
+                        } else if (node instanceof IncDecOperator) {
+                            int pre;
+                            if (((IncDecOperator) node).isIncrement) {
+                                pre = PRECEDENCES.get("++");
+                            } else {
+                                pre = PRECEDENCES.get("--");
+                            }
+                            if (pre > maxPre) {
+                                maxPre = pre;
+                                index = i;
+                            }
                         }
                     }
                 }
@@ -809,6 +836,21 @@ public class AstBuilder {
                     Node left = list.remove(index - 1);
                     ((BinaryExpr) expr).setLeft(left);
                     ((BinaryExpr) expr).setRight(right);
+                } else if (expr instanceof IncDecOperator) {
+                    boolean post = true;
+                    if (index < list.size() - 1) {
+                        Node value = list.get(index + 1);
+                        if (value instanceof NameNode || value instanceof Dot) {
+                            post = false;
+                        }
+                    }
+                    IncDecOperator ieo = (IncDecOperator) expr;
+                    ieo.setPost(post);
+                    if (post) {
+                        ieo.setValue(list.remove(index - 1));
+                    } else {
+                        ieo.setValue(list.remove(index + 1));
+                    }
                 }
             }
         } catch (IndexOutOfBoundsException e) {

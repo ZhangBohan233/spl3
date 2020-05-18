@@ -43,7 +43,7 @@ public class BinaryOperator extends BinaryExpr {
                         rt.isIntLike(),
                         getLineFile()
                 ));
-                return new TypeValue(PrimitiveType.TYPE_INT, result);
+                return new TypeValue(lt, result);
             } else if (lt.equals(PrimitiveType.TYPE_FLOAT)) {
                 Primitive result = new SplFloat(floatArithmetic(
                         operator,

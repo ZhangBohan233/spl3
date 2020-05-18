@@ -1,11 +1,7 @@
-fn tt() void {
-    return;
-}
-
 
 fn main() int {
-    tt();
+    j := 1;
 
-    return 1;
-
+    System.println(--j);
+    return j;
 }

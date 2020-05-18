@@ -14,7 +14,11 @@ import java.util.Set;
 public class Tokenizer {
 
     public static final Set<String> NUMERIC_BINARY = Set.of(
-            "+", "-", "*", "/", "%", "<<", ">>", ">>>", "&", "|", "^"
+            "+", "-", "*", "/", "%", ">>", ">>>", "<<", "&", "|", "^"
+    );
+
+    public static final Set<String> NUMERIC_BINARY_ASSIGN = Set.of(
+            "+=", "-=", "*=", "/=", "%=", ">>=", ">>>=", "<<=", "&=", "|=", "^="
     );
 
     public static final Set<String> LOGICAL_BINARY = Set.of(
@@ -38,11 +42,12 @@ public class Tokenizer {
     );
 
     public static final Set<String> OTHERS = Set.of(
-            "=", "->", "<-", ":="
+            "=", "->", "<-", ":=", "++", "--"
     );
 
     public static final Set<String> EXTRA_IDENTIFIERS = Utilities.mergeSets(
             NUMERIC_BINARY,
+            NUMERIC_BINARY_ASSIGN,
             LOGICAL_BINARY,
             LAZY_BINARY,
             LOGICAL_UNARY,
@@ -53,6 +58,7 @@ public class Tokenizer {
 
     public static final Set<String> ALL_BINARY = Utilities.mergeSets(
             NUMERIC_BINARY,
+            NUMERIC_BINARY_ASSIGN,
             LOGICAL_BINARY,
             LAZY_BINARY
     );

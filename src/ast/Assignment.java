@@ -21,14 +21,19 @@ public class Assignment extends BinaryExpr {
     protected TypeValue internalEval(Environment env) {
         TypeValue rightRes = right.evaluate(env);
 
-        if (left instanceof NameNode) {
-            env.setVar(((NameNode) left).getName(), rightRes, getLineFile());
-        } else if (left instanceof Declaration) {
-            left.evaluate(env);
+        assignment(left, rightRes, env, getLineFile());
+        return rightRes;
+    }
 
-            env.setVar(((Declaration) left).getLeftName().getName(), rightRes, getLineFile());
-        } else if (left instanceof Dot) {
-            TypeValue leftLeft = ((Dot) left).left.evaluate(env);
+    public static void assignment(Node key, TypeValue value, Environment env, LineFile lineFile) {
+        if (key instanceof NameNode) {
+            env.setVar(((NameNode) key).getName(), value, lineFile);
+        } else if (key instanceof Declaration) {
+            key.evaluate(env);
+
+            env.setVar(((Declaration) key).getLeftName().getName(), value, lineFile);
+        } else if (key instanceof Dot) {
+            TypeValue leftLeft = ((Dot) key).left.evaluate(env);
             PointerType leftLeftType = (PointerType) leftLeft.getType();
             Environment leftEnv;
             if (leftLeftType.getPointerType() == PointerType.MODULE_TYPE) {
@@ -40,21 +45,20 @@ public class Assignment extends BinaryExpr {
             } else {
                 throw new TypeError();
             }
-            leftEnv.setVar(((NameNode) ((Dot) left).right).getName(), rightRes, getLineFile());
-        } else if (left instanceof IndexingNode) {
-            TypeValue leftCallRes = ((IndexingNode) left).getCallObj().evaluate(env);
-            List<Node> arguments = ((IndexingNode) left).getArgs().getChildren();
-            int index = IndexingNode.getIndex(leftCallRes, arguments, env, getLineFile());
+            leftEnv.setVar(((NameNode) ((Dot) key).right).getName(), value, lineFile);
+        } else if (key instanceof IndexingNode) {
+            TypeValue leftCallRes = ((IndexingNode) key).getCallObj().evaluate(env);
+            List<Node> arguments = ((IndexingNode) key).getArgs().getChildren();
+            int index = IndexingNode.getIndex(leftCallRes, arguments, env, lineFile);
             SplArray.setItemAtIndex((Pointer) leftCallRes.getValue(),
                     index,
                     (ArrayType) leftCallRes.getType(),
-                    rightRes,
+                    value,
                     env,
-                    getLineFile());
+                    lineFile);
         } else {
             throw new SplException();
         }
-        return rightRes;
     }
 
     @Override

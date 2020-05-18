@@ -64,6 +64,8 @@ public class Parser {
                     builder.addUnaryOperator(identifier, RegularUnaryOperator.LOGICAL, lineFile);
                 } else if (Tokenizer.NUMERIC_BINARY.contains(identifier)) {
                     builder.addBinaryOperator(identifier, BinaryOperator.NUMERIC, lineFile);
+                } else if (Tokenizer.NUMERIC_BINARY_ASSIGN.contains(identifier)) {
+                    builder.addBinaryOperatorAssign(identifier, lineFile);
                 } else if (Tokenizer.LOGICAL_BINARY.contains(identifier)) {
                     builder.addBinaryOperator(identifier, BinaryOperator.LOGICAL, lineFile);
                 } else if (Tokenizer.LAZY_BINARY.contains(identifier)) {
@@ -210,6 +212,12 @@ public class Parser {
                             break;
                         case "<-":
                             builder.addAnonymousClass(lineFile);
+                            break;
+                        case "++":
+                            builder.addIncDecOperator(true, lineFile);
+                            break;
+                        case "--":
+                            builder.addIncDecOperator(false, lineFile);
                             break;
                         case "true":
                             builder.addBoolean(true, lineFile);
