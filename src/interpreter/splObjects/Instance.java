@@ -101,8 +101,8 @@ public class Instance extends SplObject {
             InstanceEnvironment supEnv = supIns.getEnv();
             TypeValue supConstTv = supEnv.get("init", lineFile);
             Function supConst = (Function) env.getMemory().get((Pointer) supConstTv.getValue());
-            List<Type> supParamTypes = supConst.getFuncType().getParamTypes();
-            if (supParamTypes.size() > 0) {
+//            List<Type> supParamTypes = supConst.getFuncType().getParamTypes();
+            if (supConst.minArgCount() > 0) {
                 // superclass has a non-trivial constructor
                 if (noLeadingSuperCall(constructor)) {
                     throw new SplException("Constructor of child class must first call super.init() with matching " +

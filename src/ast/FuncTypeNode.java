@@ -27,12 +27,12 @@ public class FuncTypeNode extends BinaryExpr implements TypeRepresent {
 
         Line parameters = ((LambdaExpr) left).getParameters();
 
-        List<Declaration> params = new ArrayList<>();
+        List<Function.Parameter> params = new ArrayList<>();
         List<Type> paramTypes = new ArrayList<>();
         Function.evalParamTypes(parameters, params, paramTypes, env);
 
         FunctionEnvironment fakeEnv = new FunctionEnvironment(env);
-        for (Declaration d : params) d.evaluate(fakeEnv);
+        for (Function.Parameter p : params) p.declaration.evaluate(fakeEnv);
         Type rt = right.inferredType(fakeEnv);
 
         CallableType lambdaType = new CallableType(paramTypes, rt);

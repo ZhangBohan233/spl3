@@ -45,7 +45,7 @@ public class FuncDefinition extends Node {
     @Override
     protected TypeValue internalEval(Environment env) {
 
-        List<Declaration> params = new ArrayList<>();
+        List<Function.Parameter> params = new ArrayList<>();
         List<Type> paramTypes = new ArrayList<>();
         Function.evalParamTypes(parameters, params, paramTypes, env);
 

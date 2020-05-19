@@ -18,7 +18,7 @@ public class Function extends SplCallable {
      */
     private final Environment definitionEnv;
 
-    private final List<Declaration> params;
+    private final List<Parameter> params;  // only Declaration and Assignment
     private final Node body;
     private final LineFile lineFile;
 
@@ -28,7 +28,7 @@ public class Function extends SplCallable {
     /**
      * Constructor for regular function.
      */
-    public Function(BlockStmt body, List<Declaration> params, CallableType funcType, Environment definitionEnv,
+    public Function(BlockStmt body, List<Parameter> params, CallableType funcType, Environment definitionEnv,
                     LineFile lineFile) {
         super(funcType);
 
@@ -44,7 +44,7 @@ public class Function extends SplCallable {
     /**
      * Constructor for abstract function.
      */
-    public Function(List<Declaration> params, CallableType funcType, Environment definitionEnv,
+    public Function(List<Parameter> params, CallableType funcType, Environment definitionEnv,
                     LineFile lineFile) {
         super(funcType);
 
@@ -66,7 +66,7 @@ public class Function extends SplCallable {
      * @param definitionEnv environment where this lambda is defined
      * @param lineFile      line and file
      */
-    public Function(Node body, List<Declaration> params, CallableType lambdaType, Environment definitionEnv,
+    public Function(Node body, List<Parameter> params, CallableType lambdaType, Environment definitionEnv,
                     LineFile lineFile) {
         super(lambdaType);
 
@@ -107,15 +107,23 @@ public class Function extends SplCallable {
 //        System.out.println(Arrays.toString(evaluatedArgs));
 
         FunctionEnvironment scope = new FunctionEnvironment(definitionEnv);
-        if (evaluatedArgs.length != params.size()) {
+        if (evaluatedArgs.length < minArgCount() || evaluatedArgs.length > maxArgCount()) {
             throw new SplException("Arguments length does not match parameters. ", argLineFile);
         }
 
         for (int i = 0; i < params.size(); ++i) {
-            Declaration param = params.get(i);
-            String paramName = param.getLeftName().getName();
-            param.evaluate(scope);  // declare param
-            scope.setVar(paramName, evaluatedArgs[i], lineFile);
+            Parameter param = params.get(i);
+            String paramName = param.declaration.getLeftName().getName();
+            param.declaration.evaluate(scope);  // declare param
+            if (i < evaluatedArgs.length) {
+                // arg from call
+                scope.setVar(paramName, evaluatedArgs[i], lineFile);
+            } else if (param.hasDefaultTv()) {
+                // default arg
+                scope.setVar(paramName, param.defaultTv, lineFile);
+            } else {
+                throw new SplException("Unexpect argument error. ", lineFile);
+            }
         }
 
         scope.getMemory().increaseStack();
@@ -143,17 +151,63 @@ public class Function extends SplCallable {
         }
     }
 
-    public static void evalParamTypes(Line parameters, List<Declaration> params, List<Type> paramTypes,
+    public int minArgCount() {
+        int c = 0;
+        for (Parameter param : params) {
+            if (!param.hasDefaultTv()) c++;
+        }
+        return c;
+    }
+
+    public int maxArgCount() {
+        return params.size();  // TODO: check unpack
+    }
+
+    public static void evalParamTypes(Line parameters, List<Parameter> params, List<Type> paramTypes,
                                       Environment env) {
 
+        boolean hasDefault = false;
         for (int i = 0; i < parameters.getChildren().size(); ++i) {
             Node node = parameters.getChildren().get(i);
             if (node instanceof Declaration) {
-                params.add((Declaration) node);
+                if (hasDefault) {
+                    throw new ParseError("Positional parameter cannot occur behind optional parameter. ",
+                            node.getLineFile());
+                }
+                params.add(new Parameter((Declaration) node));
                 paramTypes.add(((Declaration) node).getRightTypeRep().evalType(env));
-            } else {
-                throw new ParseError("Unexpected parameter syntax. ", node.getLineFile());
+                continue;
+            } else if (node instanceof Assignment) {
+                hasDefault = true;
+                Assignment assignment = (Assignment) node;
+                if (assignment.getLeft() instanceof Declaration) {
+                    Parameter p = new Parameter((Declaration) assignment.getLeft(),
+                            assignment.getRight().evaluate(env));
+                    params.add(p);
+                    paramTypes.add(((Declaration) assignment.getLeft()).getRightTypeRep().evalType(env));
+                    continue;
+                }
             }
+            throw new ParseError("Unexpected parameter syntax. ", node.getLineFile());
+        }
+    }
+
+    public static class Parameter {
+        public final Declaration declaration;
+        public final TypeValue defaultTv;
+
+        Parameter(Declaration declaration, TypeValue typeValue) {
+            this.declaration = declaration;
+            this.defaultTv = typeValue;
+        }
+
+        Parameter(Declaration declaration) {
+            this.declaration = declaration;
+            this.defaultTv = null;
+        }
+
+        public boolean hasDefaultTv() {
+            return defaultTv != null;
         }
     }
 }
