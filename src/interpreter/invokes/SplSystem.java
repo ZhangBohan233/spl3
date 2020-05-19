@@ -1,14 +1,12 @@
 package interpreter.invokes;
 
 import ast.Arguments;
+import ast.StringLiteral;
 import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.primitives.Int;
 import interpreter.primitives.Pointer;
-import interpreter.splObjects.Function;
-import interpreter.splObjects.Instance;
-import interpreter.splObjects.NativeObject;
-import interpreter.splObjects.SplArray;
+import interpreter.splObjects.*;
 import interpreter.types.*;
 import util.LineFile;
 
@@ -113,6 +111,16 @@ public class SplSystem extends NativeObject {
         return new TypeValue(PrimitiveType.TYPE_INT, new Int(typeValue.getValue().intValue()));
     }
 
+    public TypeValue string(Arguments arguments, Environment environment, LineFile lineFile) {
+        checkArgCount(arguments, 1, "id", lineFile);
+
+        TypeValue typeValue = arguments.getLine().getChildren().get(0).evaluate(environment);
+
+        String s = getString(typeValue, environment, lineFile);
+
+        return StringLiteral.createStringOneStep(s.toCharArray(), environment, lineFile);
+    }
+
     private static void checkArgCount(Arguments arguments, int expectArgc, String fnName, LineFile lineFile) {
         if (arguments.getLine().getChildren().size() != expectArgc) {
             throw new SplException("System." + fnName + "() takes " + expectArgc + " arguments, " +
@@ -120,7 +128,24 @@ public class SplSystem extends NativeObject {
         }
     }
 
-    private String getPrintString(Arguments arguments, Environment environment, LineFile lineFile) {
+    private static String getString(TypeValue typeValue, Environment environment, LineFile lineFile) {
+        TypeValue stringTv = environment.get("String", lineFile);
+        ClassType stringType = (ClassType) stringTv.getType();
+        return getString(typeValue, environment, lineFile, stringType);
+    }
+
+    private static String getString(TypeValue typeValue, Environment environment, LineFile lineFile,
+                                    ClassType stringType) {
+        if (typeValue.getType().isPrimitive()) {
+            return typeValue.getValue().toString();
+        } else {
+            PointerType ptrType = (PointerType) typeValue.getType();
+            Pointer ptr = (Pointer) typeValue.getValue();
+            return pointerToSting(ptrType, ptr, environment, lineFile, stringType);
+        }
+    }
+
+    private static String getPrintString(Arguments arguments, Environment environment, LineFile lineFile) {
         TypeValue[] args = arguments.evalArgs(environment);
 
         TypeValue stringTv = environment.get("String", lineFile);
@@ -128,34 +153,45 @@ public class SplSystem extends NativeObject {
 
         String[] resArr = new String[args.length];
         for (int i = 0; i < args.length; ++i) {
-            TypeValue arg = args[i];
-            if (arg.getType().isPrimitive()) {
-                resArr[i] = arg.getValue().toString();
-            } else {
-                PointerType ptrType = (PointerType) arg.getType();
-                Pointer ptr = (Pointer) arg.getValue();
-                if (ptr.getPtr() == 0) {  // Pointed to null
-                    resArr[i] = "null";
-                } else if (ptrType.getPointerType() == PointerType.CLASS_TYPE) {
-                    Instance instance = (Instance) environment.getMemory().get(ptr);
-
-                    if (stringType.equals(instance.getType())) {  // is String itself
-                        resArr[i] = extractFromSplString(instance, environment, lineFile);
-                    } else {
-                        TypeValue toStrFtnTv = instance.getEnv().get("toString", lineFile);
-                        Function toStrFtn = (Function) environment.getMemory().get((Pointer) toStrFtnTv.getValue());
-                        TypeValue toStrRes = toStrFtn.call(new TypeValue[0], environment, lineFile);
-                        assert stringType.isSuperclassOfOrEquals(toStrRes.getType(), environment);
-
-                        Instance strIns = (Instance) environment.getMemory().get((Pointer) toStrRes.getValue());
-                        resArr[i] = extractFromSplString(strIns, environment, lineFile);
-                    }
-                } else {
-                    resArr[i] = environment.getMemory().get(ptr).toString();
-                }
-            }
+            resArr[i] = getString(args[i], environment, lineFile, stringType);
         }
         return String.join(", ", resArr);
+    }
+
+    private static String pointerToSting(PointerType ptrType,
+                                         Pointer ptr,
+                                         Environment environment,
+                                         LineFile lineFile) {
+
+        TypeValue stringTv = environment.get("String", lineFile);
+        ClassType stringType = (ClassType) stringTv.getType();
+        return pointerToSting(ptrType, ptr, environment, lineFile, stringType);
+    }
+
+    private static String pointerToSting(PointerType ptrType,
+                                         Pointer ptr,
+                                         Environment environment,
+                                         LineFile lineFile,
+                                         ClassType stringType) {
+        if (ptr.getPtr() == 0) {  // Pointed to null
+            return  "null";
+        } else if (ptrType.getPointerType() == PointerType.CLASS_TYPE) {
+            Instance instance = (Instance) environment.getMemory().get(ptr);
+
+            if (stringType.equals(instance.getType())) {  // is String itself
+                return extractFromSplString(instance, environment, lineFile);
+            } else {
+                TypeValue toStrFtnTv = instance.getEnv().get("toString", lineFile);
+                Function toStrFtn = (Function) environment.getMemory().get((Pointer) toStrFtnTv.getValue());
+                TypeValue toStrRes = toStrFtn.call(new TypeValue[0], environment, lineFile);
+                assert stringType.isSuperclassOfOrEquals(toStrRes.getType(), environment);
+
+                Instance strIns = (Instance) environment.getMemory().get((Pointer) toStrRes.getValue());
+                return extractFromSplString(strIns, environment, lineFile);
+            }
+        } else {
+            return environment.getMemory().get(ptr).toString();
+        }
     }
 
     private static String extractFromSplString(Instance stringInstance, Environment env, LineFile lineFile) {

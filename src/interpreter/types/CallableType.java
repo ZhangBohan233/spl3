@@ -46,7 +46,24 @@ public class CallableType extends PointerType {
 
     @Override
     public boolean isSuperclassOfOrEqualsNotNull(Type child, Environment env) {
-        return equals(child);
+        if (child instanceof CallableType) {
+            CallableType ct = (CallableType) child;
+
+            if (ct.paramTypes == null || paramTypes == null) return equals(ct);  // may be native functions
+
+            if (ct.paramTypes.size() == paramTypes.size()) {
+                for (int i = 0; i < paramTypes.size(); ++i) {
+                    Type ptThis = paramTypes.get(i);
+                    Type ptChild = ct.paramTypes.get(i);
+                    if (!ptThis.isSuperclassOfOrEquals(ptChild, env)) {
+                        return false;
+                    }
+                }
+                var b= rType.isSuperclassOfOrEquals(ct.rType, env);
+                return b;
+            }
+        }
+        return false;
     }
 
     @Override

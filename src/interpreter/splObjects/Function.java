@@ -4,6 +4,7 @@ import ast.*;
 import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.env.FunctionEnvironment;
+import interpreter.primitives.Pointer;
 import interpreter.types.*;
 import parser.ParseError;
 import util.LineFile;
@@ -117,7 +118,13 @@ public class Function extends SplCallable {
             param.declaration.evaluate(scope);  // declare param
             if (i < evaluatedArgs.length) {
                 // arg from call
-                scope.setVar(paramName, evaluatedArgs[i], lineFile);
+                try {
+                    scope.setVar(paramName, evaluatedArgs[i], lineFile);
+                } catch (TypeError e) {
+                    System.out.println(evaluatedArgs[i]);
+                    System.out.println(callingEnv.getMemory().get((Pointer) evaluatedArgs[i].getValue()));
+                    throw e;
+                }
             } else if (param.hasDefaultTv()) {
                 // default arg
                 scope.setVar(paramName, param.defaultTv, lineFile);

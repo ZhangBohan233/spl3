@@ -15,7 +15,7 @@ import java.util.Set;
 public class Memory {
 
     public static final int INTERVAL = 1;
-    private static final int DEFAULT_HEAP_SIZE = 256;
+    private static final int DEFAULT_HEAP_SIZE = 2048;
     private int heapSize;
     private int stackSize;
 
@@ -91,6 +91,7 @@ public class Memory {
         initGcMark();
         markGcByEnv(env);
         garbageCollect();
+        System.out.println("gc!");
     }
 
     private void garbageCollect() {

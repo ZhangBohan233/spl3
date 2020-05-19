@@ -27,6 +27,27 @@ public class NewStmt extends UnaryExpr {
         }
     }
 
+    @Override
+    protected Type inferredType(Environment env) {
+        return typeInference(value, env, getLineFile());
+    }
+
+    private static Type typeInference(Node node, Environment env, LineFile lineFile) {
+        if (node instanceof FuncCall) {
+            return  ((TypeRepresent) ((FuncCall) node).callObj).evalType(env);
+        } else if (node instanceof IndexingNode) {
+            return ((IndexingNode) node).evalType(env);
+        } else if (node instanceof Dot) {
+            Dot dot = (Dot) node;
+            TypeValue dotLeft = dot.left.evaluate(env);
+            if (!(dotLeft.getType() instanceof ModuleType)) throw new TypeError();
+            SplModule module = (SplModule) env.getMemory().get((Pointer) dotLeft.getValue());
+            return typeInference(dot.right, module.getEnv(), lineFile);
+        } else {
+            throw new SplException("Class type must be a call. Got " + node + " instead. ", lineFile);
+        }
+    }
+
     private static TypeValue directInitClass(Node node, Environment classDefEnv, Environment callEnv, LineFile lineFile) {
         if (node instanceof FuncCall) {
             return instanceCreation((FuncCall) node, classDefEnv, callEnv, lineFile);

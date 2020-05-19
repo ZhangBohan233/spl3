@@ -27,12 +27,15 @@ public class StringLiteral extends LiteralNode {
 
     @Override
     protected TypeValue internalEval(Environment env) {
+        return createStringOneStep(charArray, env, getLineFile());
+    }
 
+    public static TypeValue createStringOneStep(char[] charArray, Environment env, LineFile lineFile) {
         // create spl char array
-        TypeValue arrTv = createCharArrayAndAllocate(charArray, env, getLineFile());
+        TypeValue arrTv = createCharArrayAndAllocate(charArray, env, lineFile);
 
         // create String instance
-        return createStringInstance(arrTv, env, getLineFile());
+        return createStringInstance(arrTv, env, lineFile);
     }
 
     public static TypeValue createCharArrayAndAllocate(char[] charArray, Environment env, LineFile lineFile) {

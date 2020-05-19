@@ -1,5 +1,22 @@
+abstract class Number {
 
+}
 
+class Integer extends Number {
+    const value: int;
+
+    fn init(v: int) void {
+        value = v;
+    }
+
+    fn add(o: Object) Integer {
+        return new Integer(value + o.value);
+    }
+
+    fn toString() String {
+        return System.string(value);
+    }
+}
 
 interface Collection {
     abstract fn size() int;
@@ -14,7 +31,7 @@ abstract class AbstractList implements Collection {
 class List extends AbstractList {
 
     _size: int = 0;
-    _array: Object[] = new Object[2];
+    _array: Object[] = new Object[8];
 
     fn init() void {
 
@@ -31,6 +48,10 @@ class List extends AbstractList {
         return _array[index];
     }
 
+    fn pop() Object {
+        return _array[--_size];
+    }
+
     fn size() int {
         return _size;
     }
@@ -42,6 +63,18 @@ class List extends AbstractList {
     fn tail() List {
         sl := new List();
         for i: int = 1; i < _size; i++ {
+            sl.add(get(i));
+        }
+        return sl;
+    }
+
+    fn last() Object {
+        return get(_size - 1);
+    }
+
+    fn prev() List {
+        sl := new List();
+        for i: int = 0; i < _size - 1; i++ {
             sl.add(get(i));
         }
         return sl;

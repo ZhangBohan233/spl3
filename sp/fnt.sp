@@ -1,22 +1,16 @@
-import "util"
+import namespace "functions"
 
 
 fn main() int {
     lst := new util.List();
-
     for i: int = 0 ; i < 10; i++ {
         lst.add(new util.Integer(i));
     }
-
+    lst.pop();
     lst.print();
 
-    lst2 := lst.tail();
-    lst2.print();
+    s: util.Object = sum(lst);
+    System.println(s);
 
-    System.gc();
-
-    lst3 := lst2.prev();
-    lst3.print();
-
-    return 0;
+    return lst.size();
 }
