@@ -1,14 +1,19 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
+import interpreter.SplException;
 import interpreter.env.Environment;
+import interpreter.types.ClassType;
 import interpreter.types.Type;
 import interpreter.types.TypeValue;
 import interpreter.types.PointerType;
 import util.LineFile;
 
-public class NameNode extends LeafNode implements TypeRepresent {
+import java.util.List;
+
+public class NameNode extends Node implements TypeRepresent {
     private final String name;
+    private TemplateNode templateNode;
 
     public NameNode(String name, LineFile lineFile) {
         super(lineFile);
@@ -19,9 +24,21 @@ public class NameNode extends LeafNode implements TypeRepresent {
         return name;
     }
 
+    public void setTemplateNode(TemplateNode templateNode) {
+        this.templateNode = templateNode;
+    }
+
+    public TemplateNode getTemplateNode() {
+        return templateNode;
+    }
+
     @Override
     public String toString() {
-        return "Name(" + name + ")";
+        if (templateNode == null) {
+            return "Name(" + name + ")";
+        } else {
+            return "Name(" + name + ")" + templateNode;
+        }
     }
 
     @Override
@@ -50,7 +67,22 @@ public class NameNode extends LeafNode implements TypeRepresent {
     @Override
     public PointerType evalType(Environment environment) {
         TypeValue typeValue = environment.get(name, getLineFile());
-        return (PointerType) typeValue.getType();
-//        return null;
+        if (templateNode == null) {
+            return (PointerType) typeValue.getType();
+        } else {
+            // The template type must be actual types
+            if (typeValue.getType() instanceof ClassType) {
+                ClassType ct = (ClassType) typeValue.getType();
+                TypeValue[] templates = new TypeValue[templateNode.value.getChildren().size()];
+                for (int i = 0; i < templateNode.value.getChildren().size(); ++i) {
+                    Node tr = templateNode.value.getChildren().get(i);
+                    templates[i] = tr.evaluate(environment);
+                }
+                ct.setTemplates(templates);
+                return ct;
+            } else {
+                throw new SplException("Only class type supports template. ", getLineFile());
+            }
+        }
     }
 }

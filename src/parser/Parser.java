@@ -22,6 +22,7 @@ public class Parser {
         int bracketCount = 0;
         int braceCount = 0;
         int sqrBracketCount = 0;
+        int angleBracketCount = 0;
 
         int varLevel = Declaration.VAR;
 
@@ -44,6 +45,7 @@ public class Parser {
         Stack<Integer> classBraces = new Stack<>();
         Stack<Integer> condBraces = new Stack<>();
         Stack<Integer> funcTypeSqrBrackets = new Stack<>();
+        Stack<Integer> angleBrackets = new Stack<>();
 
         for (int i = 0; i < tokens.size(); ++i) {
             Token token = tokens.get(i);
@@ -60,6 +62,22 @@ public class Parser {
                     } else {
                         // subtraction
                         builder.addBinaryOperator("-", BinaryOperator.NUMERIC, lineFile);
+                    }
+                } else if (identifier.equals("<")) {
+                    if (hasCloseAngleBracket(i + 1)) {
+                        angleBracketCount++;
+                        angleBrackets.add(angleBracketCount);
+                        builder.addAngleBracketBlock();
+                    } else {
+                        builder.addBinaryOperator("<", BinaryOperator.LOGICAL, lineFile);
+                    }
+                } else if (identifier.equals(">")) {
+                    if (isThisStack(angleBrackets, angleBracketCount)) {
+                        angleBrackets.pop();
+                        builder.buildTemplateAndAdd(lineFile);
+                        angleBracketCount--;
+                    } else {
+                        builder.addBinaryOperator(">", BinaryOperator.LOGICAL, lineFile);
                     }
                 } else if (Tokenizer.LOGICAL_UNARY.contains(identifier)) {
                     builder.addUnaryOperator(identifier, RegularUnaryOperator.LOGICAL, lineFile);
@@ -86,7 +104,7 @@ public class Parser {
                                 lambdaParams = false;
                                 lambdaParamBrackets.push(bracketCount);
                                 builder.addParameterBracket();
-                            } else if (isCall(tokens.get(i - 1))) {
+                            } else if (isCall(tokens.get(i - 1), builder.getLastAddedNode())) {
                                 builder.addCall(lineFile);
                                 callBrackets.push(bracketCount);
                             } else {
@@ -385,18 +403,36 @@ public class Parser {
         return builder.getBaseBlock();
     }
 
+    private boolean hasCloseAngleBracket(int probFrontBracketIndex) {
+        for (int i = probFrontBracketIndex + 1; i < tokens.size(); ++i) {
+            Token tk = tokens.get(i);
+            if (tk instanceof IdToken) {
+                String identifier = ((IdToken) tk).getIdentifier();
+                if (identifier.equals(">")) return true;
+                else if (Tokenizer.ALL_BINARY.contains(identifier) ||
+                        Tokenizer.RESERVED.contains(identifier) ||
+                        Tokenizer.OTHERS.contains(identifier))
+                    return false;
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
+
     private static boolean isThisStack(Stack<Integer> stack, int value) {
         if (stack.empty()) return false;
         else return stack.peek() == value;
     }
 
-    private static boolean isCall(Token token) {
+    private static boolean isCall(Token token, Node lastAddedNode) {
         if (token instanceof IdToken) {
             String identifier = ((IdToken) token).getIdentifier();
             if (Tokenizer.StringTypes.isIdentifier(identifier) &&
                     !Tokenizer.RESERVED.contains(identifier))
                 return true;
-            else return identifier.equals(")") || identifier.equals("]");
+            else return identifier.equals(")") || identifier.equals("]") ||
+                    (!(lastAddedNode instanceof BinaryOperator) && identifier.equals(">"));
         }
         return false;
     }

@@ -1,6 +1,7 @@
 package interpreter.splObjects;
 
 import ast.BlockStmt;
+import ast.Node;
 import interpreter.env.Environment;
 import interpreter.types.ClassType;
 
@@ -10,15 +11,17 @@ public class SplClass extends SplObject {
 
     private final ClassType superclassType;
     private final List<ClassType> interfacePointers;
+    public final List<Node> templates;
     private final BlockStmt body;
     private final String className;
     private final Environment definitionEnv;
 
     public SplClass(String className, ClassType superclassType, List<ClassType> interfacePointers,
-                    BlockStmt body, Environment definitionEnv) {
+                    List<Node> templates, BlockStmt body, Environment definitionEnv) {
         this.className = className;
         this.superclassType = superclassType;
         this.interfacePointers = interfacePointers;
+        this.templates = templates;
         this.body = body;
         this.definitionEnv = definitionEnv;
     }

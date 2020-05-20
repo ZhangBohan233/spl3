@@ -21,6 +21,7 @@ public class ClassStmt extends Node {
     private TypeRepresent superclass;
     private final boolean isInterface;
     private final boolean isAbstract;
+    private TemplateNode templateNode;
     private BlockStmt body;
 
     public ClassStmt(String className, boolean isInterface, boolean isAbstract, LineFile lineFile) {
@@ -37,6 +38,10 @@ public class ClassStmt extends Node {
 
     public void setImplements(Implements implementations) {
         this.implementations = implementations;
+    }
+
+    public void setTemplateNode(TemplateNode templateNode) {
+        this.templateNode = templateNode;
     }
 
     public void setSuperclass(Node extendNode) {
@@ -81,7 +86,15 @@ public class ClassStmt extends Node {
 
         // TODO: check implementations
 
-        SplClass clazz = new SplClass(className, superclassPointer, interfacePointers, body, env);
+        List<Node> templateList;
+        if (templateNode == null) {
+            templateList = new ArrayList<>();
+        } else {
+            templateList = templateNode.value.getChildren();
+        }
+
+        SplClass clazz = new SplClass(className, superclassPointer, interfacePointers,
+                templateList, body, env);
         Pointer clazzPtr = env.getMemory().allocate(1, env);
         env.getMemory().set(clazzPtr, clazz);
         ClassType clazzType = new ClassType(clazzPtr);
@@ -102,6 +115,12 @@ public class ClassStmt extends Node {
     @Override
     public String toString() {
         String title = isInterface ? "Interface" : "Class";
-        return String.format("%s %s extends %s implements %s", title, className, superclass, implementations);
+        if (templateNode == null) {
+            return String.format("%s %s extends %s implements %s",
+                    title, className, superclass, implementations);
+        } else {
+            return String.format("%s %s %s extends %s implements %s",
+                    title, className, templateNode, superclass, implementations);
+        }
     }
 }

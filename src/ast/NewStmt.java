@@ -96,7 +96,7 @@ public class NewStmt extends UnaryExpr {
 
         // define the anonymous class
         // Note that the definition env of the anonymous class is the current calling env
-        SplClass anClazz = new SplClass(null, scClazzType, new ArrayList<>(), classBody, callEnv);
+        SplClass anClazz = new SplClass(null, scClazzType, new ArrayList<>(), new ArrayList<>(), classBody, callEnv);
         Pointer anClazzPtr = callEnv.getMemory().allocateObject(anClazz, callEnv);
         ClassType anClazzType = new ClassType(anClazzPtr);
 
@@ -116,6 +116,7 @@ public class NewStmt extends UnaryExpr {
                                               LineFile lineFile) {
         TypeRepresent clazzNode = (TypeRepresent) call.callObj;
         Type type = clazzNode.evalType(classDefEnv);
+//        System.out.println(type);
         if (!(type instanceof ClassType)) throw new TypeError();
         ClassType clazzType = (ClassType) type;
 

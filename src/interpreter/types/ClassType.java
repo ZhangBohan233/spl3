@@ -3,14 +3,28 @@ package interpreter.types;
 import interpreter.Memory;
 import interpreter.env.Environment;
 import interpreter.primitives.Pointer;
+import interpreter.primitives.Primitive;
 import interpreter.splObjects.SplClass;
+import interpreter.splObjects.SplObject;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class ClassType extends PointerType {
 
     private final Pointer clazzPointer;
+    private TypeValue[] templates;
 
     public ClassType(Pointer clazzPointer) {
         this.clazzPointer = clazzPointer;
+    }
+
+    public void setTemplates(TypeValue[] templates) {
+        this.templates = templates;
+    }
+
+    public TypeValue[] getTemplates() {
+        return templates;
     }
 
     public Pointer getClazzPointer() {
@@ -19,7 +33,11 @@ public class ClassType extends PointerType {
 
     @Override
     public String toString() {
-        return "ClassType @" + clazzPointer.getPtr();
+        if (templates == null) {
+            return "ClassType @" + clazzPointer.getPtr();
+        } else {
+            return "ClassType @" + clazzPointer.getPtr() + "<" + Arrays.toString(templates) + ">";
+        }
     }
 
     @Override

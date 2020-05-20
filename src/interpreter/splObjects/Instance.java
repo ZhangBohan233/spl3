@@ -11,6 +11,7 @@ import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
 import util.LineFile;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class Instance extends SplObject {
@@ -56,6 +57,21 @@ public class Instance extends SplObject {
             InstanceTypeValue scItv = createInstanceAndAllocate(scp, outerEnv, lineFile);
             TypeValue scInstance = scItv.typeValue;
             instance.getEnv().directDefineConstAndSet("super", scInstance);
+        }
+
+//        System.out.println(clazz.templates);
+//        System.out.println(Arrays.toString(clazzType.getTemplates()));
+        if (clazzType.getTemplates() != null) {
+            // has templates
+            for (int i = 0; i < clazz.templates.size(); ++i) {
+                Node templateDef = clazz.templates.get(i);
+                if (templateDef instanceof NameNode) {
+                    String templateName = ((NameNode) templateDef).getName();
+                    instanceEnv.defineConstAndSet(templateName, clazzType.getTemplates()[i], lineFile);
+                } else {
+                    // TODO: maybe <T extends Clazz> ?
+                }
+            }
         }
 
         clazz.getBody().evaluate(instanceEnv);  // most important step

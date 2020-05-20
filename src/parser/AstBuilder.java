@@ -5,6 +5,7 @@ import lexer.SyntaxError;
 import util.LineFile;
 import util.Utilities;
 
+import java.lang.instrument.ClassDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ public class AstBuilder {
 
     private static final Map<String, Integer> PCD_BIN_SPECIAL = Map.of(
             ".", 500,
+//            "<>", 400,
             "<-", 160,  // must bigger than 'new'
             "->", 4,
             "?", 2,
@@ -102,6 +104,15 @@ public class AstBuilder {
 
     private void setIndependence(boolean independence) {
         baseBlock.setIndependence(independence);
+    }
+
+    Node getLastAddedNode() {
+        if (inner == null) {
+            if (stack.isEmpty()) return null;
+            return stack.get(stack.size() - 1);
+        } else {
+            return inner.getLastAddedNode();
+        }
     }
 
     void addName(String name, LineFile lineFile) {
@@ -395,6 +406,38 @@ public class AstBuilder {
             inner = null;
         } else {
             inner.buildBraceBlock();
+        }
+    }
+
+    void addAngleBracketBlock() {
+        if (inner == null) {
+            inner = new AstBuilder();
+        } else {
+            inner.addAngleBracketBlock();
+        }
+    }
+
+    void buildTemplateAndAdd(LineFile lineFile) {
+        if (inner.inner == null) {
+            inner.finishPart();
+            inner.finishLine();
+            BlockStmt blockStmt = inner.getBaseBlock();
+            if (blockStmt.getLines().size() != 1) {
+                throw new ParseError("Template must be one line. ", lineFile);
+            }
+            Line line = blockStmt.getLines().get(0);
+            inner = null;
+            TemplateNode templateNode = new TemplateNode(line, lineFile);
+            Node last = stack.get(stack.size() - 1);
+            if (last instanceof ClassStmt) {
+                ((ClassStmt) last).setTemplateNode(templateNode);
+            } else if (last instanceof NameNode) {
+                ((NameNode) last).setTemplateNode(templateNode);
+            } else {
+                throw new ParseError("Unexpected syntax: template. ", lineFile);
+            }
+        } else {
+            inner.buildTemplateAndAdd(lineFile);
         }
     }
 
