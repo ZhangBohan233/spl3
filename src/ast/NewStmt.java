@@ -96,7 +96,12 @@ public class NewStmt extends UnaryExpr {
 
         // define the anonymous class
         // Note that the definition env of the anonymous class is the current calling env
-        SplClass anClazz = new SplClass(null, scClazzType, new ArrayList<>(), new ArrayList<>(), classBody, callEnv);
+        SplClass anClazz = new SplClass(null,
+                scClazzType,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                classBody,
+                callEnv);
         Pointer anClazzPtr = callEnv.getMemory().allocateObject(anClazz, callEnv);
         ClassType anClazzType = new ClassType(anClazzPtr);
 

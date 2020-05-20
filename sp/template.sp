@@ -10,5 +10,14 @@ class A<T, K> {
 fn main() int {
     aa := new A<String, util.Integer>();
 
+    bb := new A<String, String>() <- {
+
+        fn x() String {
+            return b;
+        }
+    };
+
+    System.println(bb.x());
+
     return aa.b.length;
 }
