@@ -404,12 +404,17 @@ public class Parser {
     }
 
     private boolean hasCloseAngleBracket(int probFrontBracketIndex) {
+        int count = 1;
         for (int i = probFrontBracketIndex + 1; i < tokens.size(); ++i) {
             Token tk = tokens.get(i);
             if (tk instanceof IdToken) {
                 String identifier = ((IdToken) tk).getIdentifier();
-                if (identifier.equals(">")) return true;
-                else if (Tokenizer.ALL_BINARY.contains(identifier) ||
+                if (identifier.equals(">")) {
+                    count--;
+                    if (count == 0) return true;
+                } else if (identifier.equals("<")) {
+                    count++;
+                } else if (Tokenizer.ALL_BINARY.contains(identifier) ||
                         Tokenizer.RESERVED.contains(identifier) ||
                         Tokenizer.OTHERS.contains(identifier))
                     return false;

@@ -13,7 +13,7 @@ fn reduce(lst: List, ftn: [Object, Object]->Object) Object {
     }
 }
 
-fn intAdd(a: Object, b: Object) Object {
+fn intAdd(a: Integer, b: Integer) Integer {
     return a.add(b);
 }
 

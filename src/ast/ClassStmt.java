@@ -67,11 +67,13 @@ public class ClassStmt extends Node {
 
         validateExtending();
 
-        ClassType superclassPointer;
+//        System.out.println(superclass);
+
+        ClassType superclassT;
         if (superclass == null) {
-            superclassPointer = null;
+            superclassT = null;
         } else {
-            superclassPointer = (ClassType) superclass.evalType(env);
+            superclassT = (ClassType) superclass.evalType(env);
         }
 
         List<ClassType> interfacePointers = new ArrayList<>();
@@ -93,7 +95,7 @@ public class ClassStmt extends Node {
             templateList = templateNode.value.getChildren();
         }
 
-        SplClass clazz = new SplClass(className, superclassPointer, interfacePointers,
+        SplClass clazz = new SplClass(className, superclassT, interfacePointers,
                 templateList, body, env);
         Pointer clazzPtr = env.getMemory().allocate(1, env);
         env.getMemory().set(clazzPtr, clazz);

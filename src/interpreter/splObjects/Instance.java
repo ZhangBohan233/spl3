@@ -5,14 +5,10 @@ import interpreter.SplException;
 import interpreter.env.Environment;
 import interpreter.env.InstanceEnvironment;
 import interpreter.primitives.Pointer;
-import interpreter.types.ClassType;
-import interpreter.types.Type;
-import interpreter.types.TypeError;
-import interpreter.types.TypeValue;
+import interpreter.types.*;
 import util.LineFile;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Instance extends SplObject {
 
@@ -40,6 +36,13 @@ public class Instance extends SplObject {
     public static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType,
                                                               Environment outerEnv,
                                                               LineFile lineFile) {
+        return createInstanceAndAllocate(clazzType, outerEnv, lineFile, new TreeMap<>());
+    }
+
+    private static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType,
+                                                               Environment outerEnv,
+                                                               LineFile lineFile,
+                                                               Map<String, TypeValue> undeterminedTemplates) {
         SplObject obj = outerEnv.getMemory().get(clazzType.getClazzPointer());
         if (!(obj instanceof SplClass)) throw new TypeError();
         SplClass clazz = (SplClass) obj;
@@ -52,13 +55,9 @@ public class Instance extends SplObject {
         TypeValue instanceTv = new TypeValue(clazzType, instancePtr);
         instance.getEnv().directDefineConstAndSet("this", instanceTv);
 
-        ClassType scp = clazz.getSuperclassType();
-        if (scp != null) {
-            InstanceTypeValue scItv = createInstanceAndAllocate(scp, outerEnv, lineFile);
-            TypeValue scInstance = scItv.typeValue;
-            instance.getEnv().directDefineConstAndSet("super", scInstance);
-        }
+        Map<String, TypeValue> newUndTemplates = new TreeMap<>();
 
+//        System.out.println("===");
 //        System.out.println(clazz.templates);
 //        System.out.println(Arrays.toString(clazzType.getTemplates()));
         if (clazzType.getTemplates() != null) {
@@ -67,12 +66,28 @@ public class Instance extends SplObject {
                 Node templateDef = clazz.templates.get(i);
                 if (templateDef instanceof NameNode) {
                     String templateName = ((NameNode) templateDef).getName();
-                    instanceEnv.defineConstAndSet(templateName, clazzType.getTemplates()[i], lineFile);
+                    TypeValue actualT = clazzType.getTemplates()[i];
+                    TypeValue put;
+                    if (actualT.getType() instanceof UndTemplateType) {
+                        put = undeterminedTemplates.get(((UndTemplateType) actualT.getType()).templateName);
+                    } else {
+                        put = actualT;
+                    }
+                    instanceEnv.defineConstAndSet(templateName, put, lineFile);
+                    newUndTemplates.put(templateName, put);
                 } else {
                     // TODO: maybe <T extends Clazz> ?
                 }
             }
         }
+
+        ClassType scp = clazz.getSuperclassType();
+        if (scp != null) {
+            InstanceTypeValue scItv = createInstanceAndAllocate(scp, outerEnv, lineFile, newUndTemplates);
+            TypeValue scInstance = scItv.typeValue;
+            instance.getEnv().directDefineConstAndSet("super", scInstance);
+        }
+
 
         clazz.getBody().evaluate(instanceEnv);  // most important step
 

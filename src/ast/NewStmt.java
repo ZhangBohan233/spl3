@@ -167,11 +167,11 @@ public class NewStmt extends UnaryExpr {
                     throw new TypeError();
                 }
             } else {
-                throw new TypeError("Array creation must have a size argument", lineFile);
+                throw new TypeError("Array creation must have a size argument. ", lineFile);
             }
         } else {
             if (argsList.size() != 1) {
-                throw new TypeError("Array creation must have a size argument", lineFile);
+                throw new TypeError("Array creation must have a size argument. ", lineFile);
             }
             TypeValue argument = argsList.get(0).evaluate(env);
             if (argument.getType().equals(PrimitiveType.TYPE_INT)) {

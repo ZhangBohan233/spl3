@@ -18,37 +18,37 @@ class Integer extends Number {
     }
 }
 
-interface Collection {
+interface Collection<T> {
     abstract fn size() int;
 }
 
-abstract class AbstractList implements Collection {
-    abstract fn get(index: int) Object;
+abstract class AbstractList<T> implements Collection<T> {
+    abstract fn get(index: int) T;
 
-    abstract fn add(obj: Object) void;
+    abstract fn add(obj: T) void;
 }
 
-class List extends AbstractList {
+class List<T> extends AbstractList<T> {
 
     _size: int = 0;
-    _array: Object[] = new Object[8];
+    _array: T[] = new T[8];
 
     fn init() void {
 
     }
 
-    fn add(obj: Object) void {
+    fn add(obj: T) void {
         _array[_size++] = obj;
         if _size == _array.length {
             expand();
         }
     }
 
-    fn get(index: int) Object {
+    fn get(index: int) T {
         return _array[index];
     }
 
-    fn pop() Object {
+    fn pop() T {
         return _array[--_size];
     }
 
@@ -56,24 +56,24 @@ class List extends AbstractList {
         return _size;
     }
 
-    fn head() Object {
+    fn head() T {
         return get(0);
     }
 
-    fn tail() List {
-        sl := new List();
+    fn tail() List<T> {
+        sl := new List<T>();
         for i: int = 1; i < _size; i++ {
             sl.add(get(i));
         }
         return sl;
     }
 
-    fn last() Object {
+    fn last() T {
         return get(_size - 1);
     }
 
-    fn prev() List {
-        sl := new List();
+    fn prev() List<T> {
+        sl := new List<T>();
         for i: int = 0; i < _size - 1; i++ {
             sl.add(get(i));
         }
@@ -83,7 +83,7 @@ class List extends AbstractList {
     // private methods
 
     fn expand() void {
-        na := new Object[_array.length * 2];
+        na := new T[_array.length * 2];
         for i: int = 0; i < _array.length; i++ {
             na[i] = _array[i];
         }

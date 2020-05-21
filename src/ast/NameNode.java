@@ -3,10 +3,8 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.SplException;
 import interpreter.env.Environment;
-import interpreter.types.ClassType;
-import interpreter.types.Type;
-import interpreter.types.TypeValue;
-import interpreter.types.PointerType;
+import interpreter.env.EnvironmentError;
+import interpreter.types.*;
 import util.LineFile;
 
 import java.util.List;
@@ -76,7 +74,17 @@ public class NameNode extends Node implements TypeRepresent {
                 TypeValue[] templates = new TypeValue[templateNode.value.getChildren().size()];
                 for (int i = 0; i < templateNode.value.getChildren().size(); ++i) {
                     Node tr = templateNode.value.getChildren().get(i);
-                    templates[i] = tr.evaluate(environment);
+                    TypeValue tv;
+                    try {
+                        tv = tr.evaluate(environment);
+                    } catch (EnvironmentError ee) {
+                        if (tr instanceof NameNode) {
+                            tv = new TypeValue(new UndTemplateType(((NameNode) tr).getName()));
+                        } else {
+                            throw new SplException();
+                        }
+                    }
+                    templates[i] = tv;
                 }
                 ct.setTemplates(templates);
                 return ct;
