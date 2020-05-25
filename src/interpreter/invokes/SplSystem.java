@@ -121,6 +121,15 @@ public class SplSystem extends NativeObject {
         return StringLiteral.createStringOneStep(s.toCharArray(), environment, lineFile);
     }
 
+    public TypeValue typeName(Arguments arguments, Environment environment, LineFile lineFile) {
+        checkArgCount(arguments, 1, "typeName", lineFile);
+
+        TypeValue typeValue = arguments.getLine().getChildren().get(0).evaluate(environment);
+
+        String s = typeValue.getType().toString();
+        return StringLiteral.createStringOneStep(s.toCharArray(), environment, lineFile);
+    }
+
     private static void checkArgCount(Arguments arguments, int expectArgc, String fnName, LineFile lineFile) {
         if (arguments.getLine().getChildren().size() != expectArgc) {
             throw new SplException("System." + fnName + "() takes " + expectArgc + " arguments, " +

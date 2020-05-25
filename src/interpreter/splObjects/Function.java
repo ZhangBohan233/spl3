@@ -109,7 +109,8 @@ public class Function extends SplCallable {
 
         FunctionEnvironment scope = new FunctionEnvironment(definitionEnv);
         if (evaluatedArgs.length < minArgCount() || evaluatedArgs.length > maxArgCount()) {
-            throw new SplException("Arguments length does not match parameters. ", argLineFile);
+            throw new SplException("Arguments length does not match parameters. Expect " +
+                    minArgCount() + ", got " + evaluatedArgs.length + ". ", argLineFile);
         }
 
         for (int i = 0; i < params.size(); ++i) {

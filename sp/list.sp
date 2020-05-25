@@ -2,21 +2,27 @@ import "util"
 
 
 fn main() int {
-    lst := new util.List();
+    lst := new util.List<util.Integer>();
 
     for i: int = 0 ; i < 10; i++ {
         lst.add(new util.Integer(i));
     }
 
-    lst.print();
+    //System.println(System.typeName(lst));
+    System.println(lst instanceof util.List<util.Integer>);
 
-    lst2 := lst.tail();
-    lst2.print();
+    //o: Object = lst.get(0);
+    //lst2: util.List<String> = lst;
 
-    System.gc();
+    //lst.print();
 
-    lst3 := lst2.prev();
-    lst3.print();
+    //lst2 := lst.tail();
+    //lst2.print();
+
+    //System.gc();
+
+    //lst3 := lst2.prev();
+    //lst3.print();
 
     return 0;
 }

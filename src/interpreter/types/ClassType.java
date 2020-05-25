@@ -9,6 +9,7 @@ import interpreter.splObjects.SplObject;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class ClassType extends PointerType {
 
@@ -48,21 +49,62 @@ public class ClassType extends PointerType {
     @Override
     public boolean isSuperclassOfOrEqualsNotNull(Type child, Environment env) {
         if (!(child instanceof ClassType)) return false;
-        else if (equals(child)) return true;
-        else {
+        else if (equalsWithoutTemplates(child)) {
+            return checkTemplateSuperOrEquals((ClassType) child, env);
+        } else {
             ClassType childCt = (ClassType) child;
             SplClass childClazz = (SplClass) env.getMemory().get(childCt.clazzPointer);
             return isSuperclassOfOrEquals(childClazz.getSuperclassType(), env);
+            // TODO: check interfaces
         }
+    }
+
+    private boolean checkTemplateSuperOrEquals(ClassType child, Environment env) {
+        if (templates == child.templates) return true;
+        if (templates == null || child.templates == null) return false;
+        if (templates.length != child.templates.length) return false;
+
+        for (int i = 0; i < templates.length; ++i) {
+            ClassType ct = (ClassType) templates[i].getType();
+            ClassType childCt = (ClassType) child.templates[i].getType();
+            if (!ct.isSuperclassOfOrEquals(childCt, env)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean equalsWithoutTemplates(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ClassType classType = (ClassType) o;
+
+        return Objects.equals(clazzPointer, classType.clazzPointer);
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof ClassType && ((ClassType) o).clazzPointer.equals(clazzPointer);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        if (equalsWithoutTemplates(o)) {
+            ClassType classType = (ClassType) o;
+//        System.out.println(Arrays.toString(templates) + " t " + Arrays.toString(classType.templates));
+            return Arrays.equals(templates, classType.templates);
+        }
+        return false;
     }
 
     public String toStringClass(Memory memory) {
         SplClass clazz = (SplClass) memory.get(clazzPointer);
         return clazz.toString();
+    }
+
+    public ClassType copy() {
+        ClassType cpy = new ClassType(clazzPointer);
+        if (templates != null)
+            cpy.templates = Arrays.copyOf(templates, templates.length);
+        return cpy;
     }
 }

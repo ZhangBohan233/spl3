@@ -31,6 +31,11 @@ public class FloatNode extends LiteralNode {
 
     @Override
     public Node preprocess(FakeEnv env) {
-        return null;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
     }
 }

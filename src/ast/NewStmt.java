@@ -123,7 +123,7 @@ public class NewStmt extends UnaryExpr {
         Type type = clazzNode.evalType(classDefEnv);
 //        System.out.println(type);
         if (!(type instanceof ClassType)) throw new TypeError();
-        ClassType clazzType = (ClassType) type;
+        ClassType clazzType = ((ClassType) type).copy();  // create a copy to avoid modification
 
         Instance.InstanceTypeValue instanceTv = Instance.createInstanceAndAllocate(clazzType, callEnv, lineFile);
         Instance instance = instanceTv.instance;

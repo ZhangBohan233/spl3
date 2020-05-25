@@ -52,6 +52,8 @@ public class Instance extends SplObject {
         Pointer instancePtr = outerEnv.getMemory().allocate(1, instanceEnv);
         outerEnv.getMemory().set(instancePtr, instance);
 
+//        System.out.println(clazzType);
+
         TypeValue instanceTv = new TypeValue(clazzType, instancePtr);
         instance.getEnv().directDefineConstAndSet("this", instanceTv);
 
@@ -79,6 +81,24 @@ public class Instance extends SplObject {
                     // TODO: maybe <T extends Clazz> ?
                 }
             }
+        } else if (clazz.templates.size() > 0) {
+            // class declares template but instance does not give actual templates
+            // Example:
+            // class SomeClazz<T> {...}
+            // new SomeClazz();
+//            System.out.println(clazz.templates);
+            for (Node templateDef: clazz.templates) {
+                if (templateDef instanceof NameNode) {
+                    String templateName = ((NameNode) templateDef).getName();
+                    TypeValue objectTv = instanceEnv.get("Object", lineFile);
+                    instanceEnv.defineConstAndSet(templateName,
+                            objectTv,
+                            lineFile);
+                    newUndTemplates.put(templateName, objectTv);
+                } else {
+                    // TODO
+                }
+            }
         }
 
         ClassType scp = clazz.getSuperclassType();
@@ -87,7 +107,6 @@ public class Instance extends SplObject {
             TypeValue scInstance = scItv.typeValue;
             instance.getEnv().directDefineConstAndSet("super", scInstance);
         }
-
 
         clazz.getBody().evaluate(instanceEnv);  // most important step
 
@@ -159,7 +178,7 @@ public class Instance extends SplObject {
             dot.setLeft(new NameNode("super", LineFile.LF_INTERPRETER));
             FuncCall supInit = new FuncCall(LineFile.LF_INTERPRETER);
             supInit.setCallObj(new NameNode("init", LineFile.LF_INTERPRETER));
-            supInit.setArguments(new Arguments(new Line()));
+            supInit.setArguments(new Arguments(new Line(), LineFile.LF_INTERPRETER));
             dot.setRight(supInit);
 
             Line constLine = new Line();

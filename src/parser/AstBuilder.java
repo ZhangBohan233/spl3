@@ -85,9 +85,11 @@ public class AstBuilder {
     private static final Map<String, Integer> PCD_UNARY_SPECIAL = Map.of(
             "++", 300,
             "--", 300,
+            "as", 150,
             "new", 150,
             "namespace", 150,
             "extends", 150,
+            "instanceof", 25,
             "return", 0
     );
 
@@ -275,6 +277,22 @@ public class AstBuilder {
         }
     }
 
+    void addCast(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new CastExpr(lineFile));
+        } else {
+            inner.addCast(lineFile);
+        }
+    }
+
+    void addInstanceof(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new InstanceofExpr(lineFile));
+        } else {
+            inner.addInstanceof(lineFile);
+        }
+    }
+
     void addFunction(String name, boolean isAbstract, LineFile lineFile) {
         if (inner == null) {
             FuncDefinition funcDefinition = new FuncDefinition(name, isAbstract, lineFile);
@@ -349,16 +367,16 @@ public class AstBuilder {
         }
     }
 
-    void buildCall() {
+    void buildCall(LineFile lineFile) {
         if (inner.inner == null) {
             inner.finishPart();
             Line line = inner.getLine();
             inner = null;
-            Arguments arguments = new Arguments(line);
+            Arguments arguments = new Arguments(line, lineFile);
             FuncCall call = (FuncCall) stack.get(stack.size() - 1);
             call.setArguments(arguments);
         } else {
-            inner.buildCall();
+            inner.buildCall(lineFile);
         }
     }
 

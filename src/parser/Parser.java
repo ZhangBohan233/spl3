@@ -121,7 +121,7 @@ public class Parser {
                                 builder.buildParameterBracket();
                             } else if (isThisStack(callBrackets, bracketCount)) {
                                 callBrackets.pop();
-                                builder.buildCall();
+                                builder.buildCall(lineFile);
                             } else {
                                 builder.buildParenthesis(lineFile);
                             }
@@ -273,6 +273,12 @@ public class Parser {
 //                            } else {
 //                                throw new ParseError("Else must follow '{' or 'if'. ", lineFile);
 //                            }
+                            break;
+                        case "as":
+                            builder.addCast(lineFile);
+                            break;
+                        case "instanceof":
+                            builder.addInstanceof(lineFile);
                             break;
                         case "while":
                             conditioning = true;

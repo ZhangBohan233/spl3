@@ -3,6 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.env.Environment;
 import interpreter.types.TypeValue;
+import util.LineFile;
 
 import java.util.Arrays;
 
@@ -10,8 +11,8 @@ public class Arguments extends Node {
 
     private final Line line;
 
-    public Arguments(Line line) {
-        super(line.getLineFile());
+    public Arguments(Line line, LineFile lineFile) {
+        super(lineFile);
 
         this.line = line;
     }

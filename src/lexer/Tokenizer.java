@@ -66,16 +66,16 @@ public class Tokenizer {
     public static final Set<String> RESERVED = Set.of(
             "class", "fn", "if", "else", "new", "extends", "implements", "return", "break",
             "continue", "true", "false", "null", "while", "for", "import", "namespace",
-            "abstract", "const", "var", "assert", "as", "super", "this", "lambda"
+            "abstract", "const", "var", "assert", "as", "super", "this", "lambda", "instanceof"
     );
 
     private static final String IMPORT_USAGE = "Usage of import: 'import \"path\"' or 'import \"path\" as <module>' " +
             "or 'import namespace \"path\"'";
 
-    private File srcFile;
+    private final File srcFile;
     private boolean main;
-    private boolean importLang;
-    private List<Token> tokens = new ArrayList<>();
+    private final boolean importLang;
+    private final List<Token> tokens = new ArrayList<>();
 
     private boolean inDoc = false;
 

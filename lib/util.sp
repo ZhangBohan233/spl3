@@ -80,6 +80,14 @@ class List<T> extends AbstractList<T> {
         return sl;
     }
 
+    fn copy() List<T> {
+        sl := new List<T>();
+        for i: int = 0; i < _size; i++ {
+            sl.add(get(i));
+        }
+        return sl;
+    }
+
     // private methods
 
     fn expand() void {
