@@ -1,17 +1,17 @@
 fn main() int {
     a : int = 6;
-    return a;
+    b := 5;
     if a > 7 {
-        System.println(143);
+        System.println(123);
     } else {
-        if a > 5 {
-            System.println(166);
-            return 1;
+        if b > 5 {
+            System.println(345);
+        } else {if b > 4 {
+            System.println(567);
         } else {
-            System.println(324);
-        }
+            System.println(678);
+        }}
     }
-    System.println(777);
 
     return 0;
 }

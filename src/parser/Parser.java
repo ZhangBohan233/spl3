@@ -34,7 +34,6 @@ public class Parser {
         boolean implementing = false;
         boolean extending = false;
         boolean conditioning = false;
-        boolean isElse = false;
         boolean isAbstract = false;
 
         Stack<Integer> paramBrackets = new Stack<>();
@@ -46,6 +45,7 @@ public class Parser {
         Stack<Integer> condBraces = new Stack<>();
         Stack<Integer> funcTypeSqrBrackets = new Stack<>();
         Stack<Integer> angleBrackets = new Stack<>();
+        Stack<Integer> elseBraces = new Stack<>();
 
         for (int i = 0; i < tokens.size(); ++i) {
             Token token = tokens.get(i);
@@ -156,10 +156,15 @@ public class Parser {
                                 builder.buildConditionTitle();
                                 builder.addBraceBlock();
                                 condBraces.push(braceCount);
-                            } else if (isElse) {
-                                isElse = false;
-                                builder.addBraceBlock();
-                            } else {
+                            }
+//                            else if (isElif) {
+//                                isElif = false;
+//                            }
+//                            else if (isElse) {
+//                                isElse = false;
+//                                builder.addBraceBlock();
+//                            }
+                            else {
                                 builder.addIndependenceBraceBlock();
                             }
                             break;
@@ -181,6 +186,14 @@ public class Parser {
                                 condBraces.pop();
                                 builder.buildBraceBlock();
                                 builder.buildConditionBody();
+                            } else if (isThisStack(elseBraces, braceCount)) {
+                                elseBraces.pop();
+                                builder.finishPart();
+                                builder.finishLine();
+                                builder.manualInvalidateInner();
+//                                builder.buildBraceBlock();
+                                braceCount--;
+                                break;
                             } else {
                                 builder.buildBraceBlock();
                             }
@@ -253,26 +266,18 @@ public class Parser {
                             break;
                         case "else":
                             builder.addElse(lineFile);
-                            isElse = true;
-//                            IdToken next = (IdToken) tokens.get(i + 1);
-//                            i += 1;
-//                            IfStmt ifStmt = builder.getActiveIfStmt();
-//
-//                            if (next.getIdentifier().equals("{")) {
-//                                builder.addBraceBlock();
-//                                BlockStmt innermost = builder.getInnermostBlock();
-//                                ifStmt.setElseBlock(innermost);
-//                                braceCount += 1;
-////                            } else if (next.getIdentifier().equals("if")) {
-////                                // This part should be identical with the 'if' case
-////                                // #####
-////                                conditioning = true;
-////                                IfStmt ifs = builder.addIf(lineFile);
-////                                // #####
-////                                ifStmt.setElseBlock(ifs);
-//                            } else {
-//                                throw new ParseError("Else must follow '{' or 'if'. ", lineFile);
-//                            }
+                            i += 1;
+                            Token nextTk = tokens.get(i);
+                            if (!(nextTk instanceof IdToken)) {
+                                throw new SyntaxError("Unexpected syntax: 'else " + nextTk + "'. ", lineFile);
+                            }
+                            String nextId = ((IdToken) nextTk).getIdentifier();
+                            if (nextId.equals("{")) {
+                                braceCount++;
+                                elseBraces.push(braceCount);
+                            } else {
+                                throw new SyntaxError("Unexpected syntax: 'else " + nextId + "'. ", lineFile);
+                            }
                             break;
                         case "as":
                             builder.addCast(lineFile);

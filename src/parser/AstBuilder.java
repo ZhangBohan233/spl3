@@ -5,7 +5,6 @@ import lexer.SyntaxError;
 import util.LineFile;
 import util.Utilities;
 
-import java.lang.instrument.ClassDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -427,6 +426,14 @@ public class AstBuilder {
         }
     }
 
+    void manualInvalidateInner() {
+        if (inner.inner == null) {
+            inner = null;
+        } else {
+            inner.manualInvalidateInner();
+        }
+    }
+
     void addAngleBracketBlock() {
         if (inner == null) {
             inner = new AstBuilder();
@@ -689,7 +696,22 @@ public class AstBuilder {
 
     void addElse(LineFile lineFile) {
         if (inner == null) {
-            stack.add(new ElseStmt(lineFile));
+            System.out.println(baseBlock);
+            if (stack.isEmpty()) {
+                throw new SyntaxError("No 'if' before 'else. ", lineFile);
+            }
+            Node probIf = stack.get(stack.size() - 1);
+            if (!(probIf instanceof IfStmt)) {
+                throw new SyntaxError("No 'if' before 'else. ", lineFile);
+            }
+            IfStmt ifStmt = (IfStmt) probIf;
+            if (ifStmt.getElseBlock() != null) {
+                throw new SyntaxError("Only one 'else' is allowed for an if statement. ", lineFile);
+            }
+            inner = new AstBuilder();
+//            ElseStmt elseStmt = new ElseStmt(inner.getBaseBlock(), lineFile);
+            ifStmt.setElseBlock(inner.getBaseBlock());
+//            stack.add(new ElseStmt(lineFile));
         } else {
             inner.addElse(lineFile);
         }
@@ -697,12 +719,12 @@ public class AstBuilder {
 
     void checkElse() {
         if (inner == null) {
-            if (stack.size() > 2 && stack.get(stack.size() - 2) instanceof ElseStmt) {
-                IfStmt ifStmt = (IfStmt) stack.get(stack.size() - 3);
-                BlockStmt elseBlock = (BlockStmt) stack.remove(stack.size() - 1);
-                stack.remove(stack.size() - 1);  // remove the 'else' marker
-                ifStmt.setElseBlock(elseBlock);
-            }
+//            if (stack.size() > 2 && stack.get(stack.size() - 2) instanceof ElseStmt) {
+//                IfStmt ifStmt = (IfStmt) stack.get(stack.size() - 3);
+//                BlockStmt elseBlock = (BlockStmt) stack.remove(stack.size() - 1);
+//                stack.remove(stack.size() - 1);  // remove the 'else' marker
+//                ifStmt.setElseBlock(elseBlock);
+//            }
         } else {
             inner.checkElse();
         }

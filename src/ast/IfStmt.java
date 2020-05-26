@@ -9,11 +9,13 @@ import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
 import util.LineFile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class IfStmt extends ConditionalStmt {
 
     private Line condition;
     private Node elseBlock;
-    private boolean hasElse;
 
     public IfStmt(LineFile lineFile) {
         super(lineFile);
@@ -25,14 +27,6 @@ public class IfStmt extends ConditionalStmt {
 
     public void setElseBlock(Node elseBlock) {
         this.elseBlock = elseBlock;
-    }
-
-    public boolean hasElse() {
-        return hasElse;
-    }
-
-    public void setHasElse(boolean hasElse) {
-        this.hasElse = hasElse;
     }
 
     public Node getElseBlock() {

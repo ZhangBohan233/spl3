@@ -9,6 +9,7 @@ public class ArgumentParser {
     private boolean printAst;
     private boolean printTokens;
     private boolean printMem;
+    private boolean timer;
     private String msg;
     private String[] splArgs;
 
@@ -36,6 +37,10 @@ public class ArgumentParser {
                         case "-pm":
                         case "--printMem":
                             printMem = true;
+                            break;
+                        case "-t":
+                        case "--timer":
+                            timer = true;
                             break;
                         default:
                             System.out.println("Unknown flag '" + s + "'");
@@ -80,6 +85,10 @@ public class ArgumentParser {
 
     public boolean isPrintTokens() {
         return printTokens;
+    }
+
+    public boolean isTimer() {
+        return timer;
     }
 
     public String getMsg() {
