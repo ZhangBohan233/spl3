@@ -24,6 +24,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         ArgumentParser argumentParser = new ArgumentParser(args);
         if (argumentParser.isAllValid()) {
+            long parseBegin = System.currentTimeMillis();
             Tokenizer tokenizer = new Tokenizer(
                     argumentParser.getMainSrcFile(),
                     true,
@@ -40,20 +41,33 @@ public class Main {
                 System.out.println(root);
                 System.out.println("===== End of ast =====");
             }
+            long vmStartBegin = System.currentTimeMillis();
 //            FakeGlobalEnv environment = new FakeGlobalEnv();
 //            root.preprocess(environment);
             Memory memory = new Memory();
             GlobalEnvironment globalEnvironment = new GlobalEnvironment(memory);
 
             initNatives(globalEnvironment);
+
+            long runBegin = System.currentTimeMillis();
             root.evaluate(globalEnvironment);
 
             callMain(argumentParser.getSplArgs(), globalEnvironment);
 
 //            globalEnvironment.printVars();
 
+            long processEnd = System.currentTimeMillis();
+
             if (argumentParser.isPrintMem()) {
                 memory.printMemory();
+            }
+            if (argumentParser.isTimer()) {
+                System.out.println(String.format(
+                        "Parse time: %d ms, VM startup time: %d ms, running time: %d ms.",
+                        vmStartBegin - parseBegin,
+                        runBegin - vmStartBegin,
+                        processEnd - runBegin
+                ));
             }
         } else {
             System.out.println(argumentParser.getMsg());
