@@ -67,17 +67,6 @@ public class FuncDefinition extends Node {
 
     @Override
     public FuncDefinition preprocess(FakeEnv env) {
-//        FakeFunctionEnv scope = new FakeFunctionEnv(env);
-//        for (int i = 0; i < parameters.getChildren().size(); ++i) {
-//            Node node = parameters.getChildren().get(i);
-//            if (!(node instanceof Declaration)) {
-//                throw new ParseError("Unexpected parameter syntax. ", node.getLineFile());
-//            }
-//            parameters.getChildren().set(i, node.preprocess(scope));
-//        }
-//        body = body.preprocess(scope);
-//        stackUsage = scope.getStackCounter();
-
         return this;
     }
 

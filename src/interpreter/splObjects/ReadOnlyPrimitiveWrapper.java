@@ -7,16 +7,25 @@ import interpreter.primitives.*;
  */
 public class ReadOnlyPrimitiveWrapper extends SplObject {
 
-    public static final ReadOnlyPrimitiveWrapper NULL_WRAPPER =
-            new ReadOnlyPrimitiveWrapper(Pointer.NULL_PTR);
-    public static final ReadOnlyPrimitiveWrapper INT_ZERO_WRAPPER =
-            new ReadOnlyPrimitiveWrapper(new Int(0));
-    public static final ReadOnlyPrimitiveWrapper CHAR_ZERO_WRAPPER =
-            new ReadOnlyPrimitiveWrapper(new Char('\0'));
-    public static final ReadOnlyPrimitiveWrapper FLOAT_ZERO_WRAPPER =
-            new ReadOnlyPrimitiveWrapper(new SplFloat(0));
-    public static final ReadOnlyPrimitiveWrapper BOOLEAN_FALSE_WRAPPER =
-            new ReadOnlyPrimitiveWrapper(new Bool(false));
+    public static ReadOnlyPrimitiveWrapper nullWrapper() {
+        return new ReadOnlyPrimitiveWrapper(Pointer.NULL_PTR);
+    }
+
+    public static ReadOnlyPrimitiveWrapper intZeroWrapper() {
+        return new ReadOnlyPrimitiveWrapper(new Int(0));
+    }
+
+    public static ReadOnlyPrimitiveWrapper charZeroWrapper() {
+        return new ReadOnlyPrimitiveWrapper(new Char('\0'));
+    }
+
+    public static ReadOnlyPrimitiveWrapper floatZeroWrapper() {
+        return new ReadOnlyPrimitiveWrapper(new SplFloat(0));
+    }
+
+    public static ReadOnlyPrimitiveWrapper booleanFalseWrapper() {
+        return new ReadOnlyPrimitiveWrapper(new Bool(false));
+    }
 
     public final Primitive value;
 

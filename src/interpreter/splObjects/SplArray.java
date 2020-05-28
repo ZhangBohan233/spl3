@@ -73,22 +73,22 @@ public class SplArray extends SplObject {
             PrimitiveType primitiveType = (PrimitiveType) elementType;
             switch (primitiveType.type) {
                 case Primitive.INT:
-                    wrapper = ReadOnlyPrimitiveWrapper.INT_ZERO_WRAPPER;
+                    wrapper = ReadOnlyPrimitiveWrapper.intZeroWrapper();
                     break;
                 case Primitive.FLOAT:
-                    wrapper = ReadOnlyPrimitiveWrapper.FLOAT_ZERO_WRAPPER;
+                    wrapper = ReadOnlyPrimitiveWrapper.floatZeroWrapper();
                     break;
                 case Primitive.BOOLEAN:
-                    wrapper = ReadOnlyPrimitiveWrapper.BOOLEAN_FALSE_WRAPPER;
+                    wrapper = ReadOnlyPrimitiveWrapper.booleanFalseWrapper();
                     break;
                 case Primitive.CHAR:
-                    wrapper = ReadOnlyPrimitiveWrapper.CHAR_ZERO_WRAPPER;
+                    wrapper = ReadOnlyPrimitiveWrapper.charZeroWrapper();
                     break;
                 default:
                     throw new TypeError();
             }
         } else {
-            wrapper = ReadOnlyPrimitiveWrapper.NULL_WRAPPER;
+            wrapper = ReadOnlyPrimitiveWrapper.nullWrapper();
         }
         for (int i = 0; i < arrayLength; ++i) {
             memory.set(firstEleAddr + i, wrapper);

@@ -1,6 +1,5 @@
 package interpreter;
 
-import ast.Node;
 import interpreter.env.Environment;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.*;
@@ -15,7 +14,7 @@ import java.util.Set;
 public class Memory {
 
     public static final int INTERVAL = 1;
-    private static final int DEFAULT_HEAP_SIZE = 2048;
+    private static final int DEFAULT_HEAP_SIZE = 40;
     private int heapSize;
     private int stackSize;
 
@@ -88,20 +87,25 @@ public class Memory {
     }
 
     public void gc(Environment env) {
+        System.out.print("Doing gc! ");
         initGcMark();
         markGcByEnv(env);
         garbageCollect();
-        System.out.println("gc!");
+        System.out.println("gc done!");
     }
 
     private void garbageCollect() {
+        System.out.print("Available before gc: " + available.availableCount());
         available.clear();
         AvailableList.LnkNode curLast = null;
         int occupied = 0;
         for (int p = 1; p < heapSize; ++p) {
             SplObject obj = get(p);
             if (obj != null) {
-                if (obj.gcCount > 0) {
+//                if (obj instanceof ReadOnlyPrimitiveWrapper) {
+//                    System.out.println(obj.getGcCount());
+//                }
+                if (obj.isGcMarked()) {
                     occupied++;
                 } else {
                     curLast = available.addLast(p, curLast);
@@ -111,13 +115,13 @@ public class Memory {
                 curLast = available.addLast(p, curLast);
             }
         }
-        System.out.print(occupied + ", ");
-        System.out.println(heapSize - occupied);
+        System.out.println(" After gc: " + available.availableCount());
     }
 
     private void initGcMark() {
         for (SplObject obj : heap) {
-            if (obj != null) obj.gcCount = 0;
+            if (obj != null) obj.clearGcCount();
+
         }
     }
 
@@ -128,9 +132,11 @@ public class Memory {
         for (TypeValue tv : attr) {
             if (!tv.getType().isPrimitive()) {
                 Pointer ptr = (Pointer) tv.getValue();
+//                if (ptr != null) {
                 SplObject obj = get(ptr);
                 PointerType type = (PointerType) tv.getType();
                 markTrueSplObj(type, obj, ptr.getPtr());
+//                }
             }
         }
         markGcByEnv(env.outer);
@@ -138,8 +144,9 @@ public class Memory {
 
     private void markTrueSplObj(PointerType type, SplObject obj, int objAddr) {
         if (obj == null) return;
-        obj.gcCount += 1;
-        if (obj.gcCount > 1) return;  // already collected
+        if (obj.isGcMarked()) return;
+        obj.incrementGcCount();
+//        if (obj.gcCount > 1) return;  // already marked
 //        System.out.println(obj);
 
         switch (type.getPointerType()) {
@@ -153,7 +160,7 @@ public class Memory {
                         int p = arrBegin + i;
                         ReadOnlyPrimitiveWrapper ele = (ReadOnlyPrimitiveWrapper) get(p);
                         if (ele != null) {
-                            ele.gcCount += 1;
+                            ele.incrementGcCount();
                             SplObject pointed = get((Pointer) ele.value);
                             markTrueSplObj(valuePtrType, pointed, p);
                         }
@@ -163,7 +170,7 @@ public class Memory {
                         int p = arrBegin + i;
                         ReadOnlyPrimitiveWrapper ele = (ReadOnlyPrimitiveWrapper) get(p);
                         if (ele != null) {
-                            ele.gcCount += 1;
+                            ele.incrementGcCount();
                         }
                     }
                 }
@@ -197,27 +204,42 @@ public class Memory {
         System.out.println(Arrays.toString(heap));
     }
 
+    public String memoryViewWithAddress() {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < heap.length; ++i) {
+            sb.append(i).append(": ").append(get(i)).append(", ");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
     public String memoryView() {
-        return Arrays.toString(heap);
+//        return Arrays.toString(heap);
+        return memoryViewWithAddress();
     }
 
     public String availableView() {
-        return available.size() + ": " + available.toString();
+        return available.availableCount() + ": " + available.toString();
     }
 
-    public static void main(String[] args) {
-        AvailableList availableList = new AvailableList(16);
-        System.out.println(availableList.findAva(3));
-        System.out.println(availableList);
-        availableList.addAvaSorted(0, 1);
-        System.out.println(availableList);
-        System.out.println(availableList.findAva(2));
-        System.out.println(availableList);
-    }
+//    public static void main(String[] args) {
+//        AvailableList availableList = new AvailableList(16);
+//        System.out.println(availableList.findAva(3));
+//        System.out.println(availableList);
+//        availableList.addAvaSorted(0, 1);
+//        System.out.println(availableList);
+//        System.out.println(availableList.findAva(2));
+//        System.out.println(availableList);
+//    }
 
     private static class AvailableList {
 
         private final LnkNode head;
+
+        /**
+         * this size includes the head (0, null), which would never be used.
+         */
+        private int size;
 
         AvailableList(int size) {
             LnkNode last = null;
@@ -228,10 +250,12 @@ public class Memory {
                 last = node;
             }
             head = last;
+            this.size = size;
         }
 
         void clear() {
             head.next = null;
+            size = 1;
         }
 
         /**
@@ -246,6 +270,8 @@ public class Memory {
             node.value = addr;
             if (curLast == null) curLast = head;
 
+            size++;
+
             curLast.next = node;
             return node;
         }
@@ -254,6 +280,7 @@ public class Memory {
             LnkNode node = head.next;
             if (node == null) return -1;
             head.next = node.next;
+            size--;
             return node.value;
         }
 
@@ -261,7 +288,7 @@ public class Memory {
             LnkNode last = new LnkNode();
             LnkNode firstOfAdd = last;
             last.value = ptr;
-            for (int i = 1; i < intervalsCount ; ++i) {
+            for (int i = 1; i < intervalsCount; ++i) {
                 LnkNode n = new LnkNode();
                 n.value = ptr + i * INTERVAL;
                 last.next = n;
@@ -269,25 +296,27 @@ public class Memory {
             }
             last.next = head.next;
             head.next = firstOfAdd;
+            size += intervalsCount;
         }
 
-        void addAvaSorted(int ptr, int intervalsCount) {
-            LnkNode h = head;
-            while (h.next.value < ptr) {
-                h = h.next;
-            }
-            LnkNode insertHead = h.next;
-            for (int i = intervalsCount - 1; i >= 0; --i) {
-                LnkNode n = new LnkNode();
-                n.next = insertHead;
-                n.value = ptr + i * INTERVAL;
-                insertHead = n;
-            }
-            h.next = insertHead;
-            if (insertHead.value >= insertHead.next.value) {
-                throw new MemoryError("Heap memory collision. ");
-            }
-        }
+//        void addAvaSorted(int ptr, int intervalsCount) {
+//            LnkNode h = head;
+//            while (h.next.value < ptr) {
+//                h = h.next;
+//            }
+//            LnkNode insertHead = h.next;
+//            for (int i = intervalsCount - 1; i >= 0; --i) {
+//                LnkNode n = new LnkNode();
+//                n.next = insertHead;
+//                n.value = ptr + i * INTERVAL;
+//                insertHead = n;
+//            }
+//            h.next = insertHead;
+//            if (insertHead.value >= insertHead.next.value) {
+//                throw new MemoryError("Heap memory collision. ");
+//            }
+//            size+=intervalsCount;
+//        }
 
         int findAva(int size) {
             LnkNode h = head;
@@ -303,6 +332,7 @@ public class Memory {
                     LnkNode foundNode = h.next;
                     int found = foundNode.value;
                     h.next = cur.next;
+                    this.size -= size;
                     return found;
                 } else {
                     h = cur;
@@ -314,12 +344,13 @@ public class Memory {
         /**
          * @return count of available memory slots, does not include the head.
          */
-        public int size() {
-            int s = -1;
+        public int availableCount() {
+            int s = 0;
             for (LnkNode n = head; n != null; n = n.next) {
                 s++;
             }
-            return s;
+            if (s != size) throw new IndexOutOfBoundsException("Expect count: " + size + ", actual count: " + s);
+            return s - 1;  // exclude null
         }
 
         @Override
