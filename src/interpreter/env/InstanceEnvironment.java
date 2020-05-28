@@ -8,8 +8,17 @@ import util.LineFile;
 
 public class InstanceEnvironment extends MainAbstractEnvironment {
 
-    public InstanceEnvironment(Environment outer) {
-        super(outer.getMemory(), outer);
+    /**
+     * Store the reference to the environment where this instance is created. Used only for gc.
+     */
+    public final Environment creationEnvironment;
+    private final String className;
+
+    public InstanceEnvironment(String className, Environment definitionEnv, Environment creationEnvironment) {
+        super(definitionEnv.getMemory(), definitionEnv);
+
+        this.className = className;
+        this.creationEnvironment = creationEnvironment;
     }
 
     public void directDefineConstAndSet(String name, TypeValue typeValue) {
@@ -47,5 +56,10 @@ public class InstanceEnvironment extends MainAbstractEnvironment {
 
     public boolean selfContains(String name) {
         return variables.containsKey(name) || constants.containsKey(name);
+    }
+
+    @Override
+    public String toString() {
+        return "InstanceEnv of '" + className + "'";
     }
 }

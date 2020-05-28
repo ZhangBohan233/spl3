@@ -28,7 +28,6 @@ public class Dot extends BinaryExpr implements TypeRepresent {
                 case PointerType.CLASS_TYPE:
                     Instance instance = (Instance) env.getMemory().get(ptr);
                     return crossEnvEval(right, instance.getEnv(), env, getLineFile());
-//                    return right.evaluate(instance.getEnv());
                 case PointerType.MODULE_TYPE:
                     SplModule module = (SplModule) env.getMemory().get(ptr);
                     return crossEnvEval(right, module.getEnv(), env, getLineFile());

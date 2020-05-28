@@ -9,7 +9,6 @@ import interpreter.types.*;
 import parser.ParseError;
 import util.LineFile;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Function extends SplCallable {
@@ -107,7 +106,7 @@ public class Function extends SplCallable {
 
 //        System.out.println(Arrays.toString(evaluatedArgs));
 
-        FunctionEnvironment scope = new FunctionEnvironment(definitionEnv);
+        FunctionEnvironment scope = new FunctionEnvironment(definitionEnv, callingEnv);
         if (evaluatedArgs.length < minArgCount() || evaluatedArgs.length > maxArgCount()) {
             throw new SplException("Arguments length does not match parameters. Expect " +
                     minArgCount() + ", got " + evaluatedArgs.length + ". ", argLineFile);

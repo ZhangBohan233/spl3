@@ -1,6 +1,8 @@
 package interpreter;
 
 import interpreter.env.Environment;
+import interpreter.env.FunctionEnvironment;
+import interpreter.env.InstanceEnvironment;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.*;
 import interpreter.types.ArrayType;
@@ -14,7 +16,7 @@ import java.util.Set;
 public class Memory {
 
     public static final int INTERVAL = 1;
-    private static final int DEFAULT_HEAP_SIZE = 40;
+    private static final int DEFAULT_HEAP_SIZE = 50;
     private int heapSize;
     private int stackSize;
 
@@ -44,6 +46,7 @@ public class Memory {
     public Pointer allocate(int size, Environment env) {
         int ptr = innerAllocate(size);
         if (ptr == -1) {
+            System.out.println("Triggering gc when allocate " + size + " in " + env);
             gc(env);
             ptr = innerAllocate(size);
             if (ptr == -1)
@@ -128,6 +131,8 @@ public class Memory {
     private void markGcByEnv(Environment env) {
         if (env == null) return;
 
+//        System.out.println(env);
+
         Set<TypeValue> attr = env.attributes();
         for (TypeValue tv : attr) {
             if (!tv.getType().isPrimitive()) {
@@ -140,6 +145,11 @@ public class Memory {
             }
         }
         markGcByEnv(env.outer);
+        if (env instanceof FunctionEnvironment) {
+            markGcByEnv(((FunctionEnvironment) env).callingEnv);
+        } else if (env instanceof InstanceEnvironment) {
+            markGcByEnv(((InstanceEnvironment) env).creationEnvironment);
+        }
     }
 
     private void markTrueSplObj(PointerType type, SplObject obj, int objAddr) {

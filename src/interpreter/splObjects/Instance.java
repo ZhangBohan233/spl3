@@ -46,7 +46,11 @@ public class Instance extends SplObject {
         SplObject obj = outerEnv.getMemory().get(clazzType.getClazzPointer());
         if (!(obj instanceof SplClass)) throw new TypeError();
         SplClass clazz = (SplClass) obj;
-        InstanceEnvironment instanceEnv = new InstanceEnvironment(clazz.getDefinitionEnv());
+        InstanceEnvironment instanceEnv = new InstanceEnvironment(
+                clazz.getClassName(),
+                clazz.getDefinitionEnv(),
+                outerEnv
+        );
 
         Instance instance = new Instance(clazzType, instanceEnv);
         Pointer instancePtr = outerEnv.getMemory().allocate(1, instanceEnv);
@@ -87,7 +91,7 @@ public class Instance extends SplObject {
             // class SomeClazz<T> {...}
             // new SomeClazz();
 //            System.out.println(clazz.templates);
-            for (Node templateDef: clazz.templates) {
+            for (Node templateDef : clazz.templates) {
                 if (templateDef instanceof NameNode) {
                     String templateName = ((NameNode) templateDef).getName();
                     TypeValue objectTv = instanceEnv.get("Object", lineFile);

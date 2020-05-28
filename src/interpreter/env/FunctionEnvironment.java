@@ -4,10 +4,13 @@ import interpreter.types.TypeValue;
 
 public class FunctionEnvironment extends MainAbstractEnvironment {
 
+    public final Environment callingEnv;
     private TypeValue returnValue;
 
-    public FunctionEnvironment(Environment outer) {
-        super(outer.memory, outer);
+    public FunctionEnvironment(Environment definitionEnv, Environment callingEnv) {
+        super(definitionEnv.memory, definitionEnv);
+
+        this.callingEnv = callingEnv;
     }
 
     public TypeValue getReturnValue() {
