@@ -118,7 +118,7 @@ public class SplSystem extends NativeObject {
 
         String s = getString(typeValue, environment, lineFile);
 
-        return StringLiteral.createStringOneStep(s.toCharArray(), environment, lineFile);
+        return StringLiteral.createString(s.toCharArray(), environment, lineFile);
     }
 
     public TypeValue typeName(Arguments arguments, Environment environment, LineFile lineFile) {
@@ -127,7 +127,7 @@ public class SplSystem extends NativeObject {
         TypeValue typeValue = arguments.getLine().getChildren().get(0).evaluate(environment);
 
         String s = typeValue.getType().toString();
-        return StringLiteral.createStringOneStep(s.toCharArray(), environment, lineFile);
+        return StringLiteral.createString(s.toCharArray(), environment, lineFile);
     }
 
     private static void checkArgCount(Arguments arguments, int expectArgc, String fnName, LineFile lineFile) {

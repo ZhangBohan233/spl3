@@ -23,6 +23,7 @@ public class Memory {
 
     private AvailableList available;
     private final Set<Environment> temporaryEnvs = new HashSet<>();
+    private final Set<TypeValue> temporaryPointers = new HashSet<>();
     private final Deque<FunctionEnvironment> callStack = new ArrayDeque<>();
 
     public Memory() {
@@ -100,18 +101,46 @@ public class Memory {
         temporaryEnvs.remove(env);
     }
 
+    public void addTempPtr(TypeValue tv) {
+        temporaryPointers.add(tv);
+    }
+
+    public void removeTempPtr(TypeValue tv){
+        temporaryPointers.remove(tv);
+    }
+
     public void gc(Environment baseEnv) {
         System.out.print("Doing gc! ");
+
+        // set all marks to 0
         initGcMark();
+
+        // mark
+        // global root
         markGcByEnv(baseEnv);
+
+        // call stack roots
         for (FunctionEnvironment env: callStack) {
 //            System.out.println(env.attributes());
             markGcByEnv(env);
         }
+
+        // other roots
         for (Environment env : temporaryEnvs) {
             markGcByEnv(env);
         }
+
+        // temp object roots
+        for (TypeValue typeValue : temporaryPointers) {
+            Pointer ptr = (Pointer) typeValue.getValue();
+            PointerType type = (PointerType) typeValue.getType();
+            SplObject obj = get(ptr);
+            markTrueSplObj(type, obj, ptr.getPtr());
+        }
+
+        // sweep
         garbageCollect();
+
         System.out.println("gc done!");
     }
 

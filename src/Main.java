@@ -132,15 +132,15 @@ public class Main {
         Pointer argPtr = SplArray.createArray(type, List.of(args.length), globalEnvironment);
         TypeValue arrTv = new TypeValue(type, argPtr);
         for (int i = 0; i < args.length; ++i) {
-            // create spl char array
-            TypeValue charArrTv = StringLiteral.createCharArrayAndAllocate(
-                    args[i].toCharArray(),
-                    globalEnvironment,
-                    LineFile.LF_INTERPRETER);
+//            // create spl char array
+//            TypeValue charArrTv = StringLiteral.createCharArrayAndAllocate(
+//                    args[i].toCharArray(),
+//                    globalEnvironment,
+//                    LineFile.LF_INTERPRETER);
 
             // create String instance
-            TypeValue strIns = StringLiteral.createStringInstance(
-                    charArrTv, globalEnvironment, LineFile.LF_INTERPRETER
+            TypeValue strIns = StringLiteral.createString(
+                    args[i].toCharArray(), globalEnvironment, LineFile.LF_INTERPRETER
             );
             SplArray.setItemAtIndex(argPtr, i, type, strIns, globalEnvironment, LineFile.LF_INTERPRETER);
         }

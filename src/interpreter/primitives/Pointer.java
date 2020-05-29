@@ -45,4 +45,9 @@ public class Pointer extends Primitive {
 
         return ptr == pointer.ptr;
     }
+
+    @Override
+    public int hashCode() {
+        return ptr;
+    }
 }

@@ -31,7 +31,7 @@ fn main() int {
     System.memoryView();
     //c: char[] = new char[14];
     //s: String = new String(c);
-    b = "fs";
+    b := "fs";
 
     return a.size;
 }

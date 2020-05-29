@@ -1,7 +1,6 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
-import interpreter.Memory;
 import interpreter.env.Environment;
 import interpreter.primitives.Char;
 import interpreter.primitives.Pointer;
@@ -27,18 +26,23 @@ public class StringLiteral extends LiteralNode {
 
     @Override
     protected TypeValue internalEval(Environment env) {
-        return createStringOneStep(charArray, env, getLineFile());
+        return createString(charArray, env, getLineFile());
     }
 
-    public static TypeValue createStringOneStep(char[] charArray, Environment env, LineFile lineFile) {
+    public static TypeValue createString(char[] charArray, Environment env, LineFile lineFile) {
         // create spl char array
         TypeValue arrTv = createCharArrayAndAllocate(charArray, env, lineFile);
+        env.getMemory().addTempPtr(arrTv);
 
         // create String instance
-        return createStringInstance(arrTv, env, lineFile);
+        TypeValue strTv = createStringInstance(arrTv, env, lineFile);
+
+        env.getMemory().removeTempPtr(arrTv);
+
+        return strTv;
     }
 
-    public static TypeValue createCharArrayAndAllocate(char[] charArray, Environment env, LineFile lineFile) {
+    private static TypeValue createCharArrayAndAllocate(char[] charArray, Environment env, LineFile lineFile) {
         ArrayType arrayType = new ArrayType(PrimitiveType.TYPE_CHAR);
         Pointer arrPtr = SplArray.createArray(arrayType, List.of(charArray.length), env);
         for (int i = 0; i < charArray.length; ++i) {
@@ -55,7 +59,7 @@ public class StringLiteral extends LiteralNode {
         return new TypeValue(arrayType, arrPtr);
     }
 
-    public static TypeValue createStringInstance(TypeValue charArrTv, Environment env, LineFile lineFile) {
+    private static TypeValue createStringInstance(TypeValue charArrTv, Environment env, LineFile lineFile) {
         NameNode clazzNode = new NameNode("String", lineFile);
         ClassType classType = (ClassType) clazzNode.evalType(env);
         Instance.InstanceTypeValue instanceTv = Instance.createInstanceAndAllocate(classType, env, lineFile);

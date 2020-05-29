@@ -5,6 +5,8 @@ import interpreter.primitives.Pointer;
 import interpreter.types.Type;
 import interpreter.primitives.Primitive;
 
+import java.util.Objects;
+
 public class TypeValue {
 
     public static final TypeValue VOID = new TypeValue(PrimitiveType.TYPE_VOID);
@@ -44,5 +46,21 @@ public class TypeValue {
     @Override
     public String toString() {
         return "{" + value + ": " + type + "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TypeValue typeValue = (TypeValue) o;
+
+        if (!Objects.equals(type, typeValue.type)) return false;
+        return Objects.equals(value, typeValue.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
     }
 }
