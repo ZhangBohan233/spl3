@@ -10,8 +10,7 @@ import interpreter.types.PointerType;
 import interpreter.types.Type;
 import interpreter.types.TypeValue;
 
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 
 public class Memory {
 
@@ -23,6 +22,8 @@ public class Memory {
     private final SplObject[] heap;
 
     private AvailableList available;
+    private final Set<Environment> temporaryEnvs = new HashSet<>();
+    private final Deque<FunctionEnvironment> callStack = new ArrayDeque<>();
 
     public Memory() {
         heapSize = DEFAULT_HEAP_SIZE;
@@ -31,12 +32,14 @@ public class Memory {
         initAvailable();
     }
 
-    public void increaseStack() {
+    public void pushStack(FunctionEnvironment newCallEnv) {
         stackSize++;
+        callStack.push(newCallEnv);
     }
 
     public void decreaseStack() {
         stackSize--;
+        callStack.pop();
     }
 
     private void initAvailable() {
@@ -89,10 +92,25 @@ public class Memory {
 //        System.out.println(available);
     }
 
-    public void gc(Environment env) {
+    public void addTempEnv(Environment env) {
+        temporaryEnvs.add(env);
+    }
+
+    public void removeTempEnv(Environment env) {
+        temporaryEnvs.remove(env);
+    }
+
+    public void gc(Environment baseEnv) {
         System.out.print("Doing gc! ");
         initGcMark();
-        markGcByEnv(env);
+        markGcByEnv(baseEnv);
+        for (FunctionEnvironment env: callStack) {
+//            System.out.println(env.attributes());
+            markGcByEnv(env);
+        }
+        for (Environment env : temporaryEnvs) {
+            markGcByEnv(env);
+        }
         garbageCollect();
         System.out.println("gc done!");
     }
@@ -137,19 +155,22 @@ public class Memory {
         for (TypeValue tv : attr) {
             if (!tv.getType().isPrimitive()) {
                 Pointer ptr = (Pointer) tv.getValue();
-//                if (ptr != null) {
-                SplObject obj = get(ptr);
-                PointerType type = (PointerType) tv.getType();
-                markTrueSplObj(type, obj, ptr.getPtr());
-//                }
+
+                // the null case represent those constants which has not been set yet
+                if (ptr != null) {
+                    SplObject obj = get(ptr);
+
+                    PointerType type = (PointerType) tv.getType();
+                    markTrueSplObj(type, obj, ptr.getPtr());
+                }
             }
         }
         markGcByEnv(env.outer);
-        if (env instanceof FunctionEnvironment) {
-            markGcByEnv(((FunctionEnvironment) env).callingEnv);
-        } else if (env instanceof InstanceEnvironment) {
-            markGcByEnv(((InstanceEnvironment) env).creationEnvironment);
-        }
+//        if (env instanceof FunctionEnvironment) {
+//            markGcByEnv(((FunctionEnvironment) env).callingEnv);
+//        } else if (env instanceof InstanceEnvironment) {
+//            markGcByEnv(((InstanceEnvironment) env).creationEnvironment);
+//        }
     }
 
     private void markTrueSplObj(PointerType type, SplObject obj, int objAddr) {
@@ -199,6 +220,7 @@ public class Memory {
     }
 
     public Pointer allocateFunction(SplCallable function, Environment env) {
+//        System.out.println("Allocate " + function);
         Pointer ptr = allocate(1, env);
         set(ptr, function);
         return ptr;

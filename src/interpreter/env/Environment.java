@@ -12,6 +12,13 @@ import java.util.*;
 
 public abstract class Environment {
 
+    private static int envCount = 0;
+
+    /**
+     * Id is guaranteed unique.
+     */
+    private final int envId;
+
     public final Environment outer;
     protected Memory memory;
 
@@ -21,6 +28,7 @@ public abstract class Environment {
     public Environment(Memory memory, Environment outer) {
         this.memory = memory;
         this.outer = outer;
+        this.envId = envCount++;
     }
 
     public Memory getMemory() {
@@ -55,7 +63,7 @@ public abstract class Environment {
         if (localHasName(name, lineFile))
             throw new EnvironmentError("Variable '" + name + "' already defined. ", lineFile);
 
-        TypeValue typeValue = new TypeValue(type);
+        TypeValue typeValue = new TypeValue(type, type.defaultValue());
         variables.put(name, typeValue);
     }
 
@@ -70,6 +78,7 @@ public abstract class Environment {
         if (localHasName(name, lineFile))
             throw new EnvironmentError("Constant '" + name + "' already defined. ", lineFile);
 
+        // not using 'defaultValue' because 'null' is the mark of unassigned constant
         TypeValue typeValue = new TypeValue(type);
         constants.put(name, typeValue);
     }
@@ -102,6 +111,10 @@ public abstract class Environment {
         TypeValue tv = innerGet(name, true, true, lineFile);
         if (tv == null) {
             throw new EnvironmentError("Name '" + name + "' not found. ", lineFile);
+        }
+        if (tv.getValue() == null) {
+            // only defined constant
+            throw new EnvironmentError("Name '" + name + "' is defined but not assigned. ", lineFile);
         }
         return tv;
     }
@@ -166,4 +179,19 @@ public abstract class Environment {
     protected abstract TypeValue searchInNamespaces(String name);
 
     protected abstract void setInNamespaces(String name, TypeValue typeValue);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Environment that = (Environment) o;
+
+        return envId == that.envId;
+    }
+
+    @Override
+    public int hashCode() {
+        return envId;
+    }
 }

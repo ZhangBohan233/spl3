@@ -1,7 +1,8 @@
 package interpreter.types;
 
+import interpreter.SplException;
 import interpreter.env.Environment;
-import interpreter.primitives.Primitive;
+import interpreter.primitives.*;
 
 public class PrimitiveType implements Type {
 
@@ -44,5 +45,21 @@ public class PrimitiveType implements Type {
 
     public boolean isIntLike() {
         return type == Primitive.INT || type == Primitive.CHAR;
+    }
+
+    @Override
+    public Primitive defaultValue() {
+        switch (type) {
+            case Primitive.INT:
+                return Int.ZERO;
+            case Primitive.BOOLEAN:
+                return Bool.FALSE;
+            case Primitive.FLOAT:
+                return SplFloat.ZERO;
+            case Primitive.CHAR:
+                return Char.NULL_TERMINATOR;
+            default:
+                throw new SplException("No other types of primitive. ");
+        }
     }
 }

@@ -1,6 +1,8 @@
 package interpreter.types;
 
 import interpreter.env.Environment;
+import interpreter.primitives.Pointer;
+import interpreter.primitives.Primitive;
 
 public abstract class PointerType implements Type {
 
@@ -24,4 +26,9 @@ public abstract class PointerType implements Type {
     }
 
     protected abstract boolean isSuperclassOfOrEqualsNotNull(Type child, Environment env);
+
+    @Override
+    public Primitive defaultValue() {
+        return Pointer.NULL_PTR;
+    }
 }

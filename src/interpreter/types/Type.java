@@ -1,6 +1,7 @@
 package interpreter.types;
 
 import interpreter.env.Environment;
+import interpreter.primitives.Primitive;
 
 public interface Type {
 
@@ -14,4 +15,6 @@ public interface Type {
     boolean isPrimitive();
 
     boolean isSuperclassOfOrEquals(Type child, Environment env);
+
+    Primitive defaultValue();
 }

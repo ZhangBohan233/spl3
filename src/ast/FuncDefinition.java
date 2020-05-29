@@ -54,9 +54,9 @@ public class FuncDefinition extends Node {
 
         Function function;
         if (isAbstract) {
-            function = new Function(params, funcType, env, getLineFile());
+            function = new Function(params, funcType, env, name, getLineFile());
         } else {
-            function = new Function(body, params, funcType, env, getLineFile());
+            function = new Function(body, params, funcType, env, name, getLineFile());
         }
         Pointer funcPtr = env.getMemory().allocateFunction(function, env);
 

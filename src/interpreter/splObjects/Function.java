@@ -21,6 +21,7 @@ public class Function extends SplCallable {
     private final List<Parameter> params;  // only Declaration and Assignment
     private final Node body;
     private final LineFile lineFile;
+    private final String definedName;
 
     private final boolean isLambda;
     private final boolean isAbstract;
@@ -29,13 +30,14 @@ public class Function extends SplCallable {
      * Constructor for regular function.
      */
     public Function(BlockStmt body, List<Parameter> params, CallableType funcType, Environment definitionEnv,
-                    LineFile lineFile) {
+                    String definedName, LineFile lineFile) {
         super(funcType);
 
         this.body = body;
         this.params = params;
         this.definitionEnv = definitionEnv;
         this.lineFile = lineFile;
+        this.definedName = definedName;
 
         isLambda = false;
         isAbstract = false;
@@ -45,13 +47,14 @@ public class Function extends SplCallable {
      * Constructor for abstract function.
      */
     public Function(List<Parameter> params, CallableType funcType, Environment definitionEnv,
-                    LineFile lineFile) {
+                    String definedName, LineFile lineFile) {
         super(funcType);
 
         this.body = null;
         this.params = params;
         this.definitionEnv = definitionEnv;
         this.lineFile = lineFile;
+        this.definedName = definedName;
 
         isLambda = false;
         isAbstract = true;
@@ -74,6 +77,7 @@ public class Function extends SplCallable {
         this.params = params;
         this.definitionEnv = definitionEnv;
         this.lineFile = lineFile;
+        this.definedName = "";
 
         isLambda = true;
         isAbstract = false;
@@ -89,7 +93,11 @@ public class Function extends SplCallable {
 
     @Override
     public String toString() {
-        return "Function{" + funcType + "}";
+        if (definedName.isEmpty()) {
+            return "Anonymous function: {" + funcType + "}";
+        } else {
+            return "Function " + definedName + ": {" + funcType + "}";
+        }
     }
 
     public TypeValue call(Arguments arguments, Environment callingEnv) {
@@ -106,7 +114,7 @@ public class Function extends SplCallable {
 
 //        System.out.println(Arrays.toString(evaluatedArgs));
 
-        FunctionEnvironment scope = new FunctionEnvironment(definitionEnv, callingEnv);
+        FunctionEnvironment scope = new FunctionEnvironment(definitionEnv, callingEnv, definedName);
         if (evaluatedArgs.length < minArgCount() || evaluatedArgs.length > maxArgCount()) {
             throw new SplException("Arguments length does not match parameters. Expect " +
                     minArgCount() + ", got " + evaluatedArgs.length + ". ", argLineFile);
@@ -133,7 +141,7 @@ public class Function extends SplCallable {
             }
         }
 
-        scope.getMemory().increaseStack();
+        scope.getMemory().pushStack(scope);
         TypeValue evalResult = body.evaluate(scope);
         scope.getMemory().decreaseStack();
 

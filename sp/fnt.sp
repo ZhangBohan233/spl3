@@ -12,13 +12,13 @@ fn main() int {
     lst.pop();
     lst.print();
 
-    s: util.Object = sum(lst);
-    System.println(s);
+    //s: util.Object = sum(lst);
+    //System.println(s);
 
-    lst2 := map(lst, addOne);
-    lst2.print();
+    //lst2 := map(lst, addOne);
+    //lst2.print();
 
-    lst.print();
+    //lst.print();
 
     return lst.size();
 }

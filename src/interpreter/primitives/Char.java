@@ -2,6 +2,8 @@ package interpreter.primitives;
 
 public class Char extends Primitive {
 
+    public static final Char NULL_TERMINATOR = new Char('\0');
+
     public final char value;
 
     public Char(char value) {

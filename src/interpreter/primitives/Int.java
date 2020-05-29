@@ -2,6 +2,8 @@ package interpreter.primitives;
 
 public class Int extends Primitive {
 
+    public static final Int ZERO = new Int(0);
+
     public final long value;
 
     public Int(long value) {

@@ -2,6 +2,8 @@ package interpreter.primitives;
 
 public class SplFloat extends Primitive {
 
+    public static final SplFloat ZERO = new SplFloat(0.0d);
+
     public final double value;
 
     public SplFloat(double value) {

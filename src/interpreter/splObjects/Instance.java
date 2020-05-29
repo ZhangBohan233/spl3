@@ -36,13 +36,14 @@ public class Instance extends SplObject {
     public static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType,
                                                               Environment outerEnv,
                                                               LineFile lineFile) {
-        return createInstanceAndAllocate(clazzType, outerEnv, lineFile, new TreeMap<>());
+        return createInstanceAndAllocate(clazzType, outerEnv, lineFile, new TreeMap<>(), new ArrayList<>());
     }
 
     private static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType,
                                                                Environment outerEnv,
                                                                LineFile lineFile,
-                                                               Map<String, TypeValue> undeterminedTemplates) {
+                                                               Map<String, TypeValue> undeterminedTemplates,
+                                                               List<Environment> extraEnvs) {
         SplObject obj = outerEnv.getMemory().get(clazzType.getClazzPointer());
         if (!(obj instanceof SplClass)) throw new TypeError();
         SplClass clazz = (SplClass) obj;
@@ -51,6 +52,7 @@ public class Instance extends SplObject {
                 clazz.getDefinitionEnv(),
                 outerEnv
         );
+        outerEnv.getMemory().addTempEnv(instanceEnv);
 
         Instance instance = new Instance(clazzType, instanceEnv);
         Pointer instancePtr = outerEnv.getMemory().allocate(1, instanceEnv);
@@ -107,7 +109,7 @@ public class Instance extends SplObject {
 
         ClassType scp = clazz.getSuperclassType();
         if (scp != null) {
-            InstanceTypeValue scItv = createInstanceAndAllocate(scp, outerEnv, lineFile, newUndTemplates);
+            InstanceTypeValue scItv = createInstanceAndAllocate(scp, outerEnv, lineFile, newUndTemplates, extraEnvs);
             TypeValue scInstance = scItv.typeValue;
             instance.getEnv().directDefineConstAndSet("super", scInstance);
         }
@@ -125,6 +127,8 @@ public class Instance extends SplObject {
 
             fd.evaluate(instanceEnv);
         }
+
+        outerEnv.getMemory().removeTempEnv(instanceEnv);
 
         return new InstanceTypeValue(instance, instanceTv);
     }

@@ -34,6 +34,10 @@ public class Dot extends BinaryExpr implements TypeRepresent {
 //                    return right.evaluate(module.getEnv());
                 case PointerType.ARRAY_TYPE:
                     SplArray arr = (SplArray) env.getMemory().get(ptr);
+                    if (arr == null) {
+                        System.out.println(ptr);
+                        System.out.println(left);
+                    }
                     return arr.getAttr(right, getLineFile());
                 case PointerType.NATIVE_TYPE:
                     NativeObject nativeObject = (NativeObject) env.getMemory().get(ptr);

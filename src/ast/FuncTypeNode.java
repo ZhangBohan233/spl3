@@ -31,7 +31,7 @@ public class FuncTypeNode extends BinaryExpr implements TypeRepresent {
         List<Type> paramTypes = new ArrayList<>();
         Function.evalParamTypes(parameters, params, paramTypes, env);
 
-        FunctionEnvironment fakeEnv = new FunctionEnvironment(env, env);  // TODO:??
+        FunctionEnvironment fakeEnv = new FunctionEnvironment(env, env, "");  // TODO:??
         for (Function.Parameter p : params) p.declaration.evaluate(fakeEnv);
         Type rt = right.inferredType(fakeEnv);
 
