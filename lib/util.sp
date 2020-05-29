@@ -26,6 +26,18 @@ abstract class AbstractList<T> implements Collection<T> {
     abstract fn get(index: int) T;
 
     abstract fn add(obj: T) void;
+
+    abstract fn pop() T;
+
+    abstract fn head() T;
+
+    abstract fn tail() List<T>;
+
+    abstract fn last() T;
+
+    abstract fn prev() List<T>;
+
+    abstract fn copy() List<T>;
 }
 
 class List<T> extends AbstractList<T> {

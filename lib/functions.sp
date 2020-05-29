@@ -3,7 +3,7 @@ import namespace "util"
 /*
  * Notice that this function mutate the list.
  */
-fn reduce(lst: List, ftn: [Object, Object]->Object) Object {
+fn reduce(lst: AbstractList, ftn: [Object, Object]->Object) Object {
     if lst.size() == 1 {
         return lst.get(0);
     } else {
@@ -15,7 +15,7 @@ fn reduce(lst: List, ftn: [Object, Object]->Object) Object {
     }
 }
 
-fn map(lst: List, ftn: [Object]->Object) List {
+fn map(lst: AbstractList, ftn: [Object]->Object) List {
     if lst.size() == 0 {
         return new List();
     } else {
@@ -29,6 +29,6 @@ fn intAdd(a: Integer, b: Integer) Integer {
     return a.add(b);
 }
 
-fn sum(lst: List<Integer>) Integer {
+fn sum(lst: AbstractList<Integer>) Integer {
     return reduce(lst.copy(), intAdd);
 }

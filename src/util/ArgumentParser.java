@@ -10,6 +10,8 @@ public class ArgumentParser {
     private boolean printTokens;
     private boolean printMem;
     private boolean timer;
+    private boolean gcInfo;
+    private boolean gcTrigger;
     private String msg;
     private String[] splArgs;
 
@@ -29,6 +31,16 @@ public class ArgumentParser {
                             break;
                         case "-ast":
                             printAst = true;
+                            break;
+                        case "-gc":
+                            gcInfo = true;
+                            gcTrigger = true;
+                            break;
+                        case "--gci":
+                            gcInfo = true;
+                            break;
+                        case "--gct":
+                            gcTrigger = true;
                             break;
                         case "-tk":
                         case "--tokens":
@@ -89,6 +101,14 @@ public class ArgumentParser {
 
     public boolean isTimer() {
         return timer;
+    }
+
+    public boolean isGcInfo() {
+        return gcInfo;
+    }
+
+    public boolean isGcTrigger() {
+        return gcTrigger;
     }
 
     public String getMsg() {

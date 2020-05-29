@@ -15,9 +15,10 @@ import java.util.*;
 public class Memory {
 
     public static final int INTERVAL = 1;
-    private static final int DEFAULT_HEAP_SIZE = 500;
+    private static final int DEFAULT_HEAP_SIZE = 1024;
     private int heapSize;
     private int stackSize;
+    private int stackLimit = 1000;
 
     private final SplObject[] heap;
 
@@ -25,6 +26,9 @@ public class Memory {
     private final Set<Environment> temporaryEnvs = new HashSet<>();
     private final Set<TypeValue> temporaryPointers = new HashSet<>();
     private final Deque<FunctionEnvironment> callStack = new ArrayDeque<>();
+
+    private final GarbageCollector garbageCollector = new GarbageCollector();
+    public final DebugAttributes debugs = new DebugAttributes();
 
     public Memory() {
         heapSize = DEFAULT_HEAP_SIZE;
@@ -36,6 +40,9 @@ public class Memory {
     public void pushStack(FunctionEnvironment newCallEnv) {
         stackSize++;
         callStack.push(newCallEnv);
+        if (stackSize > stackLimit) {
+            throw new MemoryError("Stack overflow. ");
+        }
     }
 
     public void decreaseStack() {
@@ -50,11 +57,12 @@ public class Memory {
     public Pointer allocate(int size, Environment env) {
         int ptr = innerAllocate(size);
         if (ptr == -1) {
-            System.out.println("Triggering gc when allocate " + size + " in " + env);
+            if (debugs.printGcTrigger)
+                System.out.println("Triggering gc when allocate " + size + " in " + env);
             gc(env);
             ptr = innerAllocate(size);
             if (ptr == -1)
-                throw new MemoryError("No memory available. ");
+                throw new MemoryError("Cannot allocate size " + size + ": no memory available. ");
         }
         return new Pointer(ptr);
     }
@@ -105,150 +113,12 @@ public class Memory {
         temporaryPointers.add(tv);
     }
 
-    public void removeTempPtr(TypeValue tv){
+    public void removeTempPtr(TypeValue tv) {
         temporaryPointers.remove(tv);
     }
 
     public void gc(Environment baseEnv) {
-        System.out.print("Doing gc! ");
-
-        // set all marks to 0
-        initGcMark();
-
-        // mark
-        // global root
-        markGcByEnv(baseEnv);
-
-        // call stack roots
-        for (FunctionEnvironment env: callStack) {
-//            System.out.println("===" + env);
-            markGcByEnv(env);
-        }
-
-        // other roots
-        for (Environment env : temporaryEnvs) {
-            markGcByEnv(env);
-        }
-
-        // temp object roots
-        for (TypeValue typeValue : temporaryPointers) {
-            Pointer ptr = (Pointer) typeValue.getValue();
-            PointerType type = (PointerType) typeValue.getType();
-            SplObject obj = get(ptr);
-            markTrueSplObj(type, obj, ptr.getPtr());
-        }
-
-        // sweep
-        garbageCollect();
-
-        System.out.println("gc done!");
-    }
-
-    private void garbageCollect() {
-        System.out.print("Available before gc: " + available.availableCount());
-        available.clear();
-        AvailableList.LnkNode curLast = null;
-        int occupied = 0;
-        for (int p = 1; p < heapSize; ++p) {
-            SplObject obj = get(p);
-            if (obj != null) {
-//                if (obj instanceof ReadOnlyPrimitiveWrapper) {
-//                    System.out.println(obj.getGcCount());
-//                }
-                if (obj.isGcMarked()) {
-                    occupied++;
-                } else {
-                    curLast = available.addLast(p, curLast);
-                    set(p, null);
-                }
-            } else {
-                curLast = available.addLast(p, curLast);
-            }
-        }
-        System.out.println(" After gc: " + available.availableCount());
-    }
-
-    private void initGcMark() {
-        for (SplObject obj : heap) {
-            if (obj != null) obj.clearGcCount();
-
-        }
-    }
-
-    private void markGcByEnv(Environment env) {
-        if (env == null) return;
-
-//        System.out.println(env);
-
-        Set<TypeValue> attr = env.attributes();
-        for (TypeValue tv : attr) {
-            if (!tv.getType().isPrimitive()) {
-                Pointer ptr = (Pointer) tv.getValue();
-
-                // the null case represent those constants which has not been set yet
-                if (ptr != null) {
-                    SplObject obj = get(ptr);
-
-                    PointerType type = (PointerType) tv.getType();
-                    markTrueSplObj(type, obj, ptr.getPtr());
-                }
-            }
-        }
-        markGcByEnv(env.outer);
-        if (env instanceof FunctionEnvironment) {
-//            System.out.println("***" + ((FunctionEnvironment) env).callingEnv);
-            markGcByEnv(((FunctionEnvironment) env).callingEnv);
-        }
-//        else
-//            if (env instanceof InstanceEnvironment) {
-//            markGcByEnv(((InstanceEnvironment) env).creationEnvironment);
-//        }
-    }
-
-    private void markTrueSplObj(PointerType type, SplObject obj, int objAddr) {
-        if (obj == null) return;
-        if (obj.isGcMarked()) return;
-        obj.incrementGcCount();
-//        if (obj.gcCount > 1) return;  // already marked
-//        System.out.println(obj);
-
-        switch (type.getPointerType()) {
-            case PointerType.ARRAY_TYPE:
-                int arrBegin = objAddr + 1;
-                SplArray array = (SplArray) obj;
-                Type valueType = ((ArrayType) type).getEleType();
-                if (!valueType.isPrimitive()) {
-                    PointerType valuePtrType = (PointerType) valueType;
-                    for (int i = 0; i < array.length; i++) {
-                        int p = arrBegin + i;
-                        ReadOnlyPrimitiveWrapper ele = (ReadOnlyPrimitiveWrapper) get(p);
-                        if (ele != null) {
-                            ele.incrementGcCount();
-                            SplObject pointed = get((Pointer) ele.value);
-                            markTrueSplObj(valuePtrType, pointed, p);
-                        }
-                    }
-                } else {
-                    for (int i = 0; i < array.length; i++) {
-                        int p = arrBegin + i;
-                        ReadOnlyPrimitiveWrapper ele = (ReadOnlyPrimitiveWrapper) get(p);
-                        if (ele != null) {
-                            ele.incrementGcCount();
-                        }
-                    }
-                }
-                break;
-            case PointerType.MODULE_TYPE:
-                SplModule module = (SplModule) obj;
-                markGcByEnv(module.getEnv());
-                break;
-            case PointerType.CLASS_TYPE:
-                if (obj instanceof Instance) {
-                    Instance instance = (Instance) obj;
-                    markGcByEnv(instance.getEnv());
-                }
-                break;
-        }
+        garbageCollector.garbageCollect(baseEnv);
     }
 
     public Pointer allocateFunction(SplCallable function, Environment env) {
@@ -286,7 +156,15 @@ public class Memory {
         return available.availableCount() + ": " + available.toString();
     }
 
-//    public static void main(String[] args) {
+    public void setStackLimit(int stackLimit) {
+        this.stackLimit = stackLimit;
+    }
+
+    public void setHeapSize(int heapSize) {
+        this.heapSize = heapSize;
+    }
+
+    //    public static void main(String[] args) {
 //        AvailableList availableList = new AvailableList(16);
 //        System.out.println(availableList.findAva(3));
 //        System.out.println(availableList);
@@ -297,7 +175,146 @@ public class Memory {
 //    }
 
     private class GarbageCollector {
-        
+
+        private void garbageCollect(Environment baseEnv) {
+            long beginTime = System.currentTimeMillis();
+            if (debugs.printGcRes)
+                System.out.println("Doing gc! Available before gc: " + available.availableCount());
+
+            // set all marks to 0
+            initMarks();
+
+            // mark
+            // global root
+            mark(baseEnv);
+
+            // call stack roots
+            for (FunctionEnvironment env : callStack) {
+//            System.out.println("===" + env);
+                mark(env);
+            }
+
+            // other roots
+            for (Environment env : temporaryEnvs) {
+                mark(env);
+            }
+
+            // temp object roots
+            for (TypeValue typeValue : temporaryPointers) {
+                Pointer ptr = (Pointer) typeValue.getValue();
+                PointerType type = (PointerType) typeValue.getType();
+                SplObject obj = get(ptr);
+                markObjectAsUsed(type, obj, ptr.getPtr());
+            }
+
+            // sweep
+            sweep();
+
+            if (debugs.printGcRes)
+                System.out.println("gc done! Available after gc: " + available.availableCount() +
+                        ". Time used: " + (System.currentTimeMillis() - beginTime));
+        }
+
+        private void initMarks() {
+            for (SplObject obj : heap) {
+                if (obj != null) obj.clearGcCount();
+            }
+        }
+
+        private void mark(Environment env) {
+            if (env == null) return;
+
+//        System.out.println(env);
+
+            Set<TypeValue> attr = env.attributes();
+            for (TypeValue tv : attr) {
+                if (!tv.getType().isPrimitive()) {
+                    Pointer ptr = (Pointer) tv.getValue();
+
+                    // the null case represent those constants which has not been set yet
+                    if (ptr != null) {
+                        SplObject obj = get(ptr);
+
+                        PointerType type = (PointerType) tv.getType();
+                        markObjectAsUsed(type, obj, ptr.getPtr());
+                    }
+                }
+            }
+            mark(env.outer);
+            if (env instanceof FunctionEnvironment) {
+//            System.out.println("***" + ((FunctionEnvironment) env).callingEnv);
+                mark(((FunctionEnvironment) env).callingEnv);
+            }
+//        else
+//            if (env instanceof InstanceEnvironment) {
+//            markGcByEnv(((InstanceEnvironment) env).creationEnvironment);
+//        }
+        }
+
+        private void markObjectAsUsed(PointerType type, SplObject obj, int objAddr) {
+            if (obj == null) return;
+            if (obj.isGcMarked()) return;
+            obj.incrementGcCount();
+//        if (obj.gcCount > 1) return;  // already marked
+//        System.out.println(obj);
+
+            switch (type.getPointerType()) {
+                case PointerType.ARRAY_TYPE:
+                    int arrBegin = objAddr + 1;
+                    SplArray array = (SplArray) obj;
+                    Type valueType = ((ArrayType) type).getEleType();
+                    if (!valueType.isPrimitive()) {
+                        PointerType valuePtrType = (PointerType) valueType;
+                        for (int i = 0; i < array.length; i++) {
+                            int p = arrBegin + i;
+                            ReadOnlyPrimitiveWrapper ele = (ReadOnlyPrimitiveWrapper) get(p);
+                            if (ele != null) {
+                                ele.incrementGcCount();
+                                SplObject pointed = get((Pointer) ele.value);
+                                markObjectAsUsed(valuePtrType, pointed, p);
+                            }
+                        }
+                    } else {
+                        for (int i = 0; i < array.length; i++) {
+                            int p = arrBegin + i;
+                            ReadOnlyPrimitiveWrapper ele = (ReadOnlyPrimitiveWrapper) get(p);
+                            if (ele != null) {
+                                ele.incrementGcCount();
+                            }
+                        }
+                    }
+                    break;
+                case PointerType.MODULE_TYPE:
+                    SplModule module = (SplModule) obj;
+                    mark(module.getEnv());
+                    break;
+                case PointerType.CLASS_TYPE:
+                    if (obj instanceof Instance) {
+                        Instance instance = (Instance) obj;
+                        mark(instance.getEnv());
+                    }
+                    break;
+            }
+        }
+
+        private void sweep() {
+            available.clear();
+            AvailableList.LnkNode curLast = null;
+            for (int p = 1; p < heapSize; ++p) {
+                SplObject obj = get(p);
+                if (obj != null) {
+//                if (obj instanceof ReadOnlyPrimitiveWrapper) {
+//                    System.out.println(obj.getGcCount());
+//                }
+                    if (!obj.isGcMarked()) {
+                        curLast = available.addLast(p, curLast);
+                        set(p, null);
+                    }
+                } else {
+                    curLast = available.addLast(p, curLast);
+                }
+            }
+        }
     }
 
     private static class AvailableList {
@@ -443,4 +460,16 @@ public class Memory {
         }
     }
 
+    public static class DebugAttributes {
+        private boolean printGcRes;
+        private boolean printGcTrigger;
+
+        public void setPrintGcRes(boolean printGcRes) {
+            this.printGcRes = printGcRes;
+        }
+
+        public void setPrintGcTrigger(boolean printGcTrigger) {
+            this.printGcTrigger = printGcTrigger;
+        }
+    }
 }

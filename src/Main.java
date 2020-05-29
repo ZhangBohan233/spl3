@@ -47,6 +47,9 @@ public class Main {
             Memory memory = new Memory();
             GlobalEnvironment globalEnvironment = new GlobalEnvironment(memory);
 
+            if (argumentParser.isGcInfo()) memory.debugs.setPrintGcRes(true);
+            if (argumentParser.isGcTrigger()) memory.debugs.setPrintGcTrigger(true);
+
             initNatives(globalEnvironment);
 
             long runBegin = System.currentTimeMillis();
