@@ -37,6 +37,7 @@ public class Dot extends BinaryExpr implements TypeRepresent {
                     if (arr == null) {
                         System.out.println(ptr);
                         System.out.println(left);
+                        throw new NullPointerException("Array is null. ");
                     }
                     return arr.getAttr(right, getLineFile());
                 case PointerType.NATIVE_TYPE:

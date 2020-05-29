@@ -4,7 +4,7 @@ import "util"
 fn main() int {
     lst := new util.List<util.Integer>();
 
-    for i: int = 0 ; i < 10; i++ {
+    for i: int = 0 ; i < 20; i++ {
         lst.add(new util.Integer(i));
     }
 
@@ -14,7 +14,7 @@ fn main() int {
     //o: Object = lst.get(0);
     //lst2: util.List<String> = lst;
 
-    //lst.print();
+    lst.print();
 
     //lst2 := lst.tail();
     //lst2.print();
@@ -24,5 +24,5 @@ fn main() int {
     //lst3 := lst2.prev();
     //lst3.print();
 
-    return 0;
+    return lst.get(11).value;
 }

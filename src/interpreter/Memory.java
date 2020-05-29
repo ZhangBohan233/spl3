@@ -15,7 +15,7 @@ import java.util.*;
 public class Memory {
 
     public static final int INTERVAL = 1;
-    private static final int DEFAULT_HEAP_SIZE = 50;
+    private static final int DEFAULT_HEAP_SIZE = 500;
     private int heapSize;
     private int stackSize;
 
@@ -121,7 +121,7 @@ public class Memory {
 
         // call stack roots
         for (FunctionEnvironment env: callStack) {
-//            System.out.println(env.attributes());
+//            System.out.println("===" + env);
             markGcByEnv(env);
         }
 
@@ -195,9 +195,12 @@ public class Memory {
             }
         }
         markGcByEnv(env.outer);
-//        if (env instanceof FunctionEnvironment) {
-//            markGcByEnv(((FunctionEnvironment) env).callingEnv);
-//        } else if (env instanceof InstanceEnvironment) {
+        if (env instanceof FunctionEnvironment) {
+//            System.out.println("***" + ((FunctionEnvironment) env).callingEnv);
+            markGcByEnv(((FunctionEnvironment) env).callingEnv);
+        }
+//        else
+//            if (env instanceof InstanceEnvironment) {
 //            markGcByEnv(((InstanceEnvironment) env).creationEnvironment);
 //        }
     }
@@ -249,7 +252,7 @@ public class Memory {
     }
 
     public Pointer allocateFunction(SplCallable function, Environment env) {
-//        System.out.println("Allocate " + function);
+//        System.out.println("Allocating " + function);
         Pointer ptr = allocate(1, env);
         set(ptr, function);
         return ptr;
@@ -292,6 +295,10 @@ public class Memory {
 //        System.out.println(availableList.findAva(2));
 //        System.out.println(availableList);
 //    }
+
+    private class GarbageCollector {
+        
+    }
 
     private static class AvailableList {
 

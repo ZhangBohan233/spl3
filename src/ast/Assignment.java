@@ -50,6 +50,9 @@ public class Assignment extends BinaryExpr {
             TypeValue leftCallRes = ((IndexingNode) key).getCallObj().evaluate(env);
             List<Node> arguments = ((IndexingNode) key).getArgs().getChildren();
             int index = IndexingNode.getIndex(leftCallRes, arguments, env, lineFile);
+//            System.out.println(key + " " + key.getLineFile().toStringFileLine());
+//            System.out.println("Key is " + leftCallRes + ", Obj is " +
+//                    env.getMemory().get((Pointer) leftCallRes.getValue()));
             SplArray.setItemAtIndex((Pointer) leftCallRes.getValue(),
                     index,
                     (ArrayType) leftCallRes.getType(),

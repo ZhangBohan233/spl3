@@ -61,6 +61,10 @@ public class TypeValue {
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        if (value == null) {
+            return super.hashCode();
+        } else {
+            return value.hashCode();
+        }
     }
 }
