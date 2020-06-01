@@ -123,7 +123,3 @@ class List<T> extends AbstractList<T> {
         System.println("]");
     }
 }
-
-fn fade(n : int) int {
-    return n + 1;
-}

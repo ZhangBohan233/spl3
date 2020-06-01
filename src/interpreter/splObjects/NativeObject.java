@@ -19,7 +19,7 @@ public class NativeObject extends SplObject {
 
     public TypeValue invoke(Node node, Environment callEnv, LineFile lineFile) {
         if (node instanceof NameNode) {
-            return null;
+            return nativeAttribute(this, ((NameNode) node).getName(), lineFile);
         } else if (node instanceof FuncCall) {
             if (((FuncCall) node).getCallObj() instanceof NameNode) {
                 String name = ((NameNode) ((FuncCall) node).getCallObj()).getName();
@@ -27,6 +27,12 @@ public class NativeObject extends SplObject {
             }
         }
         throw new TypeError("Not a native invoke. ");
+    }
+
+    private static TypeValue nativeAttribute(NativeObject obj, String attrName, LineFile lineFile) {
+        
+
+        return null;
     }
 
     private static TypeValue nativeCall(NativeObject obj,

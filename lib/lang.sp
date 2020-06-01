@@ -17,3 +17,13 @@ class String {
         length = chs.length;
     }
 }
+
+class Error {
+    errno: int;
+    message: String;
+
+    fn init(errno: int, message: String = null) void {
+        this.errno = errno;
+        this.message = message;
+    }
+}

@@ -21,6 +21,8 @@ import java.util.List;
 
 public class Main {
 
+    private static final LineFile LF_MAIN = new LineFile(0, "Main");
+
     public static void main(String[] args) throws Exception {
         ArgumentParser argumentParser = new ArgumentParser(args);
         if (argumentParser.isAllValid()) {
@@ -93,7 +95,7 @@ public class Main {
 
     private static void initNativeFunctions(GlobalEnvironment ge) {
         NativeFunction toInt = new NativeFunction("int",
-                new CallableType(PrimitiveType.TYPE_INT) , 1) {
+                new CallableType(PrimitiveType.TYPE_INT), 1) {
             @Override
             protected TypeValue callFunc(Arguments arguments, Environment callingEnv) {
                 TypeValue arg = arguments.getLine().getChildren().get(0).evaluate(callingEnv);
@@ -112,24 +114,29 @@ public class Main {
     }
 
     private static void callMain(String[] args, GlobalEnvironment globalEnvironment) {
-        TypeValue mainTv = globalEnvironment.get("main", new LineFile(0, "Main"));
-        if (mainTv != null) {
+        if (globalEnvironment.hasName("main", LF_MAIN)) {
+            TypeValue mainTv = globalEnvironment.get("main", LF_MAIN);
             TypeValue[] splArg =
                     args == null ? new TypeValue[0] : makeSplArgArray(args, globalEnvironment);
 
             if (!(mainTv.getType() instanceof CallableType)) {
                 throw new TypeError("Main function must be callable. ");
             }
+            CallableType mainType = (CallableType) mainTv.getType();
+            if (!(mainType.getRType().equals(PrimitiveType.TYPE_INT) ||
+                    mainType.getRType().equals(PrimitiveType.TYPE_VOID))) {
+                throw new TypeError("Main function returns either 'int' or 'void'. ");
+            }
 
             Function mainFunc = (Function) globalEnvironment.getMemory().get((Pointer) mainTv.getValue());
-            TypeValue rtn = mainFunc.call(splArg, globalEnvironment, LineFile.LF_INTERPRETER);
+            TypeValue rtn = mainFunc.call(splArg, globalEnvironment, LF_MAIN);
 
             System.out.println("Process finished with exit value " + rtn.getValue());
         }
     }
 
     private static TypeValue[] makeSplArgArray(String[] args, GlobalEnvironment globalEnvironment) {
-        TypeValue stringTv = globalEnvironment.get("String", LineFile.LF_INTERPRETER);
+        TypeValue stringTv = globalEnvironment.get("String", LF_MAIN);
         ClassType stringType = (ClassType) stringTv.getType();
         ArrayType type = new ArrayType(stringType);
         Pointer argPtr = SplArray.createArray(type, List.of(args.length), globalEnvironment);
