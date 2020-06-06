@@ -661,6 +661,11 @@ public class AstBuilder {
                 BlockStmt blockStmt = inner.getBaseBlock();
                 inner = null;
                 ((ForLoopStmt) stmt).setCondition(blockStmt);
+            } else if (stmt instanceof CaseStmt) {
+                inner.finishPart();
+                Line line = inner.getLine();
+                inner = null;
+                ((CaseStmt) stmt).setCondition(line);
             }
         } else {
             inner.buildConditionTitle();
@@ -705,6 +710,67 @@ public class AstBuilder {
             }
         } else {
             inner.checkElse();
+        }
+    }
+
+    void addCondStmt(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new CondCaseStmt(lineFile));
+        } else {
+            inner.addCondStmt(lineFile);
+        }
+    }
+
+    void buildCondStmt(LineFile lineFile) {
+        if (inner == null) {
+            if (stack.size() < 2) {
+                throw new ParseError("Not a cond-case statement. ", lineFile);
+            }
+            BlockStmt block = (BlockStmt) stack.remove(stack.size() - 1);
+            CondCaseStmt stmt = (CondCaseStmt) stack.get(stack.size() - 1);
+            stmt.setCases(block);
+        } else {
+            inner.buildCondStmt(lineFile);
+        }
+    }
+
+    void addCase(LineFile lineFile) {
+        if (inner == null) {
+            CaseStmt caseStmt = new CaseStmt(lineFile, false);
+            stack.add(caseStmt);
+            inner = new AstBuilder();
+        } else {
+            inner.addCase(lineFile);
+        }
+    }
+
+    void addDefault(LineFile lineFile) {
+        if (inner == null) {
+            CaseStmt caseStmt = new CaseStmt(lineFile, true);
+            stack.add(caseStmt);
+        } else {
+            inner.addDefault(lineFile);
+        }
+    }
+
+    void buildDefault(LineFile lineFile) {
+        if (inner == null) {
+            if (stack.size() < 2) {
+                throw new ParseError("Not a default statement. ", lineFile);
+            }
+            BlockStmt block = (BlockStmt) stack.remove(stack.size() - 1);
+            CaseStmt stmt = (CaseStmt) stack.get(stack.size() - 1);
+            stmt.setBodyBlock(block);
+        } else {
+            inner.buildDefault(lineFile);
+        }
+    }
+
+    void addFallthrough(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new FallthroughStmt(lineFile));
+        } else {
+            inner.addFallthrough(lineFile);
         }
     }
 

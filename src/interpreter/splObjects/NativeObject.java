@@ -30,7 +30,7 @@ public class NativeObject extends SplObject {
     }
 
     private static TypeValue nativeAttribute(NativeObject obj, String attrName, LineFile lineFile) {
-        
+        // TODO
 
         return null;
     }

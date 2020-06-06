@@ -42,4 +42,14 @@ public abstract class SubAbstractEnvironment extends Environment {
     protected void setInNamespaces(String name, TypeValue typeValue) {
 
     }
+
+    @Override
+    public void fallthrough() {
+        outer.fallthrough();
+    }
+
+    @Override
+    public boolean isFallingThrough() {
+        return outer.isFallingThrough();
+    }
 }

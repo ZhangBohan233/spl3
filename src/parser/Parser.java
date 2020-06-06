@@ -1,6 +1,7 @@
 package parser;
 
 import ast.*;
+import interpreter.primitives.Int;
 import lexer.*;
 import util.LineFile;
 
@@ -46,6 +47,9 @@ public class Parser {
         Stack<Integer> condBraces = new Stack<>();
         Stack<Integer> funcTypeSqrBrackets = new Stack<>();
         Stack<Integer> angleBrackets = new Stack<>();
+        Stack<Integer> condSwitchBraces = new Stack<>();
+        Stack<Integer> caseBraces = new Stack<>();
+        Stack<Integer> defaultBraces = new Stack<>();
 
         for (int i = 0; i < tokens.size(); ++i) {
             Token token = tokens.get(i);
@@ -181,6 +185,14 @@ public class Parser {
                                 condBraces.pop();
                                 builder.buildBraceBlock();
                                 builder.buildConditionBody();
+                            } else if (isThisStack(condSwitchBraces, braceCount)) {
+                                condSwitchBraces.pop();
+                                builder.buildBraceBlock();
+                                builder.buildCondStmt(lineFile);
+                            } else if (isThisStack(defaultBraces, braceCount)) {
+                                defaultBraces.pop();
+                                builder.buildBraceBlock();
+                                builder.buildDefault(lineFile);
                             } else {
                                 builder.buildBraceBlock();
                             }
@@ -254,25 +266,38 @@ public class Parser {
                         case "else":
                             builder.addElse(lineFile);
                             isElse = true;
-//                            IdToken next = (IdToken) tokens.get(i + 1);
-//                            i += 1;
-//                            IfStmt ifStmt = builder.getActiveIfStmt();
-//
-//                            if (next.getIdentifier().equals("{")) {
-//                                builder.addBraceBlock();
-//                                BlockStmt innermost = builder.getInnermostBlock();
-//                                ifStmt.setElseBlock(innermost);
-//                                braceCount += 1;
-////                            } else if (next.getIdentifier().equals("if")) {
-////                                // This part should be identical with the 'if' case
-////                                // #####
-////                                conditioning = true;
-////                                IfStmt ifs = builder.addIf(lineFile);
-////                                // #####
-////                                ifStmt.setElseBlock(ifs);
-//                            } else {
-//                                throw new ParseError("Else must follow '{' or 'if'. ", lineFile);
-//                            }
+                            break;
+                        case "cond":
+                            i++;
+                            Token nextToken = tokens.get(i);
+                            if (nextToken instanceof IdToken && ((IdToken) nextToken).getIdentifier().equals("{")) {
+                                condSwitchBraces.push(++braceCount);
+                                builder.addCondStmt(lineFile);
+                                builder.addBraceBlock();
+                                break;
+                            } else {
+                                throw new SyntaxError(
+                                        "Statement 'cond' must followed by '{' immediately. ", lineFile);
+                            }
+                        case "switch":
+                        case "case":
+                            conditioning = true;
+                            builder.addCase(lineFile);
+                            break;
+                        case "default":
+                            i++;
+                            Token nextTk = tokens.get(i);
+                            if (nextTk instanceof IdToken && ((IdToken) nextTk).getIdentifier().equals("{")) {
+                                defaultBraces.push(++braceCount);
+                                builder.addDefault(lineFile);
+                                builder.addBraceBlock();
+                                break;
+                            } else {
+                                throw new SyntaxError(
+                                        "Statement 'default' must followed by '{' immediately. ", lineFile);
+                            }
+                        case "fallthrough":
+                            builder.addFallthrough(lineFile);
                             break;
                         case "as":
                             builder.addCast(lineFile);

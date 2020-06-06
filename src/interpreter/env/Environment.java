@@ -51,6 +51,10 @@ public abstract class Environment {
 
     public abstract void invalidate();
 
+    public abstract void fallthrough();
+
+    public abstract boolean isFallingThrough();
+
     public Set<TypeValue> attributes() {
         Set<TypeValue> set = new HashSet<>();
         set.addAll(constants.values());

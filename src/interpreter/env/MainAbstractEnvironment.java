@@ -81,4 +81,14 @@ public abstract class MainAbstractEnvironment extends Environment {
     public void invalidate() {
         throw new EnvironmentError();
     }
+
+    @Override
+    public void fallthrough() {
+        throw new EnvironmentError("'fallthrough' outside case statements. ");
+    }
+
+    @Override
+    public boolean isFallingThrough() {
+        throw new EnvironmentError("'fallthrough' outside case statements. ");
+    }
 }
