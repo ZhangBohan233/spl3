@@ -20,7 +20,7 @@ import java.io.PrintStream;
  * {@code Arguments}, {@code Environment}, {@code LineFile}
  */
 @SuppressWarnings("unused")
-public class SplSystem extends NativeObject {
+public class SplInvokes extends NativeObject {
 
     private PrintStream stdout = System.out;
     private PrintStream stderr = System.err;

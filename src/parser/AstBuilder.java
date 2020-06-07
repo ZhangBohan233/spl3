@@ -133,6 +133,14 @@ public class AstBuilder {
         }
     }
 
+//    void addAnyStmt(LineFile lineFile) {
+//        if (inner == null) {
+//            stack.add(new AnyStmt(lineFile));
+//        } else {
+//            inner.addAnyStmt(lineFile);
+//        }
+//    }
+
     void addInt(long value, LineFile lineFile) {
         if (inner == null) {
             stack.add(new IntNode(value, lineFile));

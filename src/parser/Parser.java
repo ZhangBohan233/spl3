@@ -407,6 +407,9 @@ public class Parser {
                         case "void":
                             builder.addPrimitiveTypeName(identifier, lineFile);
                             break;
+//                        case "any":
+//                            builder.addAnyStmt(lineFile);
+//                            break;
                         case "namespace":
                             builder.addNamespace(lineFile);
                             break;

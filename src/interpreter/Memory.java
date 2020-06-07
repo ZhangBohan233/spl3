@@ -15,7 +15,7 @@ import java.util.*;
 public class Memory {
 
     public static final int INTERVAL = 1;
-    private static final int DEFAULT_HEAP_SIZE = 1024;
+    private static final int DEFAULT_HEAP_SIZE = 2048;
     private int heapSize;
     private int stackSize;
     private int stackLimit = 1000;

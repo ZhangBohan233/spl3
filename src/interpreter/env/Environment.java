@@ -99,11 +99,21 @@ public abstract class Environment {
         if (typeValue == null)
             throw new EnvironmentError("Variable '" + name + "' is not defined in this scope. ", lineFile);
 
-        if (typeCheck(typeValue.getType(), newTypeValue.getType())) {
-            typeValue.setValue(newTypeValue.getValue());
+        TypeValue rightTv;
+        if (!typeValue.getType().isPrimitive() && newTypeValue.getType().isPrimitive()) {
+            // example: x: Integer = 1;
+            // Auto convert to wrapper type
+//            System.out.println(777);
+            rightTv = TypeValue.convertPrimitiveToWrapper(newTypeValue, this, lineFile);
         } else {
-            String ntvStr = newTypeValue.getType() instanceof ClassType ?
-                    ((ClassType) newTypeValue.getType()).toStringClass(memory) : newTypeValue.toString();
+            rightTv = newTypeValue;
+        }
+
+        if (typeCheck(typeValue.getType(), rightTv.getType())) {
+            typeValue.setValue(rightTv.getValue());
+        } else {
+            String ntvStr = rightTv.getType() instanceof ClassType ?
+                    ((ClassType) rightTv.getType()).toStringClass(memory) : rightTv.toString();
             String otvStr = typeValue.getType() instanceof ClassType ?
                     ((ClassType) typeValue.getType()).toStringClass(memory) : typeValue.toString();
             throw new TypeError("Cannot convert type '" + ntvStr +

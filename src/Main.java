@@ -2,11 +2,10 @@ import ast.*;
 import interpreter.Memory;
 import interpreter.env.Environment;
 import interpreter.env.GlobalEnvironment;
-import interpreter.invokes.SplSystem;
+import interpreter.invokes.SplInvokes;
 import interpreter.primitives.Int;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Function;
-import interpreter.splObjects.Instance;
 import interpreter.splObjects.NativeFunction;
 import interpreter.splObjects.SplArray;
 import interpreter.types.*;
@@ -16,7 +15,6 @@ import parser.Parser;
 import util.ArgumentParser;
 import util.LineFile;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -82,14 +80,14 @@ public class Main {
     private static void initNatives(GlobalEnvironment globalEnvironment) {
         initNativeFunctions(globalEnvironment);
 
-        SplSystem system = new SplSystem();
+        SplInvokes system = new SplInvokes();
 
         Memory memory = globalEnvironment.getMemory();
         Pointer sysPtr = memory.allocateObject(system, globalEnvironment);
 
         globalEnvironment.defineConstAndSet(
-                "System",
-                new TypeValue(new NativeType(SplSystem.class), sysPtr),
+                "Invokes",
+                new TypeValue(new NativeType(SplInvokes.class), sysPtr),
                 LineFile.LF_INTERPRETER);
     }
 

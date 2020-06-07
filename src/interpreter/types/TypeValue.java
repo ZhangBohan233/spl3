@@ -1,9 +1,12 @@
 package interpreter.types;
 
+import interpreter.env.Environment;
 import interpreter.primitives.Bool;
 import interpreter.primitives.Pointer;
+import interpreter.splObjects.Instance;
 import interpreter.types.Type;
 import interpreter.primitives.Primitive;
+import util.LineFile;
 
 import java.util.Objects;
 
@@ -66,5 +69,33 @@ public class TypeValue {
         } else {
             return value.hashCode();
         }
+    }
+
+    public static TypeValue convertPrimitiveToWrapper(TypeValue primitiveTv,
+                                                      Environment env,
+                                                      LineFile lineFile) {
+        PrimitiveType pt = (PrimitiveType) primitiveTv.getType();
+        TypeValue wrapperClazzTv;
+        switch (pt.type) {
+            case Primitive.INT:
+                wrapperClazzTv = env.get("Integer", lineFile);
+                break;
+            case Primitive.CHAR:
+                wrapperClazzTv = env.get("Character", lineFile);
+                break;
+            case Primitive.FLOAT:
+                wrapperClazzTv = env.get("Float", lineFile);
+                break;
+            case Primitive.BOOLEAN:
+                wrapperClazzTv = env.get("Boolean", lineFile);
+                break;
+            default:
+                throw new TypeError("Unexpected primitive type. ");
+        }
+        ClassType wrapperClazz = (ClassType) wrapperClazzTv.getType();
+        Instance.InstanceTypeValue instanceTv = Instance.createInstanceAndAllocate(wrapperClazz, env, lineFile);
+
+        Instance.callInit(instanceTv.instance, new TypeValue[]{primitiveTv}, env, lineFile);
+        return instanceTv.typeValue;
     }
 }
