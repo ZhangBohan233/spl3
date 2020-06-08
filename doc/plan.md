@@ -12,9 +12,9 @@
 
 * ~~Function overloading~~   _**discarded**_
 * ~~Type inference for~~ `new` expression
-* ~~`++`, `--`, `+=`, `-=`, etc.~~
+* ~~Operator `++`, `--`, `+=`, `-=`, etc.~~
 * String concatenation
-* Override type check (not using equal)
+* ~~Override type check (not using equal)~~
 
 ### Stage 3
 
@@ -22,3 +22,9 @@
 * LinkedList
 * HashMap
 * HashSet
+* More in `functions.sp`:
+    * fold
+    * map
+    * filter
+* Mutable method in class instance
+* Fix inheritance issue

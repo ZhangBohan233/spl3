@@ -52,6 +52,9 @@ public class Main {
 
             initNatives(globalEnvironment);
 
+            System.out.println("Java");
+            new C().printThis();
+
             long runBegin = System.currentTimeMillis();
             root.evaluate(globalEnvironment);
 
@@ -153,5 +156,29 @@ public class Main {
             SplArray.setItemAtIndex(argPtr, i, type, strIns, globalEnvironment, LineFile.LF_INTERPRETER);
         }
         return new TypeValue[]{arrTv};
+    }
+}
+
+class B {
+
+    public int x = 5;
+
+    public void printThis() {
+        System.out.println(this + " " + x);
+    }
+
+    @Override
+    public String toString() {
+        return "Inst of B";
+    }
+}
+
+class C extends B {
+
+    public int x = 6;
+
+    @Override
+    public String toString() {
+        return "Inst of C";
     }
 }

@@ -6,6 +6,14 @@ class B {
     fn t() int {
         return 1;
     }
+
+    fn printThis() void {
+        system.out.println(toString());
+    }
+
+    fn toString() String {
+        return "Inst of B";
+    }
 }
 
 class C extends B {
@@ -26,12 +34,19 @@ class C extends B {
     fn self() C {
         return this;
     }
+
+    fn toString() String {
+        return "Inst of C";
+    }
 }
 
 
 fn main() int {
     a: C = new C(2);
-    System.println(a.super.a);
+    print := system.out.println;
+    print(a.super.a);
+
+    a.printThis();
 
     return a.t();
 }

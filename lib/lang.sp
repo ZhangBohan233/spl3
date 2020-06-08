@@ -1,5 +1,12 @@
 class Object {
-    fn hashCode() int {
+
+    fn eq(o: Object) boolean {
+        system.out.println(Invokes.id(this));
+        system.out.println(Invokes.id(o));
+        return this == o;
+    }
+
+    fn hash() int {
         return 0;
     }
 
@@ -71,6 +78,10 @@ class Integer extends PrimitiveWrapper {
 
     fn toString() String {
         return Invokes.string(value);
+    }
+
+    fn hash() int {
+        return value;
     }
 }
 

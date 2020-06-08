@@ -1,25 +1,13 @@
-abstract class Number {
-
-}
-
-class Integer extends Number {
-    const value: int;
-
-    fn init(v: int) void {
-        value = v;
-    }
-
-    fn add(o: Object) Integer {
-        return new Integer(value + o.value);
-    }
-
-    fn toString() String {
-        return System.string(value);
-    }
-}
-
 interface Collection<T> {
     abstract fn size() int;
+}
+
+interface Map<K, V> {
+    abstract fn size() int;
+
+    abstract fn put(key: K, value: V) void;
+
+    abstract fn get(key: K) V;
 }
 
 abstract class AbstractList<T> implements Collection<T> {
@@ -115,11 +103,25 @@ class List<T> extends AbstractList<T> {
     }
 
     fn print() void {
-        System.print("[");
+        system.out.print("[");
         for i: int = 0; i < _size; i++ {
-            System.print(_array[i]);
-            System.print(", ");
+            system.out.print(_array[i]);
+            system.out.print(", ");
         }
-        System.println("]");
+        system.out.println("]");
     }
+}
+
+class LinkedNode<T> {
+    value: T;
+    next: LinkedNode<T>;
+}
+
+class LinkedList<T> extends AbstractList<T> {
+
+}
+
+class HashMap<K, V> implements Map<K, V> {
+
+
 }

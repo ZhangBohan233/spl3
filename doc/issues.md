@@ -20,3 +20,25 @@ class C {
     }    
 }
 ```
+
+Inheritance problem
+```
+class A {
+    fn printThis() void {
+        system.out.println(this);
+    }
+
+    fn toString() String {
+        return "an A";
+    }
+}
+
+class B extends A {
+    fn toString() String {
+        return "a B";
+    }
+}
+...
+(new B()).printThis();  // expect "a B" but currently prints "an A"
+
+```
