@@ -103,8 +103,10 @@ public abstract class Environment {
         if (!typeValue.getType().isPrimitive() && newTypeValue.getType().isPrimitive()) {
             // example: x: Integer = 1;
             // Auto convert to wrapper type
-//            System.out.println(777);
             rightTv = TypeValue.convertPrimitiveToWrapper(newTypeValue, this, lineFile);
+        } else if (typeValue.getType().isPrimitive() && !newTypeValue.getType().isPrimitive()) {
+            // example: x: int = new Integer(1);
+            rightTv = TypeValue.convertWrapperToPrimitive(newTypeValue, this, lineFile);
         } else {
             rightTv = newTypeValue;
         }
@@ -113,9 +115,9 @@ public abstract class Environment {
             typeValue.setValue(rightTv.getValue());
         } else {
             String ntvStr = rightTv.getType() instanceof ClassType ?
-                    ((ClassType) rightTv.getType()).toStringClass(memory) : rightTv.toString();
+                    ((ClassType) rightTv.getType()).toStringClass(memory) : rightTv.getType().toString();
             String otvStr = typeValue.getType() instanceof ClassType ?
-                    ((ClassType) typeValue.getType()).toStringClass(memory) : typeValue.toString();
+                    ((ClassType) typeValue.getType()).toStringClass(memory) : typeValue.getType().toString();
             throw new TypeError("Cannot convert type '" + ntvStr +
                     "' to type '" + otvStr + "'. ", lineFile);
         }

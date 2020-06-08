@@ -1,5 +1,8 @@
 package interpreter.primitives;
 
+import interpreter.types.TypeError;
+import interpreter.types.TypeValue;
+
 public class Int extends Primitive {
 
     public static final Int ZERO = new Int(0);

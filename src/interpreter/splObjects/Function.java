@@ -158,12 +158,37 @@ public class Function extends SplCallable {
         } else {
             if (rtnVal == null) {
                 throw new TypeError("Function with non-void return type returns nothing. ", lineFile);
-            } else if (!funcType.getRType().isSuperclassOfOrEquals(rtnVal.getType(), callingEnv)) {
-                throw new TypeError("Declared return type: " + funcType.getRType() + ", actual returning " +
-                        "type: " + rtnVal.getType() + ". ", argLineFile);
+            } else {
+                TypeValue realRtnVal;
+                if (!funcType.getRType().isPrimitive() && rtnVal.getType().isPrimitive()) {
+                    // Probable primitive wrapper case: example:
+                    //
+                    // fn f() Integer {
+                    //     return 0;
+                    // }
+                    realRtnVal = TypeValue.convertPrimitiveToWrapper(rtnVal, scope, lineFile);
+                } else if (funcType.getRType().isPrimitive() && !rtnVal.getType().isPrimitive()) {
+                    // Probable primitive wrapper case: example:
+                    //
+                    // fn f() int {
+                    //     return new Integer(0);
+                    // }
+                    realRtnVal = TypeValue.convertWrapperToPrimitive(rtnVal, scope, lineFile);
+                } else {
+                    realRtnVal = rtnVal;
+                }
+
+                if (!funcType.getRType().isSuperclassOfOrEquals(realRtnVal.getType(), callingEnv)) {
+                    throw new TypeError("Declared return type: " + funcType.getRType() + ", actual returning " +
+                            "type: " + realRtnVal.getType() + ". ", argLineFile);
+                }
+                return realRtnVal;
             }
-            return rtnVal;
         }
+    }
+
+    private Integer gg() {
+        return 0;
     }
 
     public int minArgCount() {

@@ -17,6 +17,10 @@ public abstract class Primitive {
 
     public abstract double floatValue();
 
+    public char charValue() {
+        return (char) intValue();
+    }
+
     public static String typeToString(int type) {
         switch (type) {
             case INT:

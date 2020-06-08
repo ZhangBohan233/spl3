@@ -1,9 +1,11 @@
 package interpreter.types;
 
+import ast.NameNode;
 import interpreter.env.Environment;
 import interpreter.primitives.Bool;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.Instance;
+import interpreter.splObjects.SplClass;
 import interpreter.types.Type;
 import interpreter.primitives.Primitive;
 import util.LineFile;
@@ -90,12 +92,41 @@ public class TypeValue {
                 wrapperClazzTv = env.get("Boolean", lineFile);
                 break;
             default:
-                throw new TypeError("Unexpected primitive type. ");
+                throw new TypeError("Unexpected primitive type. ", lineFile);
         }
         ClassType wrapperClazz = (ClassType) wrapperClazzTv.getType();
         Instance.InstanceTypeValue instanceTv = Instance.createInstanceAndAllocate(wrapperClazz, env, lineFile);
 
         Instance.callInit(instanceTv.instance, new TypeValue[]{primitiveTv}, env, lineFile);
         return instanceTv.typeValue;
+    }
+
+    public static TypeValue convertWrapperToPrimitive(TypeValue wrapperTv, Environment env, LineFile lineFile) {
+        if (!(wrapperTv.getType() instanceof ClassType)) {
+            throw new TypeError("Unexpected type. ", lineFile);
+        }
+        ClassType classType = (ClassType) wrapperTv.getType();
+        Instance wrapperInst = (Instance) env.getMemory().get((Pointer) wrapperTv.getValue());
+
+
+        ClassType integerType = (ClassType) new NameNode("Integer", lineFile).evalType(env);
+        if (integerType.isSuperclassOfOrEquals(classType, env)) {
+            return wrapperInst.getEnv().get("value", lineFile);
+        }
+        ClassType charType = (ClassType) new NameNode("Character", lineFile).evalType(env);
+        if (charType.isSuperclassOfOrEquals(classType, env)) {
+            return wrapperInst.getEnv().get("value", lineFile);
+        }
+        ClassType booleanType = (ClassType) new NameNode("Boolean", lineFile).evalType(env);
+        if (booleanType.isSuperclassOfOrEquals(classType, env)) {
+            return wrapperInst.getEnv().get("value", lineFile);
+        }
+        ClassType floatType = (ClassType) new NameNode("Float", lineFile).evalType(env);
+        if (floatType.isSuperclassOfOrEquals(classType, env)) {
+            return wrapperInst.getEnv().get("value", lineFile);
+        }
+
+        throw new TypeError("Cannot convert pointer type '" + classType.toStringClass(env.getMemory()) +
+                "' to primitive. ", lineFile);
     }
 }
