@@ -52,8 +52,8 @@ public class Main {
 
             initNatives(globalEnvironment);
 
-            System.out.println("Java");
-            new C().printThis();
+//            System.out.println("Java");
+//            new C().printThis();
 
             long runBegin = System.currentTimeMillis();
             root.evaluate(globalEnvironment);

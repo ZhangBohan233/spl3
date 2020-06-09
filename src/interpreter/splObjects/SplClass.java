@@ -15,15 +15,17 @@ public class SplClass extends SplObject {
     private final BlockStmt body;
     private final String className;
     private final Environment definitionEnv;
+    public final boolean isAbstract;
 
     public SplClass(String className, ClassType superclassType, List<ClassType> interfacePointers,
-                    List<Node> templates, BlockStmt body, Environment definitionEnv) {
+                    List<Node> templates, BlockStmt body, Environment definitionEnv, boolean isAbstract) {
         this.className = className;
         this.superclassType = superclassType;
         this.interfacePointers = interfacePointers;
         this.templates = templates;
         this.body = body;
         this.definitionEnv = definitionEnv;
+        this.isAbstract = isAbstract;
     }
 
     public BlockStmt getBody() {

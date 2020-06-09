@@ -2,6 +2,7 @@
 
 ### Environment
 
+**ISSUE E01** \
 Access definition env from instances.
 ```
 a: int = 5;
@@ -11,7 +12,8 @@ c: C = new C();
 System.println(c.a);  // this currently prints 5
 ```
 
-~~Function parameters name scope.~~  Fixed.
+~~**ISSUE E02**~~ **FIXED** \
+Function parameters name scope.
 ```
 class C {
     a: int;
@@ -21,7 +23,10 @@ class C {
 }
 ```
 
-Inheritance problem
+### Class and Inheritance
+
+~~**ISSUE C01**~~ **FIXED** \
+Call method overridden in child class from method in superclass
 ```
 class A {
     fn printThis() void {

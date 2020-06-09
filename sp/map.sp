@@ -1,9 +1,9 @@
 import namespace "util"
 
 class A {
-    //fn eq(o: Object) boolean {
-    //    return this == o;
-    //}
+    fn eq(o: Object) boolean {
+        return this == o;
+    }
 }
 
 fn main() int {

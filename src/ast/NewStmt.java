@@ -101,7 +101,8 @@ public class NewStmt extends UnaryExpr {
                 new ArrayList<>(),
                 new ArrayList<>(),
                 classBody,
-                callEnv);
+                callEnv,
+                false);
         Pointer anClazzPtr = callEnv.getMemory().allocateObject(anClazz, callEnv);
         ClassType anClazzType = new ClassType(anClazzPtr);
 

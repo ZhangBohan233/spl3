@@ -15,11 +15,11 @@ import java.util.List;
 
 public class FuncDefinition extends Node {
 
-    private final String name;
+    public final String name;
     private TypeRepresent rType;
     private Line parameters;
     private BlockStmt body;
-    private final boolean isAbstract;
+    public final boolean isAbstract;
 
     public FuncDefinition(String name, boolean isAbstract, LineFile lineFile) {
         super(lineFile);

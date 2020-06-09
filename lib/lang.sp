@@ -1,8 +1,6 @@
 class Object {
 
     fn eq(o: Object) boolean {
-        system.out.println(Invokes.id(this));
-        system.out.println(Invokes.id(o));
         return this == o;
     }
 

@@ -6,6 +6,7 @@ import interpreter.env.Environment;
 import interpreter.env.InstanceEnvironment;
 import interpreter.primitives.Pointer;
 import interpreter.types.*;
+import parser.ParseError;
 import util.LineFile;
 
 import java.util.*;
@@ -36,17 +37,23 @@ public class Instance extends SplObject {
     public static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType,
                                                               Environment outerEnv,
                                                               LineFile lineFile) {
-        return createInstanceAndAllocate(clazzType, outerEnv, lineFile, new TreeMap<>(), new ArrayList<>());
+        return createInstanceAndAllocate(
+                clazzType, outerEnv, lineFile, new TreeMap<>(), new HashMap<>(), true);
     }
 
     private static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType,
                                                                Environment outerEnv,
                                                                LineFile lineFile,
                                                                Map<String, TypeValue> undeterminedTemplates,
-                                                               List<Environment> extraEnvs) {
+                                                               Map<String, FuncDefinition> methods,
+                                                               boolean isFirstCall) {
+
         SplObject obj = outerEnv.getMemory().get(clazzType.getClazzPointer());
         if (!(obj instanceof SplClass)) throw new TypeError();
         SplClass clazz = (SplClass) obj;
+        if (clazz.isAbstract && isFirstCall) {
+            throw new SplException("Abstract class '" + clazz.getClassName() + "' is not instantiable. ", lineFile);
+        }
         InstanceEnvironment instanceEnv = new InstanceEnvironment(
                 clazz.getClassName(),
                 clazz.getDefinitionEnv(),
@@ -68,6 +75,8 @@ public class Instance extends SplObject {
 //        System.out.println("===");
 //        System.out.println(clazz.templates);
 //        System.out.println(Arrays.toString(clazzType.getTemplates()));
+
+        // deal with templates
         if (clazzType.getTemplates() != null) {
             // has templates
             for (int i = 0; i < clazz.templates.size(); ++i) {
@@ -107,14 +116,60 @@ public class Instance extends SplObject {
             }
         }
 
+        // evaluate superclasses
         ClassType scp = clazz.getSuperclassType();
         if (scp != null) {
-            InstanceTypeValue scItv = createInstanceAndAllocate(scp, outerEnv, lineFile, newUndTemplates, extraEnvs);
+            InstanceTypeValue scItv =
+                    createInstanceAndAllocate(scp, outerEnv, lineFile, newUndTemplates, methods, false);
             TypeValue scInstance = scItv.typeValue;
             instance.getEnv().directDefineConstAndSet("super", scInstance);
         }
 
-        clazz.getBody().evaluate(instanceEnv);  // most important step
+        Map<String, FuncDefinition> implementedMethods = new HashMap<>();
+        // evaluate class body
+        for (Line line : clazz.getBody().getLines()) {  // class body
+            Node element = extractOnlyElementFromLine(line);
+            if (element instanceof Declaration || element instanceof Assignment) {
+                /*
+                Attribute declaration.
+                Since expr `x: Something` is build as a declaration in ast while `x: Something = value`
+                is an assignment in ast.
+                Note that quick assignment `:=` is not allowed in class body
+                 */
+                element.evaluate(instanceEnv);
+            } else if (element instanceof FuncDefinition) {
+                // method declaration
+                String fnName = ((FuncDefinition) element).name;
+                element.evaluate(instanceEnv);
+//                TypeValue methodTv = element.evaluate(instanceEnv);
+//                    Function method = (Function) instanceEnv.getMemory().get((Pointer) methodTv.getValue());
+                implementedMethods.put(fnName, (FuncDefinition) element);
+            } else if (element != null) {
+                throw new SplException("Only attribute or method declarations are allowed in class body, got '" +
+                        element.getClass() + "'. ",
+                        element.getLineFile());
+            }
+        }
+//        clazz.getBody().evaluate(instanceEnv);  // most important step
+
+        // check method implementations
+        for (Map.Entry<String, FuncDefinition> methodInSc : methods.entrySet()) {
+            if (!implementedMethods.containsKey(methodInSc.getKey())) {
+                if (!clazz.isAbstract && methodInSc.getValue().isAbstract) {
+                    assert scp != null;  // if scp == null, `method` should be empty
+                    throw new SplException(
+                            String.format("Class %s extends %s but not implements its abstract method %s. ",
+                                clazz, instanceEnv.getMemory().get(scp.getClazzPointer()), methodInSc.getValue().name
+                            ), lineFile);
+                }
+                /*
+                Do an identical override.
+                This process is used to fix the inheritance bug specified in issues.md, ISSUE C01
+                 */
+                methodInSc.getValue().evaluate(instanceEnv);
+            }
+        }
+        methods.putAll(implementedMethods);
 
         if (!instanceEnv.selfContains("init")) {
             // If class no constructor, put an empty default constructor
@@ -175,6 +230,17 @@ public class Instance extends SplObject {
         }
 
         return constructor;
+    }
+
+    private static Node extractOnlyElementFromLine(Line line) {
+        if (line.getChildren().size() == 0) return null;
+        else if (line.getChildren().size() == 1) {
+            Node node = line.getChildren().get(0);
+            if (node instanceof Line) return extractOnlyElementFromLine((Line) node);
+            else return node;
+        } else {
+            throw new SplException("Too many elements in one line. ", line.getChildren().get(0).getLineFile());
+        }
     }
 
     private static void addDefaultSuperCall(Function constructor) {

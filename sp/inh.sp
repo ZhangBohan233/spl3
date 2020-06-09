@@ -1,6 +1,6 @@
 import "imp/imp.sp"
 
-class B {
+abstract class B {
     const a: int = 0;
 
     fn t() int {
@@ -8,12 +8,14 @@ class B {
     }
 
     fn printThis() void {
-        system.out.println(toString());
+        system.out.println(this);
     }
 
     fn toString() String {
         return "Inst of B";
     }
+
+    abstract fn xx() int;
 }
 
 class C extends B {
@@ -37,6 +39,10 @@ class C extends B {
 
     fn toString() String {
         return "Inst of C";
+    }
+
+    fn xx() int {
+        return 1;
     }
 }
 

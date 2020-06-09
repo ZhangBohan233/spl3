@@ -96,7 +96,7 @@ public class ClassStmt extends Node {
         }
 
         SplClass clazz = new SplClass(className, superclassT, interfacePointers,
-                templateList, body, env);
+                templateList, body, env, isAbstract);
         Pointer clazzPtr = env.getMemory().allocate(1, env);
         env.getMemory().set(clazzPtr, clazz);
         ClassType clazzType = new ClassType(clazzPtr);
@@ -118,11 +118,11 @@ public class ClassStmt extends Node {
     public String toString() {
         String title = isInterface ? "Interface" : "Class";
         if (templateNode == null) {
-            return String.format("%s %s extends %s implements %s",
-                    title, className, superclass, implementations);
+            return String.format("%s %s extends %s implements %s %s",
+                    title, className, superclass, implementations, body);
         } else {
-            return String.format("%s %s %s extends %s implements %s",
-                    title, className, templateNode, superclass, implementations);
+            return String.format("%s %s %s extends %s implements %s %s",
+                    title, className, templateNode, superclass, implementations, body);
         }
     }
 }
