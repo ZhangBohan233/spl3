@@ -10,6 +10,14 @@ interface Map<K, V> {
     abstract fn get(key: K) V;
 }
 
+interface Queue<T> {
+
+}
+
+interface Stack<T> {
+
+}
+
 abstract class AbstractList<T> implements Collection<T> {
     abstract fn get(index: int) T;
 
@@ -40,7 +48,7 @@ class List<T> extends AbstractList<T> {
     fn add(obj: T) void {
         _array[_size++] = obj;
         if _size == _array.length {
-            expand();
+            _expand();
         }
     }
 
@@ -90,7 +98,7 @@ class List<T> extends AbstractList<T> {
 
     // private methods
 
-    fn expand() void {
+    fn _expand() void {
         na := new T[_array.length * 2];
         for i: int = 0; i < _array.length; i++ {
             na[i] = _array[i];
@@ -98,7 +106,7 @@ class List<T> extends AbstractList<T> {
         _array = na;
     }
 
-    fn collapse() void {
+    fn _collapse() void {
 
     }
 
@@ -121,7 +129,104 @@ class LinkedList<T> extends AbstractList<T> {
 
 }
 
+/*
+Each HashMapNode stores:
+-- The key itself
+-- The value
+-- A link to next node
+
+Keys that have the same (hash_code mod capacity) is stored in a link, occupying one position in the table.
+*/
+class HashMapNode<K, V> {
+
+    key: K;
+    value: V;
+    next: HashMapNode<K, V> = null;
+
+    fn init(key: K, value: V) void {
+        this.key = key;
+        this.value = value;
+    }
+}
+
+/*
+A linked hashed map implementation.
+
+Typically it takes O(1) time to insert, and O(1) time to get.
+*/
 class HashMap<K, V> implements Map<K, V> {
 
+    const defaultLoadFactor: float = 0.75;
+    const defaultCapacity: int = 8;
+    _size: int = 0;
+    _loadFactor: float = defaultLoadFactor;
+    _table: HashMapNode<K, V>[];
+
+    fn init(capacity: int = defaultCapacity) void {
+        _table = new HashMapNode<K, V>[capacity];
+    }
+
+    fn size() int {
+        return _size;
+    }
+
+    fn put(key: K, value: V) void {
+        hashCode: int = key.hash();
+        node: HashMapNode<K, V> = _getNode(hashCode, key);
+
+        if node == null {
+            // insert new node
+            newNode: HashMapNode<K, V> = new HashMapNode<K, V>(key, value);
+            oldHead: HashMapNode<K, V> = _table[hashCode % _table.length];
+            newNode.next = oldHead;
+            _table[hashCode % _table.length] = newNode;
+            _size++;
+            currentLf: float = (_size as float) / _table.length;
+            if currentLf > _loadFactor {
+                _expand();
+            }
+        } else {
+            // update entry
+            node.value = value;
+        }
+    }
+
+    fn get(key: K) V {
+        hashCode: int = key.hash();
+        node: HashMapNode<K, V> = _getNode(hashCode, key);
+        if node == null {
+            return null;
+        } else {
+            return node.value;
+        }
+    }
+
+    // private methods
+
+    fn _getNode(hashCode: int, key: K) HashMapNode<K, V> {
+        index: int = hashCode % _table.length;
+        headNode: HashMapNode<K, V> = _table[index];
+
+        node := headNode;
+        while node != null {
+            //print(node.key);
+            //print(node.key.eq(key));
+            if node.key.hash() == hashCode && node.key.eq(key) {
+                return node;
+            }
+            node = node.next;
+        }
+        return null;
+    }
+
+    fn _expand() void {
+
+    }
+
+    fn _collapse() void {
+
+    }
 
 }
+
+print := system.out.println;

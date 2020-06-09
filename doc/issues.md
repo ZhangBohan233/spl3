@@ -47,3 +47,17 @@ class B extends A {
 (new B()).printThis();  // expect "a B" but currently prints "an A"
 
 ```
+
+### Parser
+
+**ISSUE P01** \
+Indexing node with dot
+```
+something.array[index];  // currently causes error
+```
+
+**ISSUE P02** \
+Unknown parse error of indexing node
+```
+someFunc((something.array)[index]);
+```

@@ -49,8 +49,9 @@ class C extends B {
 
 fn main() int {
     a: C = new C(2);
+    b: C = new C(2);
     print := system.out.println;
-    print(a.super.a);
+    print(a.eq(b));
 
     a.printThis();
 

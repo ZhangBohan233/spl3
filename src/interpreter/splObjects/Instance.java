@@ -41,6 +41,29 @@ public class Instance extends SplObject {
                 clazzType, outerEnv, lineFile, new TreeMap<>(), new HashMap<>(), true);
     }
 
+    /**
+     * Creates an instance and allocate it in memory.
+     *
+     * @param clazzType             class type
+     * @param outerEnv              env where the new instance is created, not the class definition env
+     * @param lineFile              error traceback info of code where instance creation
+     * @param undeterminedTemplates undetermined templates, used to pass templates from subclass to superclass.
+     *                              For example, in code snippet:
+     *                              {@code
+     *                              class A<T> {
+     *                              ...
+     *                              }
+     *                              class B<T> extends A<T> {
+     *                              ...
+     *                              }
+     *                              ...
+     *                              x : B<String> = new B<String>;
+     *                              }
+     *                              {@code undeterminedTemplates} contains {T: {TypeValue(String)}}
+     * @param methods               all method definition of the sub-most class
+     * @param isFirstCall           whether the currently creating instance is the actual instance
+     * @return the tuple of the newly created instance, and the {@code TypeValue} contains the pointer to this instance
+     */
     private static InstanceTypeValue createInstanceAndAllocate(ClassType clazzType,
                                                                Environment outerEnv,
                                                                LineFile lineFile,
@@ -159,7 +182,7 @@ public class Instance extends SplObject {
                     assert scp != null;  // if scp == null, `method` should be empty
                     throw new SplException(
                             String.format("Class %s extends %s but not implements its abstract method %s. ",
-                                clazz, instanceEnv.getMemory().get(scp.getClazzPointer()), methodInSc.getValue().name
+                                    clazz, instanceEnv.getMemory().get(scp.getClazzPointer()), methodInSc.getValue().name
                             ), lineFile);
                 }
                 /*

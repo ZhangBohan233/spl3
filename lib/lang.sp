@@ -81,6 +81,10 @@ class Integer extends PrimitiveWrapper {
     fn hash() int {
         return value;
     }
+
+    fn eq(o: Object) boolean {
+        return o instanceof Integer && o.value == value;
+    }
 }
 
 abstract class OutputStream {
@@ -107,6 +111,10 @@ class StdOut extends NativeStream {
 
 class System {
     out: NativeStream = new StdOut();
+
+    fn time() int {
+        return Invokes.time();
+    }
 }
 
 class Error {
