@@ -14,7 +14,7 @@ import java.util.List;
 
 public class IndexingNode extends Node implements TypeRepresent {
 
-    private Node callObj;
+    private final Node callObj;
     private Line args;
 
     public IndexingNode(Node callObj, LineFile lineFile) {
@@ -33,6 +33,16 @@ public class IndexingNode extends Node implements TypeRepresent {
 
     public Node getCallObj() {
         return callObj;
+    }
+
+    public Type evalAtomType(Environment env) {
+        if (callObj instanceof IndexingNode) {
+            return ((IndexingNode) callObj).evalAtomType(env);
+        } else if (callObj instanceof TypeRepresent) {
+            return ((TypeRepresent) callObj).evalType(env);
+        } else {
+            throw new SplException("Not a type. ", getLineFile());
+        }
     }
 
     @Override

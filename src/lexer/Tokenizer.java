@@ -38,7 +38,7 @@ public class Tokenizer {
     );
 
     public static final Set<String> SYMBOLS = Set.of(
-            "{", "}", "[", "]", "(", ")", ".", ",", ";", ":"
+            "{", "}", "[", "\\[", "]", "(", ")", ".", ",", ";", ":"
     );
 
     public static final Set<String> OTHERS = Set.of(
@@ -332,6 +332,7 @@ public class Tokenizer {
         private static final int MINUS = 22;
         private static final int OTHER_ARITHMETIC = 23;
         private static final int TYPE = 24;
+        private static final int ESCAPE = 25;
         private static final int UNDEFINED = 0;
 
         private static final int[] SELF_CONCATENATE = {DIGIT, LETTER, GT, EQ, LT, AND, OR, UNDERSCORE, PLUS, MINUS};
@@ -351,7 +352,8 @@ public class Tokenizer {
                 {PLUS, EQ},
                 {MINUS, EQ},
                 {OTHER_ARITHMETIC, EQ},
-                {TYPE, EQ}
+                {TYPE, EQ},
+                {ESCAPE, L_SQR_BRACKET}
         };
 
         private final char ch;
@@ -424,6 +426,8 @@ public class Tokenizer {
                     return OTHER_ARITHMETIC;
                 case ':':
                     return TYPE;
+                case '\\':
+                    return ESCAPE;
                 default:
                     return UNDEFINED;
             }

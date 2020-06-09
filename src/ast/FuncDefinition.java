@@ -77,4 +77,17 @@ public class FuncDefinition extends Node {
         else
             return String.format("fn %s(%s)->%s: %s", name, parameters, rType, body);
     }
+
+    public boolean doesOverride(FuncDefinition superMethod, Environment env) {
+        if (parameters.getChildren().size() != superMethod.parameters.getChildren().size()) return false;
+        for (int i = 0 ; i < parameters.getChildren().size(); ++i) {
+            Node thisParam = parameters.getChildren().get(i);
+            Node superParam = superMethod.parameters.getChildren().get(i);
+            // TODO: check this. Two cases: Declaration and Assignment
+        }
+
+        Type thisRType = rType.evalType(env);
+        Type superRType = superMethod.rType.evalType(env);
+        return superRType.isSuperclassOfOrEquals(thisRType, env);
+    }
 }

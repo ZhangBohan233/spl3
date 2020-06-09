@@ -24,8 +24,9 @@ public abstract class MainAbstractEnvironment extends Environment {
 
     @Override
     public void defineFunction(String name, TypeValue funcTv, LineFile lineFile) {
-        if (!NON_OVERRIDE_FUNCTIONS.contains(name) && hasName(name, lineFile)) {
+        if (!NON_OVERRIDE_FUNCTIONS.contains(name) && localHasName(name, lineFile)) {
             TypeValue superFn = get(name, lineFile);
+            // FIXME: this step might not be useful anymore
             if (!superFn.getType().equals(funcTv.getType())) {
                 throw new TypeError("Function '" + name + "' does not overrides its super function, but has " +
                         "identical names. ", lineFile);

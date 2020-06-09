@@ -1,14 +1,32 @@
+import namespace "util"
+
+
 fn main() int {
 
-    t0: int = System.clock();
-    for j: int = 0; j < 10; j = j + 1 {
-        if j == 6 {
-            return 1212;
-        }
-        System.println(j);
+    t0: int = system.clock();
+    for j: int = 0; j < 100; j = j + 1 {
+        //system.out.println(j);
     }
-    t1: int = System.clock();
-    System.println(t1 - t0);
+    t1: int = system.clock();
+    system.out.println(t1 - t0);
 
-    return 1;
+    arr := new int[4];
+    for i: int = 0; i < 4; ++i {
+        arr[i] = i;
+    }
+
+    for ele: int; arr {
+        system.out.println(ele);
+    }
+
+    lst: List<Integer> = new List<Integer>();
+    for i: int = 0; i < 4; ++i {
+        lst.add(i);
+    }
+    ite := lst.iterator();
+    while ite.hasNext() {
+        print(ite.next());
+    }
+
+    return arr[1];
 }

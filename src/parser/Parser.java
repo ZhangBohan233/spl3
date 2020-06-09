@@ -1,7 +1,6 @@
 package parser;
 
 import ast.*;
-import interpreter.primitives.Int;
 import lexer.*;
 import util.LineFile;
 
@@ -50,6 +49,7 @@ public class Parser {
         Stack<Integer> condSwitchBraces = new Stack<>();
         Stack<Integer> caseBraces = new Stack<>();
         Stack<Integer> defaultBraces = new Stack<>();
+        Stack<Integer> arraySqrBrackets = new Stack<>();
 
         for (int i = 0; i < tokens.size(); ++i) {
             Token token = tokens.get(i);
@@ -221,10 +221,21 @@ public class Parser {
                             if (isThisStack(funcTypeSqrBrackets, sqrBracketCount)) {
                                 funcTypeSqrBrackets.pop();
                                 builder.finishSqrBracketBlock();
+                            } else if (isThisStack(arraySqrBrackets, sqrBracketCount)) {
+                                arraySqrBrackets.pop();
+                                builder.buildArrayLiteral(lineFile);
                             } else {
                                 builder.buildIndexing();
                             }
                             sqrBracketCount--;
+                            break;
+                        case "\\[":
+                            sqrBracketCount++;
+
+                            arraySqrBrackets.push(sqrBracketCount);
+                            builder.addArrayLiteral(lineFile);
+                            builder.addIndependenceBraceBlock();
+
                             break;
                         case ".":
                             builder.addDot(lineFile);

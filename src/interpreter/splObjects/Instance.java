@@ -77,6 +77,9 @@ public class Instance extends SplObject {
         if (clazz.isAbstract && isFirstCall) {
             throw new SplException("Abstract class '" + clazz.getClassName() + "' is not instantiable. ", lineFile);
         }
+        if (clazz.isInterface && isFirstCall) {
+            throw new SplException("Interface '" + clazz.getClassName() + "' is not instantiable. ", lineFile);
+        }
         InstanceEnvironment instanceEnv = new InstanceEnvironment(
                 clazz.getClassName(),
                 clazz.getDefinitionEnv(),
@@ -124,7 +127,6 @@ public class Instance extends SplObject {
             // Example:
             // class SomeClazz<T> {...}
             // new SomeClazz();
-//            System.out.println(clazz.templates);
             for (Node templateDef : clazz.templates) {
                 if (templateDef instanceof NameNode) {
                     String templateName = ((NameNode) templateDef).getName();
@@ -143,9 +145,15 @@ public class Instance extends SplObject {
         ClassType scp = clazz.getSuperclassType();
         if (scp != null) {
             InstanceTypeValue scItv =
-                    createInstanceAndAllocate(scp, outerEnv, lineFile, newUndTemplates, methods, false);
+                    createInstanceAndAllocate(scp.copy(), outerEnv, lineFile, newUndTemplates, methods, false);
             TypeValue scInstance = scItv.typeValue;
             instance.getEnv().directDefineConstAndSet("super", scInstance);
+        }
+
+        // evaluate interfaces
+        for (ClassType interfaceT: clazz.getInterfacePointers()) {
+            ClassType thisInterfaceT = interfaceT.copy();
+            createInstanceAndAllocate(thisInterfaceT, outerEnv, lineFile, newUndTemplates, methods, false);
         }
 
         Map<String, FuncDefinition> implementedMethods = new HashMap<>();
@@ -164,8 +172,6 @@ public class Instance extends SplObject {
                 // method declaration
                 String fnName = ((FuncDefinition) element).name;
                 element.evaluate(instanceEnv);
-//                TypeValue methodTv = element.evaluate(instanceEnv);
-//                    Function method = (Function) instanceEnv.getMemory().get((Pointer) methodTv.getValue());
                 implementedMethods.put(fnName, (FuncDefinition) element);
             } else if (element != null) {
                 throw new SplException("Only attribute or method declarations are allowed in class body, got '" +
@@ -178,11 +184,18 @@ public class Instance extends SplObject {
         // check method implementations
         for (Map.Entry<String, FuncDefinition> methodInSc : methods.entrySet()) {
             if (!implementedMethods.containsKey(methodInSc.getKey())) {
-                if (!clazz.isAbstract && methodInSc.getValue().isAbstract) {
+                if (!(clazz.isAbstract || clazz.isInterface) && methodInSc.getValue().isAbstract) {
                     assert scp != null;  // if scp == null, `method` should be empty
+                    List<SplObject> interfaces = new ArrayList<>();
+                    for (ClassType itrT: clazz.getInterfacePointers()) {
+                        interfaces.add(instanceEnv.getMemory().get(itrT.getClazzPointer()));
+                    }
                     throw new SplException(
-                            String.format("Class %s extends %s but not implements its abstract method %s. ",
-                                    clazz, instanceEnv.getMemory().get(scp.getClazzPointer()), methodInSc.getValue().name
+                            String.format("'%s' extends '%s' implements %s but not implements abstract method '%s'. ",
+                                    clazz,
+                                    instanceEnv.getMemory().get(scp.getClazzPointer()),
+                                    interfaces,
+                                    methodInSc.getValue().name
                             ), lineFile);
                 }
                 /*
@@ -190,6 +203,13 @@ public class Instance extends SplObject {
                 This process is used to fix the inheritance bug specified in issues.md, ISSUE C01
                  */
                 methodInSc.getValue().evaluate(instanceEnv);
+            } else {
+                FuncDefinition impMethod = implementedMethods.get(methodInSc.getKey());
+                if (!impMethod.doesOverride(methodInSc.getValue(), instanceEnv)) {
+                    throw new TypeError("Function '" + impMethod.name +
+                            "' does not overrides its super function, but has " +
+                            "identical names. ", impMethod.getLineFile());
+                }
             }
         }
         methods.putAll(implementedMethods);
@@ -210,6 +230,8 @@ public class Instance extends SplObject {
 
         return new InstanceTypeValue(instance, instanceTv);
     }
+
+//    private static void
 
     public static void callInit(Instance instance, Arguments arguments, Environment callEnv, LineFile lineFile) {
         Function constructor = getConstructor(instance, lineFile);

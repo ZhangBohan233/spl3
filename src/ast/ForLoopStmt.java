@@ -6,14 +6,19 @@ import interpreter.env.BlockEnvironment;
 import interpreter.env.Environment;
 import interpreter.env.LoopTitleEnvironment;
 import interpreter.primitives.Bool;
-import interpreter.types.PrimitiveType;
-import interpreter.types.TypeError;
-import interpreter.types.TypeValue;
+import interpreter.primitives.Pointer;
+import interpreter.primitives.Primitive;
+import interpreter.splObjects.SplArray;
+import interpreter.types.*;
 import util.LineFile;
+
+import java.util.HashMap;
 
 public class ForLoopStmt extends ConditionalStmt {
 
     private BlockStmt condition;
+
+    private final static String forEachSyntaxMsg = "Syntax of for-each loop: for ele: T; collection {...}";
 
     public ForLoopStmt(LineFile lineFile) {
         super(lineFile);
@@ -28,7 +33,15 @@ public class ForLoopStmt extends ConditionalStmt {
         LoopTitleEnvironment titleEnv = new LoopTitleEnvironment(env);
         BlockEnvironment bodyEnv = new BlockEnvironment(titleEnv);
 
-        if (condition.getLines().size() == 3) {
+        if (condition.getLines().size() == 2) {  // for each loop
+            forEachLoop(
+                    condition.getLines().get(0),
+                    condition.getLines().get(1),
+                    env,
+                    titleEnv,
+                    bodyEnv
+            );
+        } else if (condition.getLines().size() == 3) {  // regular for loop
             forLoop3Parts(
                     condition.getLines().get(0),
                     condition.getLines().get(1),
@@ -56,6 +69,41 @@ public class ForLoopStmt extends ConditionalStmt {
             titleEnv.resumeLoop();
             step.evaluate(titleEnv);
             bool = (Bool) end.evaluate(titleEnv).getValue();
+        }
+    }
+
+    private void forEachLoop(Line loopInvariantPart, Line collectionPart, Environment parentEnv,
+                             LoopTitleEnvironment titleEnv, BlockEnvironment bodyEnv) {
+        TypeValue collectionTv = collectionPart.evaluate(parentEnv);
+
+        if (loopInvariantPart.getChildren().size() != 1)
+            throw new SplException(forEachSyntaxMsg, getLineFile());
+        Node lin = loopInvariantPart.getChildren().get(0);
+        if (!(lin instanceof Declaration))
+            throw new SplException(forEachSyntaxMsg, getLineFile());
+        String liName = ((Declaration) lin).getLeftName().getName();
+        loopInvariantPart.evaluate(titleEnv);
+
+        if (collectionTv.getType() instanceof ArrayType) {
+            ArrayType arrayType = (ArrayType) collectionTv.getType();
+            Pointer arrPtr = (Pointer) collectionTv.getValue();
+            SplArray array = (SplArray) parentEnv.getMemory().get(arrPtr);
+            int arrLen = array.length;
+            for (int i = 0; i < arrLen; ++i) {
+                bodyEnv.invalidate();
+                Primitive ele = SplArray.getItemAtIndex(arrPtr, i, parentEnv, getLineFile());
+                titleEnv.setVar(liName, new TypeValue(arrayType.getEleType(), ele), getLineFile());
+
+                bodyBlock.evaluate(bodyEnv);
+                if (titleEnv.isBroken() || parentEnv.interrupted()) break;
+
+                titleEnv.resumeLoop();
+            }
+        } else if (collectionTv.getType() instanceof ClassType) {
+
+        } else {
+            throw new SplException("Only array or classes extends 'Collection' supports for each loop. ",
+                    getLineFile());
         }
     }
 

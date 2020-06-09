@@ -1,7 +1,11 @@
 import "util"
 
 
-class Lst<T> {
+interface Col<T> {
+
+}
+
+class Lst<T> implements Col<T> {
     arr : T[] = new T[8];
     size: int = 0;
 
@@ -27,16 +31,13 @@ class LL<T, K> extends Lst<T> {
 }
 
 fn main() int {
-    lst := new LL<util.Integer, Lst<String> >();
+    lst := new LL<Integer, String>();
 
-    lst.add(new util.Integer(77));
-
-    ll: Lst<String> = new Lst<String>();
-    ll.add("fff");
-    lst.setK(ll);
+    lst.add(new Integer(77));
 
     gg := lst.getK();
-    System.println(lst.getK().get(0));
+    system.out.println(lst.getK());
+    system.out.println(lst instanceof Lst<String>);
 
     return lst.get(0).value;
 }

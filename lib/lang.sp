@@ -23,6 +23,16 @@ class String {
     }
 }
 
+interface Iterator<T> {
+    abstract fn next() T;
+
+    abstract fn hasNext() boolean;
+}
+
+interface Iterable<T> {
+    abstract fn iterator() Iterator<T>;
+}
+
 abstract class PrimitiveWrapper {
 
 }
@@ -112,8 +122,8 @@ class StdOut extends NativeStream {
 class System {
     out: NativeStream = new StdOut();
 
-    fn time() int {
-        return Invokes.time();
+    fn clock() int {
+        return Invokes.clock();
     }
 }
 

@@ -6,6 +6,7 @@ import interpreter.env.Environment;
 import interpreter.primitives.Pointer;
 import interpreter.splObjects.*;
 import interpreter.types.*;
+import parser.ParseError;
 import util.LineFile;
 
 import java.util.ArrayList;
@@ -21,7 +22,14 @@ public class NewStmt extends UnaryExpr {
     protected TypeValue internalEval(Environment env) {
         if (value instanceof AnonymousClassExpr) {
             AnonymousClassExpr ace = (AnonymousClassExpr) value;
-            return initAnonymousClass(ace.left, ace.getContent(), env, env, getLineFile());
+            Node content = ace.getContent();
+            if (content instanceof BlockStmt) {
+                return initAnonymousClass(ace.left, (BlockStmt) content, env, env, getLineFile());
+            } else if (ace.left instanceof IndexingNode && content instanceof ArrayLiteral) {
+                return createArrayWithLiteral((IndexingNode) ace.left, (ArrayLiteral) content, env, env, getLineFile());
+            } else {
+                throw new ParseError("Unexpected expression in right side of '<-'. ", getLineFile());
+            }
         } else {
             return directInitClass(value, env, env, getLineFile());
         }
@@ -48,7 +56,8 @@ public class NewStmt extends UnaryExpr {
         }
     }
 
-    private static TypeValue directInitClass(Node node, Environment classDefEnv, Environment callEnv, LineFile lineFile) {
+    private static TypeValue directInitClass(Node node, Environment classDefEnv, Environment callEnv,
+                                             LineFile lineFile) {
         if (node instanceof FuncCall) {
             return instanceCreation((FuncCall) node, classDefEnv, callEnv, lineFile);
         } else if (node instanceof IndexingNode) {
@@ -102,6 +111,7 @@ public class NewStmt extends UnaryExpr {
                 new ArrayList<>(),
                 classBody,
                 callEnv,
+                false,
                 false);
         Pointer anClazzPtr = callEnv.getMemory().allocateObject(anClazz, callEnv);
         ClassType anClazzType = new ClassType(anClazzPtr);
@@ -131,6 +141,28 @@ public class NewStmt extends UnaryExpr {
 
         Instance.callInit(instance, call.arguments, callEnv, lineFile);
         return instanceTv.typeValue;
+    }
+
+    private static TypeValue createArrayWithLiteral(IndexingNode node,
+                                                    ArrayLiteral literal,
+                                                    Environment classDefEnv,
+                                                    Environment callEnv,
+                                                    LineFile lineFile) {
+
+        Type atomType = node.evalAtomType(classDefEnv);
+
+        TypeValue literalArray = literal.createAndAllocate(atomType, callEnv);
+        System.out.println(atomType);
+        // TODO: temporarily 不想写
+//        ArrayType arrayType = (ArrayType) node.evalType(classDefEnv);
+//        List<Integer> dimensions = new ArrayList<>();
+//        traverseArrayCreation(node, dimensions, callEnv, lineFile);
+//        Pointer arrPtr = SplArray.createArray(arrayType, dimensions, callEnv);
+//
+//        literal.fillArray(arrayType, arrPtr, dimensions, callEnv.getMemory());
+//        return new TypeValue(arrayType, arrPtr);
+
+        return literalArray;
     }
 
     private static TypeValue arrayCreation(IndexingNode node,

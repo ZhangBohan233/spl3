@@ -20,11 +20,13 @@
 
 * Ast visualizer
 * LinkedList
-* HashMap
+* ~~HashMap~~
 * HashSet
 * More in `functions.sp`:
     * fold
     * map
     * filter
 * Mutable method in class instance
-* Fix inheritance issue
+* ~~Fix inheritance issue~~
+* For each loop
+* Direct array creation

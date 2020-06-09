@@ -5,7 +5,6 @@ import lexer.SyntaxError;
 import util.LineFile;
 import util.Utilities;
 
-import java.lang.instrument.ClassDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -432,6 +431,33 @@ public class AstBuilder {
             inner = null;
         } else {
             inner.buildBraceBlock();
+        }
+    }
+
+    void addArrayLiteral(LineFile lineFile) {
+        if (inner == null) {
+            stack.add(new ArrayLiteral(lineFile));
+        } else {
+            inner.addArrayLiteral(lineFile);
+        }
+    }
+
+    void buildArrayLiteral(LineFile lineFile) {
+        if (inner.inner == null) {
+            inner.finishPart();
+            inner.finishLine();
+            Line line = inner.baseBlock.getLines().get(0);
+            inner = null;
+            if (stack.isEmpty()) throw new ParseError("Empty parser stack. ", lineFile);
+            Node node = stack.get(stack.size() - 1);
+            if (node instanceof ArrayLiteral) {
+                ArrayLiteral adc = (ArrayLiteral) node;
+                adc.setContent(line);
+            } else {
+                throw new ParseError("Not an array creation. ", lineFile);
+            }
+        } else {
+            inner.buildArrayLiteral(lineFile);
         }
     }
 

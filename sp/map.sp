@@ -13,15 +13,13 @@ class A {
 }
 
 fn main() int {
-    a: Object = new A(1);
-    print(a instanceof A);
-
     map := new HashMap<Integer, String>();
 
     map.put(1, "asd");
     map.put(9, "dfg");
+    map.put(1, "3asd");
 
-    print(map.get(3));
+    print(map.get(1));
 
     return map.size();
 }

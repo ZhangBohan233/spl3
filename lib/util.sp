@@ -1,4 +1,4 @@
-interface Collection<T> {
+interface Collection<T> extends Iterable<T> {
     abstract fn size() int;
 }
 
@@ -34,6 +34,24 @@ abstract class AbstractList<T> implements Collection<T> {
     abstract fn prev() List<T>;
 
     abstract fn copy() List<T>;
+}
+
+class ListIterator<T> implements Iterator<T> {
+
+    lst: List<T>;
+    index: int = 0;
+
+    fn init(lst: List<T>) void {
+        this.lst = lst;
+    }
+
+    fn next() T {
+        return lst.get(index++);
+    }
+
+    fn hasNext() boolean {
+        return index < lst.size();
+    }
 }
 
 class List<T> extends AbstractList<T> {
@@ -94,6 +112,10 @@ class List<T> extends AbstractList<T> {
             sl.add(get(i));
         }
         return sl;
+    }
+
+    fn iterator() ListIterator<T> {
+        return new ListIterator<T>(this);
     }
 
     // private methods

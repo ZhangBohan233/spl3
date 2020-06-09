@@ -48,6 +48,16 @@ class B extends A {
 
 ```
 
+**ISSUE C02** \
+Operator `instanceof` with template classes and interfaces
+```
+c := new List<String>();
+system.out.println(c instanceof Collection<Integer>);  // this prints true, which is not reasonable enough
+```
+Probable fixes:
+1. Change the implementation
+2. Remove support of `c instanceof Type<T>`
+
 ### Parser
 
 **ISSUE P01** \

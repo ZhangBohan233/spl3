@@ -3,6 +3,7 @@ package ast;
 import ast.fakeEnv.FakeEnv;
 import interpreter.SplException;
 import interpreter.env.EnvironmentError;
+import interpreter.types.TypeError;
 import interpreter.types.TypeValue;
 import interpreter.types.Type;
 import interpreter.env.Environment;
@@ -49,12 +50,13 @@ public class Declaration extends BinaryExpr {
     }
 
     public NameNode getLeftName() {
-        if (!(left instanceof NameNode)) throw new EnvironmentError();
+        if (!(left instanceof NameNode))
+            throw new SplException("Left side of declaration must be a name. ", getLineFile());
         return (NameNode) left;
     }
 
     public TypeRepresent getRightTypeRep() {
-        if (!(right instanceof TypeRepresent)) throw new EnvironmentError("Not a type");
+        if (!(right instanceof TypeRepresent)) throw new TypeError("Not a type", getLineFile());
         return (TypeRepresent) right;
     }
 }

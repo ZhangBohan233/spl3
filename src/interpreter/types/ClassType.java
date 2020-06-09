@@ -7,9 +7,7 @@ import interpreter.primitives.Primitive;
 import interpreter.splObjects.SplClass;
 import interpreter.splObjects.SplObject;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ClassType extends PointerType {
 
@@ -54,8 +52,12 @@ public class ClassType extends PointerType {
         } else {
             ClassType childCt = (ClassType) child;
             SplClass childClazz = (SplClass) env.getMemory().get(childCt.clazzPointer);
-            return isSuperclassOfOrEquals(childClazz.getSuperclassType(), env);
-            // TODO: check interfaces
+            if (isSuperclassOfOrEquals(childClazz.getSuperclassType(), env)) return true;
+
+            for (ClassType interfaceT: childClazz.getInterfacePointers()) {
+                if (isSuperclassOfOrEquals(interfaceT, env)) return true;
+            }
+            return false;
         }
     }
 

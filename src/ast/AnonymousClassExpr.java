@@ -12,8 +12,8 @@ public class AnonymousClassExpr extends BinaryExpr {
         super("<-", lineFile);
     }
 
-    BlockStmt getContent() {
-        return (BlockStmt) right;
+    Node getContent() {
+        return right;
     }
 
     @Override

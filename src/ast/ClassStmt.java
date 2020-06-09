@@ -96,7 +96,7 @@ public class ClassStmt extends Node {
         }
 
         SplClass clazz = new SplClass(className, superclassT, interfacePointers,
-                templateList, body, env, isAbstract);
+                templateList, body, env, isAbstract, isInterface);
         Pointer clazzPtr = env.getMemory().allocate(1, env);
         env.getMemory().set(clazzPtr, clazz);
         ClassType clazzType = new ClassType(clazzPtr);
