@@ -31,7 +31,7 @@ public class WhileStmt extends ConditionalStmt {
             if (titleEnv.isBroken() || env.interrupted()) break;
 
             titleEnv.resumeLoop();
-            bool = (Bool) condition.evaluate(titleEnv).getValue();
+            bool = Bool.evalBoolean(condition, titleEnv, getLineFile());
         }
 
         return null;

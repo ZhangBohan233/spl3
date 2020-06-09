@@ -28,5 +28,9 @@ fn main() int {
         print(ite.next());
     }
 
+    for ele: Integer; lst {
+        print(ele);
+    }
+
     return arr[1];
 }

@@ -1,6 +1,7 @@
 package ast;
 
 import ast.fakeEnv.FakeEnv;
+import interpreter.Memory;
 import interpreter.SplException;
 import interpreter.env.BlockEnvironment;
 import interpreter.env.Environment;
@@ -8,11 +9,15 @@ import interpreter.env.LoopTitleEnvironment;
 import interpreter.primitives.Bool;
 import interpreter.primitives.Pointer;
 import interpreter.primitives.Primitive;
+import interpreter.splObjects.Function;
+import interpreter.splObjects.Instance;
 import interpreter.splObjects.SplArray;
 import interpreter.types.*;
 import util.LineFile;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class ForLoopStmt extends ConditionalStmt {
 
@@ -101,8 +106,53 @@ public class ForLoopStmt extends ConditionalStmt {
             }
         } else if (collectionTv.getType() instanceof ClassType) {
 
+//            WhileStmt whileStmt = new WhileStmt(getLineFile());
+//            whileStmt.setCondition();
+
+            ClassType iterable = (ClassType) new NameNode("Iterable", getLineFile()).evalType(parentEnv);
+            ClassType thisType = (ClassType) collectionTv.getType();
+            if (iterable.isSuperclassOfOrEquals(thisType, parentEnv)) {
+                Memory memory = parentEnv.getMemory();
+                Instance instance = (Instance) memory.get((Pointer) collectionTv.getValue());
+                TypeValue iteratorFnTv = instance.getEnv().get("iterator", getLineFile());
+                Function iteratorFn = (Function) memory.get((Pointer) iteratorFnTv.getValue());
+
+                TypeValue iteratorTv = iteratorFn.call(new TypeValue[0], titleEnv, getLineFile());
+                Instance iterator = (Instance) memory.get((Pointer) iteratorTv.getValue());
+
+//                TypeValue hasNextTv = iterator.getEnv().get("hasNext", getLineFile());
+//                TypeValue nextTv = iterator.getEnv().get("next", getLineFile());
+//                Function hasNext = (Function) memory.get((Pointer) hasNextTv.getValue());
+//                Function next = (Function) memory.get((Pointer) nextTv.getValue());
+
+                FuncCall hasNextCall = new FuncCall(getLineFile());
+                hasNextCall.setCallObj(new NameNode("hasNext", getLineFile()));
+                hasNextCall.setArguments(new Arguments(new Line(getLineFile()), getLineFile()));
+
+                FuncCall nextCall = new FuncCall(getLineFile());
+                nextCall.setCallObj(new NameNode("next", getLineFile()));
+                nextCall.setArguments(new Arguments(new Line(getLineFile()), getLineFile()));
+
+                Bool bool = Bool.evalBoolean(hasNextCall, iterator.getEnv(), getLineFile());
+                while (bool.value) {
+                    bodyEnv.invalidate();
+                    TypeValue nextTv = nextCall.evaluate(iterator.getEnv());
+                    titleEnv.setVar(liName, nextTv, getLineFile());
+
+                    bodyBlock.evaluate(bodyEnv);
+                    if (titleEnv.isBroken() || parentEnv.interrupted()) break;
+
+                    titleEnv.resumeLoop();
+
+                    bool = Bool.evalBoolean(hasNextCall, iterator.getEnv(), getLineFile());
+                }
+
+            } else {
+                throw new SplException("Only array or classes implements 'Iterable' supports for each loop. ",
+                        getLineFile());
+            }
         } else {
-            throw new SplException("Only array or classes extends 'Collection' supports for each loop. ",
+            throw new SplException("Only array or classes implements 'Iterable' supports for each loop. ",
                     getLineFile());
         }
     }
